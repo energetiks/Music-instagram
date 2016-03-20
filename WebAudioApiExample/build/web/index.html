@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>COOL EXAMPLE</title>
+        <meta charset="UTF-8">
+        <script src="jquery-1.11.3.min.js"></script>
+        <script src="tuna.js"></script>
+        <script src="recorder.js"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script>
+            var context;
+            var tuna;
+            var buffer;
+            var source;
+            var fileName;
+            var startTime;
+            var startOffset;
+            var isPlaying;
+            var isPaused;
+            var gainNode;
+            var effects;
+            var recorder;
+            $(function () {
+                $("#uploadButton").on("click", function (event) {
+                    uploadFile();
+                });
+                $("#downloadButton").on("click", function (event) {
+                    effects = null;
+                    if (context) {
+                        stop();
+                        if (source) {
+                            source.disconnect();
+                        }
+                        releasePlayer();
+                    }
+                    initPlayer();
+                    $("#toggleButton").attr('disabled', true);
+                    loadSound("./upload/" + fileName);
+                    gainNode = context.createGain();
+                    gainNode.connect(context.destination);
+                    changeVolume($("#volumeRange").get(0));
+                    recorder = new Recorder(gainNode);
+                });
+                $("#toggleButton").on("click", function (event) {
+                    if (!isPlaying) {
+                        startTime = 0;
+                        startOffset = 0;
+                        isPaused = true;
+                        isPlaying = true;
+                    }
+                    isPaused ? play() : pause();
+                });
+                $("#stopButton").on("click", function (event) {
+                    stop();
+                });
+                $("#addEffectButton").on("click", function (event) {
+                    addEffect();
+                });
+                setInterval(function () {
+                    if (!isPaused && isPlaying) {
+                        element = $("#positionRange").get(0);
+                        var timeElapsed = startOffset + context.currentTime - startTime;
+                        timeElapsed %= buffer.duration;
+                        var fraction = timeElapsed / buffer.duration;
+                        element.value = element.max * fraction;
+                    }
+                }, 1000);
+            });
+            function uploadFile() {
+                var documentData = new FormData();
+                documentData.append('uploadedFile', $('#inputFile')[0].files[0]);
+                fileName = $('#inputFile').get(0).files[0].name;
+                documentData.append('fileName', fileName);
+                $.ajax({
+                    url: "./webresources/generic/upload",
+                    type: 'POST',
+                    data: documentData,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    success: function (responseText) {
+                        $('#progress_percent').text(responseText);
+                    },
+                    xhr: function () {
+                        var myXhr = $.ajaxSettings.xhr();
+                        if (myXhr.upload) {
+                            myXhr.upload.addEventListener('progress', progress, false);
+                        } else {
+                            console.log('Upload progress is not supported.');
+                        }
+                        return myXhr;
+                    }
+                });
+            }
+            function progress(e) {
+                if (e.lengthComputable) {
+                    $('#progress_percent').text(Math.floor((e.loaded * 100) / e.total) + "%");
+                    $('progress').attr({value: e.loaded, max: e.total});
+                }
+            }
+            function initPlayer() {
+                window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                context = new AudioContext();
+                tuna = new Tuna(context);
+            }
+            function releasePlayer() {
+                context.close();
+            }
+            function loadSound(url) {
+                var request = new XMLHttpRequest();
+                request.open('GET', url, true);
+                request.responseType = 'arraybuffer';
+                // Decode asynchronously
+                request.onload = function () {
+                    context.decodeAudioData(request.response, function (b) {
+                        buffer = b;
+                        $("#toggleButton").attr('disabled', false);
+                    }, function (err) {
+                        alert('Download error');
+                    });
+                };
+                request.send();
+            }
+            function play() {
+                if (isPaused) {
+                    isPaused = false;
+                    source = context.createBufferSource();
+                    source.buffer = buffer;
+                    source.loop = false;
+                    source.connect(firstEffect());
+                    source.start(0, startOffset);
+                    startTime = context.currentTime;
+                }
+            }
+            function pause() {
+                if (!isPaused) {
+                    isPaused = true;
+                    startOffset += context.currentTime - startTime;
+                    startOffset %= buffer.duration;
+                    source.stop();
+                }
+            }
+            function stop() {
+                pause();
+                startOffset = 0;
+                $("#positionRange").get(0).value = 0;
+            }
+            function changeVolume() {
+                element = $("#volumeRange").get(0);
+                var fraction = parseInt(element.value) / parseInt(element.max);
+                gainNode.gain.value = fraction * fraction;
+            }
+            function changePosition() {
+                element = $("#positionRange").get(0);
+                var fraction = parseInt(element.value) / parseInt(element.max);
+                if (isPaused) {
+                    startOffset = buffer.duration * fraction;
+                } else {
+                    pause();
+                    startOffset = buffer.duration * fraction;
+                    play();
+                }
+            }
+            // add node before last gain node
+            function addEffect() {
+                var effect = $("#effectsSelect :selected").text();
+                if (!effects) {
+                    effects = new Array();
+                }
+                var last = lastEffect();
+                ind = effects.length;
+                switch (effect) {
+                    case 'chorus':
+                        effects[ind] = new tuna.Chorus({
+                            rate: 1.5, //0.01 to 8+
+                            feedback: 0.2, //0 to 1+
+                            delay: 0.0045, //0 to 1
+                            bypass: 0 //the value 1 starts the effect as bypassed, 0 or 1
+                        });
+                        break
+                    case 'delay':
+                        effects[ind] = new tuna.Delay({
+                            feedback: 0.45, //0 to 1+
+                            delayTime: 150, //how many milliseconds should the wet signal be delayed?
+                            wetLevel: 0.25, //0 to 1+
+                            dryLevel: 1, //0 to 1+
+                            cutoff: 2000, //cutoff frequency of the built in lowpass-filter. 20 to 22050
+                            bypass: 0
+                        });
+                        break
+                    case 'phaser':
+                        effects[ind] = new tuna.Phaser({
+                            rate: 1.2, //0.01 to 8 is a decent range, but higher values are possible
+                            depth: 0.3, //0 to 1
+                            feedback: 0.2, //0 to 1+
+                            stereoPhase: 30, //0 to 180
+                            baseModulationFrequency: 700, //500 to 1500
+                            bypass: 0
+                        });
+                        break
+                    case 'overdrive':
+                        effects[ind] = new tuna.Overdrive({
+                            outputGain: 0.5, //0 to 1+
+                            drive: 0.7, //0 to 1
+                            curveAmount: 1, //0 to 1
+                            algorithmIndex: 0, //0 to 5, selects one of our drive algorithms
+                            bypass: 0
+                        });
+                        break
+                    case 'compressor':
+                        effects[ind] = new tuna.Compressor({
+                            threshold: 0.5, //-100 to 0
+                            makeupGain: 1, //0 and up
+                            attack: 1, //0 to 1000
+                            release: 0, //0 to 3000
+                            ratio: 4, //1 to 20
+                            knee: 5, //0 to 40
+                            automakeup: true, //true/false
+                            bypass: 0
+                        });
+                        break
+                    case 'convolver':
+                        effects[ind] = new tuna.Convolver({
+                            highCut: 22050, //20 to 22050
+                            lowCut: 20, //20 to 22050
+                            dryLevel: 1, //0 to 1+
+                            wetLevel: 1, //0 to 1+
+                            level: 1, //0 to 1+, adjusts total output of both wet and dry
+                            impulse: "impulses/filter-telephone.wav", //the path to your impulse response
+                            bypass: 0
+                        });
+                        break
+                    case 'filter':
+                        effects[ind] = new tuna.Filter({
+                            frequency: 440, //20 to 22050
+                            Q: 1, //0.001 to 100
+                            gain: 0, //-40 to 40
+                            filterType: "lowpass", //lowpass, highpass, bandpass, lowshelf, highshelf, peaking, notch, allpass
+                            bypass: 0
+                        });
+                        break
+                    case 'cabinet':
+                        effects[ind] = new tuna.Cabinet({
+                            makeupGain: 1, //0 to 20
+                            impulsePath: "impulses/smooth-hall.wav", //path to your speaker impulse
+                            bypass: 0
+                        });
+                        break
+                    case 'tremolo':
+                        effects[ind] = new tuna.Tremolo({
+                            intensity: 0.3, //0 to 1
+                            rate: 4, //0.001 to 8
+                            stereoPhase: 0, //0 to 180
+                            bypass: 0
+                        });
+                        break
+                    case 'wahwah':
+                        effects[ind] = new tuna.WahWah({
+                            automode: true, //true/false
+                            baseFrequency: 0.5, //0 to 1
+                            excursionOctaves: 2, //1 to 6
+                            sweep: 0.2, //0 to 1
+                            resonance: 10, //1 to 100
+                            sensitivity: 0.5, //-1 to 1
+                            bypass: 0
+                        });
+                        break
+                    case 'bitcrusher':
+                        effects[ind] = new tuna.Bitcrusher({
+                            bits: 4, //1 to 16
+                            normfreq: 0.1, //0 to 1
+                            bufferSize: 4096  //256 to 16384
+                        });
+                        break
+                    case 'moog':
+                        effects[ind] = new tuna.MoogFilter({
+                            cutoff: 0.065, //0 to 1
+                            resonance: 3.5, //0 to 4
+                            bufferSize: 4096  //256 to 16384
+                        });
+                        break
+                    case 'glitch':
+                        effects[ind] = new tuna.PingPongDelay({
+                            wetLevel: 0.5, //0 to 1
+                            feedback: 0.3, //0 to 1
+                            delayTimeLeft: 150, //1 to 10000 (milliseconds)
+                            delayTimeRight: 200 //1 to 10000 (milliseconds)
+                        });
+                        break
+                }
+                effects[ind].connect(gainNode);
+                last.disconnect();
+                last.connect(effects[ind]);
+                deleteButton = $('<input type="button" value="Delete ' + effect + '"\
+                    onclick="deleteEffect(' + ind + ')"\
+                    id="deleteEffect' + ind + '">');
+                deleteButton.appendTo('#deleteEffect');
+            }
+            function firstEffect() {
+                return nextEffect(-1);
+            }
+            function lastEffect() {
+                return prevEffect(effects.length);
+            }
+            function prevEffect(ind) {
+                if (!effects || ind === 0)
+                    return source;
+                for (var i = ind - 1; i >= 0; --i) {
+                    if (effects[i])
+                        return effects[i];
+                }
+                return source;
+            }
+            function nextEffect(ind) {
+                if (!effects || ind === effects.length - 1)
+                    return gainNode;
+                for (var i = ind + 1; i < effects.length; ++i) {
+                    if (effects[i])
+                        return effects[i];
+                }
+                return gainNode;
+            }
+            function deleteEffect(ind) {
+                if (!effects)
+                    return;
+                var prev = prevEffect(ind);
+                var next = nextEffect(ind);
+                prev.disconnect();
+                prev.connect(next);
+                effects[ind].disconnect;
+                effects[ind] = null;
+                $('#deleteEffect' + ind).remove();
+            }
+            function uploadWAV(blob) {
+                var documentData = new FormData();
+                documentData.append('uploadedFile', blob);
+                fileName = "record.wav";
+                documentData.append('fileName', fileName);
+                $.ajax({
+                    url: "./webresources/generic/upload",
+                    type: 'POST',
+                    data: documentData,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    success: function (responseText) {
+                        $('#progress_percent').text(responseText);
+                    },
+                    xhr: function () {
+                        var myXhr = $.ajaxSettings.xhr();
+                        if (myXhr.upload) {
+                            myXhr.upload.addEventListener('progress', progress, false);
+                        } else {
+                            console.log('Upload progress is not supported.');
+                        }
+                        return myXhr;
+                    }
+                });
+            }
+        </script>
+    </head>
+    <body>
+        <input type="button" value="Upload" id="uploadButton">
+        <input type="file" id="inputFile">
+        <br>
+        <progress value=0 max=100></progress><span id="progress_percent">0%</span>
+        <br>
+        <input type="button" value="Download" id="downloadButton">
+        <input type="button" value="Play/Pause" id="toggleButton">
+        <input type="button" value="Stop" id="stopButton">
+        <br>
+        <input type="range" min="0" max="100" value="100" style="width: 500px" oninput="changeVolume();" id="volumeRange">
+        <br>
+        <input type="range" min="0" max="100" value="0" style="width: 500px" oninput="changePosition();" id="positionRange">
+        <br>
+        <input type="button" value="start rec" id="recButton" onclick="recorder.record()">
+        <input type="button" value="pause rec" id="pauseRecButton" onclick="recorder.stop()">
+        <input type="button" value="stop rec" id="stopRecButton" onclick="recorder.clear()">
+        <input type="button" value="upload rec" id="uploadRecButton" onclick="recorder.exportWAV(uploadWAV)">
+        <br>
+        <select id="effectsSelect">
+            <option>chorus</option>
+            <option>delay</option>
+            <option>phaser</option>
+            <option>overdrive</option>
+            <option>compressor</option>
+            <option>convolver</option>
+            <option>filter</option>
+            <option>cabinet</option>
+            <option>tremolo</option>
+            <option>wahwah</option>
+            <option>bitcrusher</option>
+            <option>moog</option>
+            <option>glitch</option>
+        </select>
+        <input type="button" value="Add effect" id="addEffectButton">
+        <br>
+        <div id="deleteEffect"></div>
+    </body>
+</html>
