@@ -12,7 +12,7 @@ and open the template in the editor.
         <link rel="stylesheet" type="text/css" href="css/reset.css"/>
         <link rel="stylesheet" type="text/css" href="css/style.css"/>
         <link rel="stylesheet" type="text/css" href="css/default.css"/>
-        
+
         <link rel="stylesheet" type="text/css" href="scripts/nivo-slider/nivo-slider.css"/>
         <link rel="stylesheet" type="text/css" href="scripts/nivo-slider/themes/default/default.css"/>
 
@@ -20,7 +20,108 @@ and open the template in the editor.
 
         <link rel="stylesheet" type="text/css" href="scripts/autocomplete/jquery.autocomplete.css" />
 
-        <link rel="stylesheet" type="text/css" href="scripts/demo/colorpicker/css/colorpicker.css"/>        
+        <link rel="stylesheet" type="text/css" href="scripts/demo/colorpicker/css/colorpicker.css"/>
+
+        <!-- auxiliary libraries -->
+        <script src="js/jquery-1.11.3.min.js"></script>
+        <script src="js/tuna.js"></script>
+        <script src="js/recorder.js"></script>
+
+        <!-- main library -->
+        <script src="js/player.js"></script>
+
+        <script>
+            $(function () {
+                var player = new Player();
+                var visualizer = new Visualizer(player.analyserNode, document.querySelector("#frequencyCanvas"));
+                var recorder = new Recorder(player.analyserNode);
+                var effectsManager = new EffectsManager();
+                effectsManager.context = player.getContext();
+                effectsManager.outputNode = player.getLastNode();
+                effectsManager.updateNodes();
+                player.setSourceConnection(effectsManager.getInputNode());
+                var isRecording = false;
+                $("#downloadButton").on("click", function (event) {
+                    var fileName = "example.mp3";
+                    player.loadSound("./upload/" + fileName, function () {
+                        $("#toggleButton").attr('disabled', false);
+                        $("#stopButton").attr('disabled', false);
+                        $("#addEffectButton").attr('disabled', false);
+                        $("#recButton").attr('disabled', false);
+                        $("#clearRecButton").attr('disabled', false);
+                        $("#uploadRecButton").attr('disabled', false);
+                        $("#positionRange").attr('disabled', false);
+                        $("#volumeRange").attr('disabled', false);
+                        $("#effectsSelect").attr('disabled', false);
+                    });
+                });
+                $("#toggleButton").on("click", function (event) {
+                    player.toggle();
+                });
+                $("#stopButton").on("click", function (event) {
+                    player.stop();
+                    $("#positionRange").get(0).value = 0;
+                });
+                $("#addEffectButton").on("click", function (event) {
+                    var effect = $("#effectsSelect :selected").text();
+                    var id = effectsManager.addEffect(effect);
+                    deleteButton = $('<input type="button" value="Delete ' + effect + '" id="deleteEffect' + id + '">');
+                    deleteButton.appendTo('#deleteEffect');
+                    $("#deleteEffect" + id).on("click", function () {
+                        effectsManager.deleteEffect(id);
+                    });
+                });
+                $("#volumeRange").on("input", function () {
+                    var element = $("#volumeRange").get(0);
+                    var fraction = parseInt(element.value) / parseInt(element.max);
+                    player.setVolume(fraction * fraction);
+                });
+                $("#positionRange").on("input", function () {
+                    element = $("#positionRange").get(0);
+                    var fraction = parseInt(element.value) / parseInt(element.max);
+                    player.setPosition(fraction);
+                });
+                $("#recButton").on("click", function () {
+                    if (isRecording) {
+                        $("#recButton").css('color', '');
+                        recorder.stop();
+                    } else {
+                        $("#recButton").css('color', 'red');
+                        recorder.record();
+                    }
+                    isRecording = !isRecording;
+                });
+                $("#clearRecButton").on("click", function () {
+                    if (isRecording) {
+                        $("#recButton").css('color', '');
+                        recorder.stop();
+                    }
+                    recorder.clear();
+                });
+                $("#uploadRecButton").on("click", function () {
+                    if (isRecording) {
+                        $("#recButton").css('color', '');
+                        recorder.stop();
+                    }
+                    recorder.exportWAV(uploadWAV);
+                });
+                $("#toggleButton").attr('disabled', true);
+                $("#stopButton").attr('disabled', true);
+                $("#addEffectButton").attr('disabled', true);
+                $("#recButton").attr('disabled', true);
+                $("#clearRecButton").attr('disabled', true);
+                $("#uploadRecButton").attr('disabled', true);
+                $("#positionRange").attr('disabled', true);
+                $("#volumeRange").attr('disabled', true);
+                $("#effectsSelect").attr('disabled', true);
+                setInterval(function () {
+                    if (player.isPlaying) {
+                        var element = $("#positionRange").get(0);
+                        element.value = element.max * player.getPosition();
+                    }
+                }, 1000);
+            });
+        </script>
     </head>
     <body>
         <!--background changer-->
@@ -65,7 +166,7 @@ and open the template in the editor.
                 </ul>
             </div>
             <div class="alignleft_block open_close">
-                    <a href="#" class="arrow">OPEN</a>
+                <a href="#" class="arrow">OPEN</a>
             </div>  
         </div>
         <div id="body-wrapper">
@@ -102,20 +203,51 @@ and open the template in the editor.
                             <span>My friends</span>                       
                         </li>
                         <li>
-                            <input type="button" value="Log out" style="height: 35px" onclick="window.location.href='/Music_instagram/faces/index.html'; return false;"/>
+                            <input type="button" value="Log out" style="height: 35px" onclick="window.location.href = '/Music_instagram/faces/index.html'; return false;"/>
                         </li>
                     </ul>
-                    
+
                 </div>
             </div>
         </div>
-        
+
         <div class="clear20"></div>
 
         <!--content container-->
         <div id="content_container" class="center-clear">
             <div class="box-three-sub-wrapper transparent-background">
-
+                <input type="button" value="Download" id="downloadButton">
+                <input type="button" value="Play/Pause" id="toggleButton">
+                <input type="button" value="Stop" id="stopButton">
+                <br>
+                <input type="range" min="0" max="100" value="100" style="width: 500px" id="volumeRange">
+                <br>
+                <input type="range" min="0" max="100" value="0" style="width: 500px" id="positionRange">
+                <br>
+                <input type="button" value="Rec/Pause" id="recButton">
+                <input type="button" value="Clear" id="clearRecButton">
+                <input type="button" value="Upload" id="uploadRecButton">
+                <progress value=0 max=100></progress><span id="progress_percent">0%</span>
+                <br>
+                <select id="effectsSelect">
+                    <option>chorus</option>
+                    <option>delay</option>
+                    <option>phaser</option>
+                    <option>overdrive</option>
+                    <option>compressor</option>
+                    <option>convolver</option>
+                    <option>filter</option>
+                    <option>cabinet</option>
+                    <option>tremolo</option>
+                    <option>wahwah</option>
+                    <option>bitcrusher</option>
+                    <option>moog</option>
+                    <option>glitch</option>
+                </select>
+                <input type="button" value="Add effect" id="addEffectButton">
+                <br>
+                <div id="deleteEffect"></div>
+                <canvas id="frequencyCanvas"></canvas>
             </div>    
         </div>
 

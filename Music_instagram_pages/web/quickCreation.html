@@ -12,7 +12,7 @@ and open the template in the editor.
         <link rel="stylesheet" type="text/css" href="css/reset.css"/>
         <link rel="stylesheet" type="text/css" href="css/style.css"/>
         <link rel="stylesheet" type="text/css" href="css/default.css"/>
-        
+
         <link rel="stylesheet" type="text/css" href="scripts/nivo-slider/nivo-slider.css"/>
         <link rel="stylesheet" type="text/css" href="scripts/nivo-slider/themes/default/default.css"/>
 
@@ -20,7 +20,191 @@ and open the template in the editor.
 
         <link rel="stylesheet" type="text/css" href="scripts/autocomplete/jquery.autocomplete.css" />
 
-        <link rel="stylesheet" type="text/css" href="scripts/demo/colorpicker/css/colorpicker.css"/>        
+        <link rel="stylesheet" type="text/css" href="scripts/demo/colorpicker/css/colorpicker.css"/>
+
+
+        <!-- auxiliary libraries -->
+        <script type="text/javascript" src="scripts/jquery-1.7.1.min.js"></script>
+        <script src="js/tuna.js"></script>
+        <script src="js/recorder.js"></script>
+
+        <!-- range slider -->
+        <link rel="stylesheet" href="js/jquery-ui-1.11.4/jquery-ui.css">
+        <link rel="stylesheet" href="css/my-jquery-ui.css">
+        <script src="js/jquery-ui-1.11.4/jquery-ui.js"></script>
+
+        <!-- main library -->
+        <script src="js/player.js"></script>
+
+        <script>
+            $(function () {
+                var player = new Player();
+                var visualizer = new Visualizer(player.analyserNode, document.querySelector("#frequencyCanvas"));
+                var effectsManager = new EffectsManager();
+                var buffer;
+                $("#downloadButton").on("click", function () {
+                    $("#generateButton").attr('disabled', true);
+                    $("#toggleButton").attr('disabled', true);
+                    $("#stopButton").attr('disabled', true);
+                    $("#uploadButton").attr('disabled', true);
+                    var fileName = "example.mp3";
+                    // download and decode
+                    var request = new XMLHttpRequest();
+                    request.open('GET', "./upload/" + fileName, true);
+                    request.responseType = 'arraybuffer';
+                    // Decode asynchronously
+                    request.onload = function () {
+                        player.context.decodeAudioData(request.response, function (buf) {
+                            buffer = buf;
+                            $("#generateButton").attr('disabled', false);
+                            drawTimeLine(buffer, $("#slider-range"));
+                        }, function () {
+                            console.log('Download error');
+                        });
+                    };
+                    request.send();
+                });
+                $("#generateButton").on("click", function () {
+                    $("#toggleButton").attr('disabled', true);
+                    $("#stopButton").attr('disabled', true);
+                    $("#uploadButton").attr('disabled', true);
+
+                    player.stop();
+
+                    var sr = $("#slider-range");
+                    var start = sr.slider("values", 0) / sr.slider("option", "max");
+                    var end = sr.slider("values", 1) / sr.slider("option", "max");
+                    var offset = start * buffer.duration;
+                    var duration = (end - start) * buffer.duration;
+
+                    var ocontext = new OfflineAudioContext(2, 44100 * duration, 44100);
+
+                    effectsManager.context = ocontext;
+                    effectsManager.outputNode = ocontext.destination;
+                    effectsManager.updateNodes();
+                    var inputNode = effectsManager.getInputNode();
+                    var sourceNode = ocontext.createBufferSource();
+                    sourceNode.buffer = buffer;
+                    sourceNode.loop = false;
+                    sourceNode.connect(inputNode);
+                    sourceNode.start(0, offset, duration);
+                    ocontext.startRendering().then(function (rBuf) {
+                        console.log('Rendering completed successfully');
+                        $("#positionRange").get(0).value = 0;
+                        player.buffer = rBuf;
+                        $("#toggleButton").attr('disabled', false);
+                        $("#stopButton").attr('disabled', false);
+                        $("#uploadButton").attr('disabled', false);
+                    }).catch(function (err) {
+                        console.log('Rendering failed: ' + err);
+                        // Note: The promise should reject when startRendering is called a second time on an OfflineAudioContext
+                    });
+                });
+                $("#toggleButton").on("click", function () {
+                    player.toggle();
+                });
+                $("#stopButton").on("click", function () {
+                    player.stop();
+                    $("#positionRange").get(0).value = 0;
+                });
+                $("#uploadButton").on("click", function () {
+                    var worker = new Worker('js/recorderWorker.js');
+
+                    // initialize the new worker
+                    worker.postMessage({
+                        command: 'init',
+                        config: {
+                            sampleRate: 44100,
+                            numChannels: player.buffer.numberOfChannels
+                        }
+                    });
+
+                    // callback for `exportWAV`
+                    worker.onmessage = function (e) {
+                        blob = e.data;
+
+                        var documentData = new FormData();
+                        documentData.append('uploadedFile', blob);
+                        fileName = "simple-record.wav";
+                        documentData.append('fileName', fileName);
+                        $.ajax({
+                            url: "./webresources/generic/upload",
+                            type: 'POST',
+                            data: documentData,
+                            cache: false,
+                            contentType: false,
+                            processData: false,
+                            success: function (responseText) {
+                                $('#progress_percent').text(responseText);
+                            },
+                            xhr: function () {
+                                var myXhr = $.ajaxSettings.xhr();
+                                if (myXhr.upload) {
+                                    myXhr.upload.addEventListener('progress', progress, false);
+                                } else {
+                                    console.log('Upload progress is not supported.');
+                                }
+                                return myXhr;
+                            }
+                        });
+
+                        function progress(e) {
+                            if (e.lengthComputable) {
+                                $('#progress_percent').text(Math.floor((e.loaded * 100) / e.total) + "%");
+                                $('progress').attr({value: e.loaded, max: e.total});
+                            }
+                        }
+                    };
+
+                    // send the channel data from our buffer to the worker
+                    worker.postMessage({
+                        command: 'record',
+                        buffer: [
+                            player.buffer.getChannelData(0),
+                            player.buffer.getChannelData(1)
+                        ]
+                    });
+
+                    // ask the worker for a WAV
+                    worker.postMessage({
+                        command: 'exportWAV',
+                        type: 'audio/wav'
+                    });
+
+                });
+                $("#volumeRange").on("input", function () {
+                    var element = $("#volumeRange").get(0);
+                    var fraction = parseInt(element.value) / parseInt(element.max);
+                    player.setVolume(fraction * fraction);
+                });
+                $("#positionRange").on("input", function () {
+                    element = $("#positionRange").get(0);
+                    var fraction = parseInt(element.value) / parseInt(element.max);
+                    player.setPosition(fraction);
+                });
+                $("#addEffectButton").on("click", function (event) {
+                    var effect = $("#effectsSelect :selected").text();
+                    var e = effectsManager.addDummyEffect(effect);
+                    deleteButton = $('<input type="button" value="Delete ' + effect + '" id="deleteEffect' + e.id + '">');
+                    deleteButton.appendTo('#deleteEffect');
+                    $("#deleteEffect" + e.id).on("click", function () {
+                        effectsManager.deleteEffect(e.id);
+                    });
+                });
+                function positionUpdate() {
+                    if (player.isPlaying) {
+                        var element = $("#positionRange").get(0);
+                        element.value = element.max * player.getPosition();
+                    }
+                    requestAnimationFrame(positionUpdate);
+                }
+                $("#generateButton").attr('disabled', true);
+                $("#toggleButton").attr('disabled', true);
+                $("#stopButton").attr('disabled', true);
+                $("#uploadButton").attr('disabled', true);
+                requestAnimationFrame(positionUpdate);
+            });
+        </script>
     </head>
     <body>
         <!--background changer-->
@@ -65,7 +249,7 @@ and open the template in the editor.
                 </ul>
             </div>
             <div class="alignleft_block open_close">
-                    <a href="#" class="arrow">OPEN</a>
+                <a href="#" class="arrow">OPEN</a>
             </div>  
         </div>
         <div id="body-wrapper">
@@ -102,20 +286,52 @@ and open the template in the editor.
                             <span>My friends</span>                       
                         </li>
                         <li>
-                            <input type="button" value="Log out" style="height: 35px" onclick="window.location.href='/Music_instagram/faces/index.html'; return false;"/>
+                            <input type="button" value="Log out" style="height: 35px" onclick="window.location.href = '/Music_instagram/faces/index.html'; return false;"/>
                         </li>
                     </ul>
-                    
+
                 </div>
             </div>
         </div>
-        
+
         <div class="clear20"></div>
 
         <!--content container-->
         <div id="content_container" class="center-clear">
             <div class="box-three-sub-wrapper transparent-background">
-
+                <input type="button" value="Download" id="downloadButton">
+                <input type="button" value="Generate" id="generateButton">
+                <input type="button" value="Play/Pause" id="toggleButton">
+                <input type="button" value="Stop" id="stopButton">
+                <input type="button" value="Upload" id="uploadButton">
+                <progress value=0 max=100></progress><span id="progress_percent">0%</span>
+                <br>
+                <input type="range" min="0" max="100" value="100" style="width: 500px" id="volumeRange">
+                <br>
+                <input type="range" min="0" max="100" value="0" style="width: 500px" id="positionRange">
+                <br>
+                <select id="effectsSelect">
+                    <option>chorus</option>
+                    <option>delay</option>
+                    <option>phaser</option>
+                    <option>overdrive</option>
+                    <option>compressor</option>
+                    <option>convolver</option>
+                    <option>filter</option>
+                    <option>cabinet</option>
+                    <option>tremolo</option>
+                    <option>wahwah</option>
+                    <option>bitcrusher</option>
+                    <option>moog</option>
+                    <option>glitch</option>
+                </select>
+                <input type="button" value="Add effect" id="addEffectButton">
+                <br>
+                <div id="deleteEffect"></div>
+                <br>
+                <div id="slider-range"></div>
+                <br>
+                <canvas id="frequencyCanvas"></canvas>
             </div>    
         </div>
 
@@ -143,7 +359,6 @@ and open the template in the editor.
                 <div>Copyright MusicInstagram. 2016</div>
             </div>
         </div>
-        <script type="text/javascript" src="scripts/jquery-1.7.1.min.js"></script>
         <script type="text/javascript" src="scripts/jquery.easing.1.3.js"></script>
         <script type="text/javascript" src="scripts/nivo-slider/jquery.nivo.slider.js"></script>
         <script type="text/javascript" src="scripts/superfish/js/superfish.js"></script>
