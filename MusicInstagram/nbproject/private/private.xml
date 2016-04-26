@@ -3,7 +3,15 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Test/Desktop/MusicInstagram/src/java/ru/bystrov/musicinstagram/service/SourceResource.java</file>
+            <file>file:/C:/Users/Test/Desktop/MusicInstagram/src/java/ru/bystrov/musicinstagram/service/SampleResource.java</file>
+            <file>file:/C:/Users/Test/Desktop/MusicInstagram/src/java/ru/bystrov/musicinstagram/service/FileResource.java</file>
+            <file>file:/C:/Users/Test/Desktop/MusicInstagram/web/css/style.css</file>
+            <file>file:/C:/Users/Test/Desktop/MusicInstagram/src/java/ru/bystrov/musicinstagram/service/DirectoryService.java</file>
+            <file>file:/C:/Users/Test/Desktop/MusicInstagram/web/homePage.html</file>
+            <file>file:/C:/Users/Test/Desktop/MusicInstagram/src/java/ru/bystrov/musicinstagram/entities/dataobject/CountOfLikeObject.java</file>
+            <file>file:/C:/Users/Test/Desktop/MusicInstagram/web/friend.html</file>
+            <file>file:/C:/Users/Test/Desktop/MusicInstagram/web/friends.html</file>
+            <file>file:/C:/Users/Test/Desktop/MusicInstagram/web/TESTPAGE.html</file>
             <file>file:/C:/Users/Test/Desktop/MusicInstagram/src/java/ru/bystrov/musicinstagram/service/UserResource.java</file>
         </group>
     </open-files>

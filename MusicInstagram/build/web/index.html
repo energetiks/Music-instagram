@@ -1,81 +1,56 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
 <html>
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
-        <!-- Latest compiled and minified CSS -->
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-
-        <!-- Optional theme -->
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
-
-        <!-- Latest compiled and minified JavaScript -->
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>Login page</title>
+        <link rel="stylesheet" type="text/css" href="css/index.css"/>        
     </head>
     <body>
-        <script>
-            $(function(){
-                $("#insertUser").click(function(){
-                $.ajax({ 
-                    type: "POST", 
-                    url: "webresources/user/createUser", 
-                    data:{first_name:$("#first_name").val(),last_name:$("#last_name").val(),age:$("#age").val(),
-                          country:$("#country").val(),city:$("#city").val(),univercity:$("#univercity").val(),
-                          phone_number:$("#phone_number").val(),login:$("#login").val(),password:$("#password").val()},
-                    success: function(response2) { 
-                       alert("SUCCESS!!");
-                        
-                    }, 
-                    dataType: "json" 
-                });
-
-            });
-        });
-            
-        </script>
-        <div class="row">
-            <div class="col-xs-6 col-md-4">
+        <div id="wrapper">
+            <div id="panel">
                 <form>
-                    <div class="form-group">
-                        <label for="first_name">First name</label>
-                        <input type="text" class="form-control" id="first_name" placeholder="First name">
-                    </div>
-                    <div class="form-group">
-                        <label for="last_name">Last name</label>
-                        <input type="text" class="form-control" id="last_name" placeholder="Last name">
-                    </div>
-                    <div class="form-group">
-                        <label for="age">Age</label>
-                        <input type="text" class="form-control" id="age" placeholder="0">
-                    </div>
-                    <div class="form-group">
-                        <label for="city">City</label>
-                        <input type="text" class="form-control" id="city" placeholder="City">
-                    </div>
-                    <div class="form-group">
-                        <label for="country">City</label>
-                        <input type="text" class="form-control" id="country" placeholder="City">
-                    </div>
-                    <div class="form-group">
-                        <label for="univercity">Univercity</label>
-                        <input type="text" class="form-control" id="univercity" placeholder="Univercity">
-                    </div>
-                    <div class="form-group">
-                        <label for="phone_number">Phone Number</label>
-                        <input type="text" class="form-control" id="phone_number" placeholder="+7-***-***-**-**">
-                    </div>
-                    <div class="form-group">
-                        <label for="login">Login</label>
-                        <input type="text" class="form-control" id="login" placeholder="login">
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <input type="text" class="form-control" id="password" placeholder="Password">
-                    </div>
-                    <button type='button'  class='btn btn-success' id="insertUser">Insert</button>
+                    <table cellpadding="10" cellspacing="1">
+                        <thead>
+                            <tr>
+                                <th colspan="2" scope="colgroup">
+                                    <span style="color: #FFF">Login</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <label>Username</label>
+                                </td>
+                                <td>
+                                    <input type="text"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label>Password</label>
+                                </td>
+                                <td>
+                                    <input type="password"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="2">
+                                    <input type="button" onclick="window.location.href='/MusicInstagram/homePage.html'; return false;" value="login" class="submit"/>
+                                    <input type="button" onclick="window.location.href='/MusicInstagram/registration.html'; return false;" value="registration" class="reg"/>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
                 </form>
             </div>
         </div>
-        
     </body>
 </html>

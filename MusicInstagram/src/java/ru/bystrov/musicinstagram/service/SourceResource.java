@@ -110,18 +110,18 @@ public class SourceResource {
                 newAttrValue.setObjId(newSource.getObjId());
                 if (entry.getValue().getType().equals("String")) {
                     newAttrValue.setStringValue(String.valueOf(entry.getValue().getValue()));
-                    newAttrValue.setNumberValue(0);
-                    newAttrValue.setReferenceValue(0);
+                    newAttrValue.setNumberValue(-1);
+                    newAttrValue.setReferenceValue(-1);
                     
                 }
                 if (entry.getValue().getType().equals("int")) {
                     newAttrValue.setNumberValue((int)entry.getValue().getValue());
                     newAttrValue.setStringValue("");
-                    newAttrValue.setReferenceValue(0);
+                    newAttrValue.setReferenceValue(-1);
                 }
                 if (entry.getValue().getType().equals("Reference")) {
                     newAttrValue.setReferenceValue((int) entry.getValue().getValue());
-                    newAttrValue.setNumberValue(0);
+                    newAttrValue.setNumberValue(-1);
                     newAttrValue.setStringValue("");
                 }
                 em.persist(newAttrValue);
@@ -201,13 +201,13 @@ public class SourceResource {
                                 .setParameter(1, objId).getResultList();
             
             for (AttributeValue attr : attrs){
-                if (attr.getNumberValue() != 0) {
+                if (attr.getNumberValue() != -1) {
                     obj.put(String.valueOf(attr.getAttrId()),attr.getNumberValue());
                 } else
                 if (!attr.getStringValue().equals("")) {
                     obj.put(String.valueOf(attr.getAttrId()),attr.getStringValue());
                 } else
-                if (attr.getReferenceValue() != 0) {
+                if (attr.getReferenceValue() != -1) {
                     obj.put(String.valueOf(attr.getAttrId()),attr.getReferenceValue());
                 }
             }
@@ -225,13 +225,13 @@ public class SourceResource {
                                 .setParameter(1, objId).getResultList();
         JSONObject obj = new JSONObject();
         for (AttributeValue attr : attrs){
-            if (attr.getNumberValue() != 0) {
+            if (attr.getNumberValue() != -1) {
                 obj.put(String.valueOf(attr.getAttrId()),attr.getNumberValue());
             } else
             if (!attr.getStringValue().equals("")) {
                 obj.put(String.valueOf(attr.getAttrId()),attr.getStringValue());
             } else
-            if (attr.getReferenceValue() != 0) {
+            if (attr.getReferenceValue() != -1) {
                 obj.put(String.valueOf(attr.getAttrId()),attr.getReferenceValue());
             }
         }
@@ -291,46 +291,6 @@ public class SourceResource {
         return findSMTHbyParameter(sourcesID);
     }
     
-        @GET
-    @Path("getThreeRandomSourcesById")
-    @Produces(MediaType.APPLICATION_JSON+ ";charset=UTF-8")
-    public String geThreeRandomSourcesById(@Context HttpServletRequest req,
-                                 @QueryParam("objId") String objId) {
-        JSONArray array = new JSONArray();
-        List<Integer> sourcesId = em.createNativeQuery(" select attrV.objId "
-                                                     + " from AttributeValue attrV, Objects o  "
-                                                     + " where attrV.objId = o.objId  and "
-                                                     + " o.objTypeId = ? and "
-                                                     + " attrV.attrId = ? and "
-                                                     + " attrV.referenceValue = ?")
-                        .setParameter(1, SOURCE_TYPE_ID).setParameter(2,USER_REF_ID).setParameter(3, objId).getResultList();
-        JSONObject obj;
-        
-        Integer[] arrayOfSourcesId = sourcesId.toArray(new Integer[sourcesId.size()]);
-        for(int i = 0; i < 3; i++) {
-            Integer sourceId  = arrayOfSourcesId[(int) (Math.random() * arrayOfSourcesId.length)];
-            obj = new JSONObject();
-            List<AttributeValue> attrs = em.createNativeQuery("select * "
-                                                            + "from AttributeValue attrV "
-                                                            + "where attrV.objId = ?", AttributeValue.class)
-                                .setParameter(1, sourceId).getResultList();
-            
-            for (AttributeValue attr : attrs){
-                if (attr.getNumberValue() != 0) {
-                    obj.put(String.valueOf(attr.getAttrId()),attr.getNumberValue());
-                } else
-                if (!attr.getStringValue().equals("")) {
-                    obj.put(String.valueOf(attr.getAttrId()),attr.getStringValue());
-                } else
-                if (attr.getReferenceValue() != 0) {
-                    obj.put(String.valueOf(attr.getAttrId()),attr.getReferenceValue());
-                }
-            }
-            array.put(obj);
-        }
-        return array.toString();
-    }
-    
     public String findSMTHbyParameter(List<Integer> sourcesId) {
         JSONArray array = new JSONArray();
         JSONObject obj;
@@ -340,13 +300,13 @@ public class SourceResource {
                                 .setParameter(1, objId).getResultList();
             
             for (AttributeValue attr : attrs){
-                if (attr.getNumberValue() != 0) {
+                if (attr.getNumberValue() != -1) {
                     obj.put(String.valueOf(attr.getAttrId()),attr.getNumberValue());
                 } else
                 if (!attr.getStringValue().equals("")) {
                     obj.put(String.valueOf(attr.getAttrId()),attr.getStringValue());
                 } else
-                if (attr.getReferenceValue() != 0) {
+                if (attr.getReferenceValue() != -1) {
                     obj.put(String.valueOf(attr.getAttrId()),attr.getReferenceValue());
                 }
             }

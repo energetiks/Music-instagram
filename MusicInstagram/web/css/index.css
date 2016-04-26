@@ -1,0 +1,39 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 12.04.2016, 9:21:58
+    Author     : defesteban
+*/
+body {
+    background: #32383f url(../images/background/page_tile_12.png);
+/*    float:left;
+    width:100%;*/
+}
+
+#wrapper {
+    margin: 250px auto;
+    width: 960px;
+}
+#panel {
+    padding-left: 300px;
+    vertical-align: middle;
+    background:url(../images/transparent_background.png);	
+}
+
+#panel label {
+    float: right;
+    color: #fff;
+}
+
+.reg {
+    float: right;
+}
+.submit {
+    margin-left: 86px;
+}
+.back {
+    margin-left: 140px;
+}

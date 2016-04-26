@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>Registration</title>
+        <link rel="stylesheet" type="text/css" href="css/index.css"/>
+        <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>        
+    </head>
+    <body>
+        <script>
+            $(function(){
+                $(".reg").click(function(){
+                $.ajax({ 
+                    type: "POST", 
+                    url: "webresources/user/createUser", 
+                    data:{login:$("#login").val(),password:$("#password").val()},
+                    success: function(response) { 
+                       alert("SUCCESS!!");
+
+                    }, 
+                    dataType: "json" 
+                });
+            });
+        });
+        </script>
+        <div id="wrapper">
+            <div id="panel">
+                <form>
+                    <table cellpadding="10" cellspacing="1">
+                        <thead>
+                            <tr>
+                                <th colspan="2" scope="colgroup">
+                                    <span style="color: #FFF">Registration</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <label>Username</label>
+                                </td>
+                                <td>
+                                    <input id="login" type="text"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label>Password</label>
+                                </td>
+                                <td>
+                                    <input id="password" type="password"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label>Confirm password</label>
+                                </td>
+                                <td>
+                                    <input type="password"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="2">
+                                    <input type="button" onclick="window.location.href='/MusicInstagram/index.html'; return false;" value="back" class="back"/>
+                                    <input type="button" onclick="window.location.href='/MusicInstagram/homePage.html'; return false;" value="registration" class="reg"/>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </form>
+            </div>
+        </div>
+    </body>
+</html>

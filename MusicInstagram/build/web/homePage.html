@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>Music instagram</title>
+        <link href='http://fonts.googleapis.com/css?family=Terminal+Dosis:400,700,800,600,500,300,200' rel='stylesheet' type='text/css'/>
+        <link rel="stylesheet" type="text/css" href="css/reset.css"/>
+        <link rel="stylesheet" type="text/css" href="css/style.css"/>
+        <link rel="stylesheet" type="text/css" href="css/default.css"/>
+        
+        <link rel="stylesheet" type="text/css" href="scripts/nivo-slider/nivo-slider.css"/>
+        <link rel="stylesheet" type="text/css" href="scripts/nivo-slider/themes/default/default.css"/>
+
+        <link rel="stylesheet" type="text/css" href="scripts/superfish/css/superfish.css"/>
+
+        <link rel="stylesheet" type="text/css" href="scripts/autocomplete/jquery.autocomplete.css" />
+
+        <link rel="stylesheet" type="text/css" href="scripts/demo/colorpicker/css/colorpicker.css"/> 
+        
+        
+        <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+        
+    </head>
+    <body>
+        <script>
+            $(function(){
+                    var firstFriend;
+                    var secondFriend;
+                    var thirdFriend;
+                    
+                    $.ajax({ 
+                        type: "GET", 
+                        url: "webresources/user/getLogin",
+                        success: function(data, response) {
+                            $("#userName").text(data.nickName);
+                        },
+                        dataType: "json"
+                    });
+                    
+                    $.ajax({ 
+                        type: "GET", 
+                        url: "webresources/user/getPhotoByLogin",
+                        data:{login:"energetiks"},
+                        success: function(data, response) {
+                            $(".userPhoto").attr("src",data.photo);
+                        },
+                        dataType: "json"
+                    });
+                    
+                    $.ajax({ 
+                        type: "GET", 
+                        url: "webresources/user/getUserByLogin",
+                        data:{login:"energetiks"},
+                        success: function(data, response) {
+                            $("#infoAboutUser").html(
+                                "First Name: " + data.User1 + "<br>" + 
+                                "Last Name: " + data.User2 + "<br>" + 
+                                "Age: " + data.User3 + "<br>" +
+                                "City: " + data.User5 + "<br>" +
+                                "Country: " + data.User4 + "<br>" +
+                                "Univercity: " + data.User6 + "<br>" +
+                                "Phone number: " + data.User7 + "<br>" +
+                                "About me: ");
+                            $("#name").text(data.User1 + " " + data.User2);
+                        },
+                        dataType: "json"
+                    });
+                    
+                    $.ajax({ 
+                        type: "GET", 
+                        url: "webresources/user/getFriendsByLogin",
+                        data:{login:"energetiks"},
+                        success: function(data, response) {
+                            if (data[0].countOfFriend >= 3) {
+                                firstFriend = data[1].Friend8;
+                                secondFriend = data[2].Friend8;
+                                thirdFriend = data[3].Friend8;
+                                $("#firstFriendPhoto").attr("src",data[1].Friend30);
+                                $("#secondFriendPhoto").attr("src",data[2].Friend30);
+                                $("#thirdFriendPhoto").attr("src",data[3].Friend30);
+                                $("#firstFriend").html(data[1].Friend1 + "<br>" + data[1].Friend2);
+                                $("#secondFriend").html(data[2].Friend1 + "<br>" + data[2].Friend2);
+                                $("#thirdFriend").html(data[3].Friend1 + "<br>" + data[3].Friend2);
+                                
+                                
+                            }
+                            if (data[0].countOfFriend == 2) {
+                                firstFriend = data[1].Friend8;
+                                secondFriend = data[2].Friend8;
+                                $("#firstFriendPhoto").attr("src",data[1].Friend30);
+                                $("#secondFriendPhoto").attr("src",data[2].Friend30);
+                                $("#thirdFriendPhoto").hide();
+                                $("#firstFriend").html(data[1].Friend1 + "<br>" + data[1].Friend2);
+                                $("#secondFriend").html(data[2].Friend1 + "<br>" + data[2].Friend2);
+                                $("#thirdFriend").hide();
+                            }
+                            if (data[0].countOfFriend == 1) {
+                                firstFriend = data[1].Friend8;
+                                $("#firstFriendPhoto").attr("src",data[1].Friend30);
+                                $("#secondFriendPhoto").hide();
+                                $("#thirdFriendPhoto").hide();
+                                $("#firstFriend").html(data[1].Friend1 + "<br>" + data[1].Friend2);
+                                $("#secondFriend").hide();
+                                $("#thirdFriend").hide();
+                            }
+                            if (data[0].countOfFriend == 0) {
+                                $("#firstFriendPhoto").hide();
+                                $("#secondFriendPhoto").hide();
+                                $("#thirdFriendPhoto").hide();
+                                $("#firstFriend").hide();
+                                $("#secondFriend").hide();
+                                $("#thirdFriend").hide();
+                            }
+                        },
+                        dataType: "json"
+                    });
+                    
+                    $.ajax({ 
+                        type: "GET", 
+                        url: "webresources/sample/getSamplesByLoginInTimeOrder",
+                        data:{login:"energetiks"},
+                        success: function(data, response) {
+                            if (data[0].countOfSamples >= 3) {
+                                $("#Sample1").html(data[1].Sample19);
+                                $("#Sample2").html(data[2].Sample19);
+                                $("#Sample3").html(data[3].Sample19);
+                                $("#Like1").html(data[1].Sample31);
+                                $("#Like2").html(data[2].Sample31);
+                                $("#Like3").html(data[3].Sample31);
+                                $("#DisLike1").html(data[1].Sample32);
+                                $("#DisLike2").html(data[2].Sample32);
+                                $("#DisLike3").html(data[3].Sample32);
+                            }
+                            if (data[0].countOfSamples == 2) {
+                                $("#Sample1").html(data[1].Sample19);
+                                $("#Sample2").html(data[2].Sample19);
+                                $("#Sample3").hide();
+                                $("#Like1").html(data[1].Sample31);
+                                $("#Like2").html(data[2].Sample31);
+                                $("#Like3").hide();
+                                $("#PhotoLike3").hide();
+                                $("#DisLike1").html(data[1].Sample32);
+                                $("#DisLike2").html(data[2].Sample32);
+                                $("#DisLike3").hide();
+                                $("#PhotoDisLike3").hide();
+                            }
+                            if (data[0].countOfSamples == 1) {
+                                $("#Sample1").html(data[1].Sample19);
+                                $("#Sample2").hide();
+                                $("#Sample3").hide();
+                                $("#Like1").html(data[1].Sample31);
+                                $("#Like2").hide();
+                                $("#Like3").hide();
+                                $("#PhotoLike2").hide();
+                                $("#PhotoLike3").hide();
+                                $("#DisLike1").html(data[1].Sample32);
+                                $("#DisLike2").hide();
+                                $("#DisLike3").hide();
+                                $("#PhotoDisLike2").hide();
+                                $("#PhotoDisLike3").hide()
+                            }
+                            if (data[0].countOfSamples == 0) {
+                                $("#Sample1").hide();
+                                $("#Sample2").hide();
+                                $("#Sample3").hide();
+                                $("#Like1").hide();
+                                $("#Like2").hide();
+                                $("#Like3").hide();
+                                $("#PhotoLike1").hide();
+                                $("#PhotoLike2").hide();
+                                $("#PhotoLike3").hide();
+                                $("#DisLike1").hide();
+                                $("#DisLike2").hide();
+                                $("#DisLike3").hide();
+                                $("#PhotoDisLike1").hide();
+                                $("#PhotoDisLike2").hide();
+                                $("#PhotoDisLike3").hide();
+                            }
+                        },
+                        dataType: "json"
+                    });
+                    
+                    $.ajax({ 
+                        type: "GET", 
+                        url: "webresources/sample/getSamplesInLikeOrder",
+                        success: function(data, response) {
+                                var countOfSamples = data[0].countOfSamples;
+                                $("#SampleLike1").html(data[countOfSamples].Sample19);
+                                $("#SampleLike2").html(data[countOfSamples-1].Sample19);
+                                $("#SampleLike3").html(data[countOfSamples-2].Sample19);
+                                $("#SampleLike4").html(data[countOfSamples-3].Sample19);
+                                $("#SampleLike5").html(data[countOfSamples-4].Sample19);
+                                
+                                $("#CountOfLikes1").html(data[countOfSamples].Sample31);
+                                $("#CountOfLikes2").html(data[countOfSamples-1].Sample31);
+                                $("#CountOfLikes3").html(data[countOfSamples-2].Sample31);
+                                $("#CountOfLikes4").html(data[countOfSamples-3].Sample31);
+                                $("#CountOfLikes5").html(data[countOfSamples-4].Sample31);
+                                
+                                $("#CountOfDisLikes1").html(data[countOfSamples].Sample32);
+                                $("#CountOfDisLikes2").html(data[countOfSamples-1].Sample32);
+                                $("#CountOfDisLikes3").html(data[countOfSamples-2].Sample32);
+                                $("#CountOfDisLikes4").html(data[countOfSamples-3].Sample32);
+                                $("#CountOfDisLikes5").html(data[countOfSamples-4].Sample32);
+                        }
+                    });
+                    
+                    $("#friend1").on("click", function () {
+                        document.location.href = 'friend.html?' + firstFriend;
+                    });
+                    $("#friend2").on("click", function () {
+                        document.location.href = 'friend.html?' + secondFriend;
+                    });
+                    $("#friend3").on("click", function () {
+                        document.location.href = 'friend.html?' + thirdFriend;
+                    });
+                });
+        </script>
+        <!--background changer-->
+        <div id="background_changer">
+            <div class="alignleft_block backgrounds">
+                <ul id="theme_roller_list">
+                    <li>
+                        <a href="#">Color</a>
+                        <div>
+                            <span id="color_picker" class="alignleft_block"></span>
+                        </div>
+                    </li>
+                    <li>
+                        <a href="#">Pattern</a>
+                        <div id="background_patterns">
+                            <a href="0"><img src="images/background/page_tile_0.png" width="24" height="24" alt=""/></a>
+                            <a href="1"><img src="images/background/page_tile_1.png" width="24" height="24" alt=""/></a>
+                            <a href="2"><img src="images/background/page_tile_2.png" width="24" height="24" alt=""/></a>
+                            <a href="3"><img src="images/background/page_tile_3.png" width="24" height="24" alt=""/></a>
+                            <a href="4"><img src="images/background/page_tile_4.png" width="24" height="24" alt=""/></a>
+                            <a href="5"><img src="images/background/page_tile_5.png" width="24" height="24" alt=""/></a>
+                            <a href="6"><img src="images/background/page_tile_6.png" width="24" height="24" alt=""/></a>
+                            <a href="7"><img src="images/background/page_tile_7.png" width="24" height="24" alt=""/></a>
+                            <a href="8"><img src="images/background/page_tile_8.png" width="24" height="24" alt=""/></a>                        
+                            <a href="9"><img src="images/background/page_tile_9.png" width="24" height="24" alt=""/></a>
+                            <a href="10"><img src="images/background/page_tile_10.png" width="24" height="24" alt=""/></a>
+                            <a href="11"><img src="images/background/page_tile_11.png" width="24" height="24" alt=""/></a>
+                            <a href="12"><img src="images/background/page_tile_12.png" width="24" height="24" alt=""/></a>                                                                        
+                            <a href="13"><img src="images/background/page_tile_13.png" width="24" height="24" alt=""/></a>                        
+                        </div>
+                    </li>
+                    <li>
+                        <a href="#">Background</a>
+                        <div id="background_images">
+                            <a href="1"><img src="images/background/bg01.jpg" width="154" alt=""/></a>
+                            <a href="2"><img src="images/background/bg02.jpg" width="154" alt=""/></a>
+                            <a href="3"><img src="images/background/bg03.jpg" width="154" alt=""/></a>
+                            <a href="4"><img src="images/background/bg04.jpg" width="154" alt=""/></a>
+                            <a href="5"><img src="images/background/bg05.jpg" width="154" alt=""/></a>                                                                                                
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="alignleft_block open_close">
+                    <a href="#" class="arrow">OPEN</a>
+            </div>  
+        </div>
+        
+        <!--header-->
+        <div id="body-wrapper">
+            <div id="header-contanier">
+                <div id="header" class="center-clear">
+                    <div id="logo"></div>
+                    <table id="userface">
+                        <tr>
+                            <td>
+                                <label id="userName"></label>
+                            </td>
+                            <td>
+                                <img class="userPhoto" style="max-height: 100px; " alt="Small image"/>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!--menu-->
+                    <ul id="top_menu" class="sf-menu">
+                        <li>
+                            <a href="homePage.html">MY PAGE</a>
+                            <span>Home</span>
+                        </li>
+                        <li>
+                            <a href="albums.html">MY ALBUMS</a>
+                            <span>My creations</span>                     
+                        </li>
+                        <li>
+                            <a href="music.html">MUSIC</a>
+                            <span>All music</span>                     
+                        </li>
+                        <li>
+                            <a href="friends.html">FRIENDS</a>
+                            <span>My friends</span>                       
+                        </li>
+                        <li>
+                            <a href="editData.html">EDIT DATA</a>
+                            <span>Edit your data</span>                       
+                        </li>
+                        <li>
+                            <input type="button" value="Log out" style="height: 35px" onclick="window.location.href='/MusicInstagram/index.html'; return false;"/>
+                        </li>
+                    </ul>                    
+                </div>
+            </div>
+        </div>
+        <div class="clear20"></div>
+
+        <!--content container-->
+        <div id="content_container" class="center-clear">
+            <div class="box-three-sub-wrapper transparent-background">
+                <table class='profile'>
+                    <tr>
+                        <td width='280px'>
+                            <div class="userHead">
+                                <p id="name"></p>
+                                <img class="userPhoto" style="width: 250px;" src="" alt="Image">
+                            </div>
+                        </td>
+                        <td width="400px">
+                            <div class="userTextArea">
+                                <p id="infoAboutUser"></p>
+                            </div>
+                        </td>
+                        <td>
+                            <p>Last created samples</p>
+                            <div class='last_created_samples'>                                
+                                <table>
+                                    <tr>
+                                        <td>
+                                            <a class="sample" style="background-color:transparent; border:2px;">
+                                                <img src="images/songImage.jpg" alt="Sample1">
+                                                <label id="Sample1"></label><br/>
+                                            </a>
+                                            <a id="PhotoLike1">
+                                                <img class="like" src="images/Like.jpg">
+                                            </a>
+                                            <label id="Like1"></label>
+                                            <a id="PhotoDisLike1">
+                                                <img class="like" src="images/DisLike.jpg">
+                                            </a>
+                                            <label id="DisLike1"></label>
+                                            
+                                        </td>
+                                        <td>
+                                            <a class="sample" style="background-color:transparent; border:2px;">
+                                                <img src="images/songImage.jpg" alt="Sample1">
+                                                <label id="Sample2"></label>
+                                            </a>
+                                            <a id="PhotoLike2">
+                                                <img class="like" src="images/Like.jpg">
+                                            </a>
+                                            <label id="Like2"></label>
+                                            <a id="PhotoDisLike2">
+                                                <img class="like" src="images/DisLike.jpg">
+                                            </a>
+                                            <label id="DisLike2"></label>
+                                        </td>
+                                        <td>
+                                            <a class="sample" style="background-color:transparent; border:2px;">
+                                                <img src="images/songImage.jpg" alt="Sample1">
+                                                <label id="Sample3"></label>
+                                            </a>
+                                            <a id="PhotoLike3">
+                                                <img class="like" src="images/Like.jpg">
+                                            </a>
+                                            <label id="Like3"></label>
+                                            <a id="PhotoDisLike3">
+                                                <img class="like" src="images/DisLike.jpg">
+                                            </a>
+                                            <label id="DisLike3"></label>
+                                        </td>                                                                                            
+                                    </tr>
+                                </table>
+                            </div>
+                            <p>Friends</p>
+                            <div class='last_created_samples'>
+                                <table>
+                                    <tr>
+                                        <td>
+                                            <a id="friend1" class="sample">
+                                                <img id="firstFriendPhoto" alt="Friend1">
+                                                <label id="firstFriend"></label>
+                                            </a>
+                                        <td>
+                                            <a id="friend2" class="sample">
+                                                <img id="secondFriendPhoto" alt="Friend2">
+                                                <label id="secondFriend"></label>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <a id="friend3" class="sample">
+                                                <img id="thirdFriendPhoto" alt="Friend3">
+                                                <label id="thirdFriend"></label>
+                                            </a>
+                                        </td>                                                                                            
+                                    </tr>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="clear20"></div>        
+
+            <div class="box-three-sub-wrapper transparent-background">
+                <h3>MOST LISTENED</h3>
+                <div class="last_created_samples most-listened">
+                    <table>                    
+                        <tr>
+                            <td>
+                                <img src="images/songImage.jpg" alt=""><br/>
+                                <label id="SampleLike1"></label><br/>
+                                <a>
+                                    <img class="like" src="images/Like.jpg">
+                                </a>
+                                <label id="CountOfLikes1"></label>
+                                <a>
+                                    <img class="like" src="images/DisLike.jpg">
+                                </a>
+                                <label id="CountOfDisLikes1"></label>
+                            </td>
+                            <td>
+                                <img src="images/songImage.jpg" alt=""><br/>
+                                <label id="SampleLike2"></label><br/>
+                                <a>
+                                    <img class="like" src="images/Like.jpg">
+                                </a>
+                                <label id="CountOfLikes2"></label>
+                                <a>
+                                    <img class="like" src="images/DisLike.jpg">
+                                </a>
+                                <label id="CountOfDisLikes2"></label>
+                            </td>
+                            <td>
+                                <img src="images/songImage.jpg" alt=""><br/>
+                                <label id="SampleLike3"></label><br/>
+                                <a>
+                                    <img class="like" src="images/Like.jpg">
+                                </a>
+                                <label id="CountOfLikes3"></label>
+                                <a>
+                                    <img class="like" src="images/DisLike.jpg">
+                                </a>
+                                <label id="CountOfDisLikes3"></label>
+                            </td>
+                            <td>
+                                <img src="images/songImage.jpg" alt=""><br/>
+                                <label id="SampleLike4"></label><br/>
+                                <a>
+                                    <img class="like" src="images/Like.jpg">
+                                </a>
+                                <label id="CountOfLikes4"></label>
+                                <a>
+                                    <img class="like" src="images/DisLike.jpg">
+                                </a>
+                                <label id="CountOfDisLikes4"></label>
+                            </td>
+                            <td>
+                                <img src="images/songImage.jpg" alt=""><br/>
+                                <label id="SampleLike5"></label><br/>
+                                <a>
+                                    <img class="like" src="images/Like.jpg">
+                                </a>
+                                <label id="CountOfLikes5"></label>
+                                <a>
+                                    <img class="like" src="images/DisLike.jpg">
+                                </a>
+                                <label id="CountOfDisLikes5"></label>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>      
+        </div>
+
+        <div class="clear20"></div>
+
+        <div id="footer_container">
+            <div id="footer" class="center-clear">
+                <ul>
+                    <li>
+                        <a href="homePage.html" class="active">MY PAGE</a>
+                    </li>
+                    <li>
+                        <a href="albums.html">MY ALBUMS</a>
+                    </li>
+                    <li>
+                        <a href="music.html">MUSIC</a>
+                    </li>
+                    <li>
+                        <a href="friends.html">FRIENDS</a>
+                    </li>
+                    <li>
+                        <a href="editData.html">EDIT DATA</a>
+                    </li>
+                </ul>
+                <div>Copyright MusicInstagram. 2016</div>
+            </div>
+        </div>
+        <script type="text/javascript" src="scripts/jquery-1.7.1.min.js"></script>
+        <script type="text/javascript" src="scripts/jquery.easing.1.3.js"></script>
+        <script type="text/javascript" src="scripts/nivo-slider/jquery.nivo.slider.js"></script>
+        <script type="text/javascript" src="scripts/superfish/js/superfish.js"></script>
+        <script type="text/javascript" src="scripts/superfish/js/hoverIntent.js"></script>
+        <script type="text/javascript" src="scripts/superfish/js/jquery.bgiframe.min.js"></script>
+        <script type="text/javascript" src="scripts/superfish/js/supersubs.js"></script>
+        <script type='text/javascript' src='scripts/autocomplete/jquery.autocomplete.min.js'></script>
+        <script type="text/javascript" src="scripts/scripts.js"></script>
+        <script type="text/javascript" src="scripts/jquery-backgroundpos/jquery.backgroundpos.pack.js"></script>
+        <script type="text/javascript" src="scripts/demo/colorpicker/js/colorpicker.js"></script>
+        <script type="text/javascript" src="scripts/demo/demo.js"></script>
+    </body>
+</html>

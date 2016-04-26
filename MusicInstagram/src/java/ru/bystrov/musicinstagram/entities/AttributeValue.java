@@ -37,6 +37,8 @@ public class AttributeValue implements Serializable {
     private int numberValue;
     @Column
     private int referenceValue;
+    @Column
+    private String dateValue;
 
     public int getAttrValueId() {
         return attrValueId;
@@ -89,6 +91,14 @@ public class AttributeValue implements Serializable {
 
     public void setReferenceValue(int ref) {
         this.referenceValue = ref;
+    }
+
+    public String getDateValue() {
+        return dateValue;
+    }
+
+    public void setDateValue(String dateValue) {
+        this.dateValue = dateValue;
     }
     
 }
