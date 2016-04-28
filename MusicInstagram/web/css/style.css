@@ -199,12 +199,10 @@ body,textarea,input,select{
     width: 100%;
 }
 .albums {
-    width: 600px;
+    width: 850px;
 }
 
-.albums table{
-    width: 100%;
-}
+
 
 .most-listened table tr td img{
     width: 90px;
@@ -2235,9 +2233,11 @@ ul.accordion-large li div{
     height: 20px;
     margin: 0px;
 }
-.last_created_samples table tr td a lable {
-    padding-right: 0px;
-    padding-left: 0px;
+.last_created_samples table tr td label {
+    padding: 5px;
+}
+.last_created_samples table tr td  a label {
+    padding: 5px;
 }
 .last_created_samples table tr td a .like:hover {
 	background-color:transparent;

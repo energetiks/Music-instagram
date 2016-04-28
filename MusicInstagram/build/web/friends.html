@@ -6,6 +6,7 @@
         <link rel="stylesheet" type="text/css" href="css/reset.css"/>
         <link rel="stylesheet" type="text/css" href="css/style.css"/>
         <link rel="stylesheet" type="text/css" href="css/default.css"/>
+        <script type="text/javascript" src="scripts/jquery-1.7.1.min.js"></script>
         
         <link rel="stylesheet" type="text/css" href="scripts/nivo-slider/nivo-slider.css"/>
         <link rel="stylesheet" type="text/css" href="scripts/nivo-slider/themes/default/default.css"/>
@@ -17,6 +18,92 @@
         <link rel="stylesheet" type="text/css" href="scripts/demo/colorpicker/css/colorpicker.css"/>        
     </head>
     <body>
+        <script>
+            $(function(){
+                $.ajax({ 
+                    type: "GET", 
+                    url: "webresources/user/getLogin",
+                    success: function(result, response) {
+                        $("#userName").text(result.nickName);
+                        $.ajax({ 
+                            type: "GET", 
+                            url: "webresources/user/getPhotoByLogin",
+                            data:{login:result.nickName},
+                            success: function(data, response) {
+                                $(".userPhoto").attr("src",data.photo);
+                            },
+                            dataType: "json"
+                        });
+                        
+                        $.ajax({ 
+                            type: "GET", 
+                            url: "webresources/user/getFriendsByLogin",
+                            data:{login:result.nickName},
+                            success: function(data, response) {
+                                var i;
+                                var table = document.getElementById('friendsTable');
+                                for (i = 1; i <= data[0].countOfFriend; i++) {
+                                    var tr = document.createElement('TR');
+                                    var td1 = document.createElement('TD');
+                                    var div1 = document.createElement('DIV');
+                                    div1.setAttribute('class','userHead');
+                                    
+                                    var p = document.createElement('P');
+                                    p.setAttribute('id','friendName' + i);
+                                    
+                                    var img = document.createElement('IMG');
+                                    img.setAttribute('id','friendPhoto' + i);
+                                    img.setAttribute('style','height:140px;');
+                                    img.setAttribute('src',data[i].Friend30);
+                                    
+                                    var br = document.createElement('BR');
+                                    var btn = document.createElement('INPUT');
+                                    btn.setAttribute('id','friend' + i);
+                                    btn.setAttribute('type','button');
+                                    btn.setAttribute('value','Full Info');
+                                    btn.setAttribute('style','height: 25px; width:65px; margin: 10px;');
+                                    btn.setAttribute('onclick',"window.location.href='friend.html?" + data[i].Friend8 + "'; return false;");
+
+                                    var td2 = document.createElement('TD');
+                                    var div2 = document.createElement('DIV');
+                                    div2.setAttribute("class","userTextArea");
+
+                                    var p2 = document.createElement('P');
+                                    p2.setAttribute("id","friendInfo" + i);
+                                    p2.setAttribute("style","text-align:left;");
+
+                                    div1.appendChild(p);
+                                    div1.appendChild(img);
+                                    div1.appendChild(br);
+                                    div1.appendChild(btn);
+
+                                    div2.appendChild(p2);
+
+                                    td1.appendChild(div1);
+                                    td2.appendChild(div2);
+
+                                    tr.appendChild(td1);
+                                    tr.appendChild(td2);
+
+                                    table.appendChild(tr);
+                                    $("#friendName" + i).html(data[i].Friend1 + " " + data[i].Friend2);
+                                    $("#friendInfo" + i).html(
+                                                    "Age: " + data[i].Friend3 + "<br>" +
+                                                    "City: " + data[i].Friend5 + "<br>" +
+                                                    "Country: " + data[i].Friend4 + "<br>" +
+                                                    "Univercity: " + data[i].Friend6 + "<br>" +
+                                                    "Phone number: " + data[i].Friend7 + "<br>");
+                                }
+                            }
+                        });
+                    },
+                    dataType: "json"
+                });
+                
+                
+            });
+            
+        </script>
         <!--background changer-->
         <div id="background_changer">
             <div class="alignleft_block backgrounds">
@@ -96,6 +183,10 @@
                             <span>My friends</span>                       
                         </li>
                         <li>
+                            <a href="editData.html">EDIT DATA</a>
+                            <span>Edit your data</span>                       
+                        </li>
+                        <li>
                             <input type="button" value="Log out" style="height: 35px" onclick="window.location.href='/MusicInstagram/index.html'; return false;"/>
                         </li>
                     </ul>
@@ -109,46 +200,7 @@
         <!--content container-->
         <div id="content_container" class="center-clear">
             <div class="box-three-sub-wrapper transparent-background">
-                <table class='profile friend'>
-                    <tr>
-                        <td>
-                            <div class="userHead">
-                                <p>Username</p>
-                                <img src="images/face.png"/>
-                            </div>                                
-                        </td>  
-                        <td>
-                            <div class="userTextArea">
-                                <p>Cityjsghlwhg hg lhgkjshgkjs hkjshg jsh gkjhgkhgkjs hkjsh ksdh kjsdhg ksh kshgk </p>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="userHead">
-                                <p>Username</p>
-                                <img src="images/face.png" alt/>
-                            </div>                                
-                        </td>  
-                        <td>
-                            <div class="userTextArea">
-                                <p>Cityjsghlwhg hg lhgkjshgkjs hkjshg jsh gkjhgkhgkjs hkjsh ksdh kjsdhg ksh kshgk </p>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="userHead">
-                                <p>Username</p>
-                                <img src="images/face.png" alt/>
-                            </div>                                
-                        </td>  
-                        <td>
-                            <div class="userTextArea">
-                                <p>Cityjsghlwhg hg lhgkjshgkjs hkjshg jsh gkjhgkhgkjs hkjsh ksdh kjsdhg ksh kshgk </p>
-                            </div>
-                        </td>
-                    </tr>
+                <table class='profile friend' id="friendsTable">
                 </table>
             </div>
         </div>
@@ -159,19 +211,19 @@
             <div id="footer" class="center-clear">
                 <ul>
                     <li>
-                        <a href="#" class="active">MY PAGE</a>
+                        <a href="homePage.html" >MY PAGE</a>
                     </li>
                     <li>
-                        <a href="#">MY ALBUMS</a>
+                        <a href="albums.html">MY ALBUMS</a>
                     </li>
                     <li>
-                        <a href="#">MUSIC</a>
+                        <a href="music.html">MUSIC</a>
                     </li>
                     <li>
-                        <a href="#">FRIENDS</a>
+                        <a href="friends.html" class="active">FRIENDS</a>
                     </li>
                     <li>
-                        <a href="#">CREATE MUSIC</a>
+                        <a href="editData.html">EDIT DATA</a>                     
                     </li>
                 </ul>
                 <div>Copyright MusicInstagram. 2016</div>

@@ -1,10 +1,4 @@
-<!DOCTYPE html>
-<!--
-To change this license header, choose License Headers in Project Properties.
-To change this template file, choose Tools | Templates
-and open the template in the editor.
--->
-<html>
+<!DOCTYPE html><html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <title>Music instagram</title>
@@ -12,6 +6,7 @@ and open the template in the editor.
         <link rel="stylesheet" type="text/css" href="css/reset.css"/>
         <link rel="stylesheet" type="text/css" href="css/style.css"/>
         <link rel="stylesheet" type="text/css" href="css/default.css"/>
+        <script type="text/javascript" src="scripts/jquery-1.7.1.min.js"></script>
         
         <link rel="stylesheet" type="text/css" href="scripts/nivo-slider/nivo-slider.css"/>
         <link rel="stylesheet" type="text/css" href="scripts/nivo-slider/themes/default/default.css"/>
@@ -23,6 +18,137 @@ and open the template in the editor.
         <link rel="stylesheet" type="text/css" href="scripts/demo/colorpicker/css/colorpicker.css"/>        
     </head>
     <body>
+        <script>
+            $(function(){
+                $.ajax({ 
+                    type: "GET", 
+                    url: "webresources/user/getLogin",
+                    success: function(result, response) {
+                        $("#userName").text(result.nickName);
+                        $.ajax({ 
+                            type: "GET", 
+                            url: "webresources/user/getPhotoByLogin",
+                            data:{login:result.nickName},
+                            success: function(data, response) {
+                                $("#userPhoto").attr("src",data.photo);
+                            },
+                            dataType: "json"
+                        });
+                        
+                        $.ajax({ 
+                            type: "GET", 
+                            url: "webresources/sample/getSamplesFromDirectory",
+                            data:{login:result.nickName},
+                            success: function(data, response) {
+                                var i;
+                                var table = document.getElementById('albums');
+                                for (i = 1; i <= data.countOfDirectories; i++) {
+                                    var tr = document.createElement('TR');
+                                    var td = document.createElement('TD');
+                                    var p = document.createElement('P');
+                                    p.setAttribute("id","albumName" + i);
+                                    p.setAttribute("class","userHead");
+                                    var div = document.createElement('DIV');
+                                    div.setAttribute("class","last_created_samples albums");
+                                    var tbl=document.createElement('TABLE');
+                                    var tr1=document.createElement('TR');
+                                    
+                                    var j;
+                                    var name = "Directory" + i;
+                                    for(j = 1; j <=data.Directory[i-1][0].countOfSamples; j++) {
+                                        var td1=document.createElement('TD');
+                                        var a1=document.createElement('A');
+                                        a1.setAttribute("class","sample");
+                                        var img1 = document.createElement('IMG');
+                                        img1.setAttribute("id","photoSample" + i*100+j);
+                                        img1.setAttribute("src","images/songImage.jpg");
+                                        var br1 = document.createElement('BR');
+                                        var label = document.createElement('LABEL');
+                                        label.setAttribute("id","nameSample" + i*100+j);
+                                        var br2 = document.createElement('BR');
+                                        var a2=document.createElement('A');
+                                        a2.setAttribute("id","photoLike" + i*100+j);
+                                        var img2 = document.createElement('IMG');
+                                        img2.setAttribute("class","like");
+                                        img2.setAttribute("src","images/Like.jpg");
+                                        img2.setAttribute("style","width:20px; height:20px;");
+
+                                        var label2 = document.createElement('LABEL');
+                                        label2.setAttribute("id","Like" + i*100+j);
+
+                                        var a3=document.createElement('A');
+                                        a3.setAttribute("id","photoDisLike" + i*100+j);
+                                        var img3 = document.createElement('IMG');
+                                        img3.setAttribute("class","like");
+                                        img3.setAttribute("src","images/DisLike.jpg");
+                                        img3.setAttribute("style","width:20px; height:20px;");
+
+                                        var label3 = document.createElement('LABEL');
+                                        label3.setAttribute("id","DisLike" + i*100+j);
+                                        
+                                        a1.appendChild(img1);
+                                        a1.appendChild(br1);
+                                        a1.appendChild(label);
+                                        td1.appendChild(a1);
+                                        td1.appendChild(br2);
+                                        a2.appendChild(img2);
+                                        td1.appendChild(a2);
+                                        td1.appendChild(label2);
+                                        a3.appendChild(img3);
+                                        td1.appendChild(a3);
+                                        td1.appendChild(label3);
+                                        if (j%6 == 0 ) {
+                                            var br3 = document.createElement('BR');
+                                            tr1.appendChild(br3);
+                                        }
+                                        tr1.appendChild(td1);
+                                    }
+                                    tbl.appendChild(tr1);
+                                    div.appendChild(tbl);
+                                    td.appendChild(p);
+                                    td.appendChild(div);
+                                    tr.appendChild(td);
+                                    table.appendChild(tr);
+                                    var size = data.Directory[i-1][0].countOfSamples;
+                                    for(j = 1; j <= size; j++) {
+                                        $("#albumName" + i).html(data.Directory[i-1][size - j + 1].nameOfDirectory);
+                                        $("#nameSample" + i*100+j).html(data.Directory[i-1][size - j + 1].Sample19);
+                                        $("#Like" + i*100+j).html(data.Directory[i-1][size - j + 1].Sample31);
+                                        $("#DisLike" + i*100+j).html(data.Directory[i-1][size - j + 1].Sample32);
+                                    }                         
+//                                    <tr>
+//                                        <td>
+//                                            <p id="albumName" class="userHead">Album</p>
+//                                            <div class='last_created_samples albums'>
+//                                                <table>
+//                                                <tr>
+//                                                <td>
+//                                                <a class="sample" style="background-color:transparent; border:2px;">
+//                                                    <img src="images/songImage.jpg" alt="Sample1">
+//                                                    <label id="Sample1"></label><br/>
+//                                                </a>
+//                                                <a id="PhotoLike1">
+//                                                    <img class="like" src="images/Like.jpg">
+//                                                </a>
+//                                                <label id="Like1"></label>
+//                                                <a id="PhotoDisLike1">
+//                                                    <img class="like" src="images/DisLike.jpg">
+//                                                </a>
+//                                                <label id="DisLike1"></label>
+//                                                </td>
+//                                                </tr>
+//                                                </table>
+//                                            </div>                             
+//                                        </td>
+//                                    </tr>
+                                }
+                            }
+                        });
+                    },
+                    dataType: "json"
+                });
+            });
+        </script>
         <!--background changer-->
         <div id="background_changer">
             <div class="alignleft_block backgrounds">
@@ -75,10 +201,10 @@ and open the template in the editor.
                     <table id="userface">
                         <tr>
                             <td>
-                                <label id="username">nickname</label>
+                                <label id="userName">nickname</label>
                             </td>
                             <td>
-                                <img src="images/face.png" style="border: 2px solid #000" alt="Small image"/>
+                                <img id="userPhoto" style="max-height: 100px;" alt="Small image"/>
                             </td>
                         </tr>
                     </table>
@@ -102,6 +228,10 @@ and open the template in the editor.
                             <span>My friends</span>                       
                         </li>
                         <li>
+                            <a href="editData.html">EDIT DATA</a>
+                            <span>Edit your data</span>                       
+                        </li>
+                        <li>
                             <input type="button" value="Log out" style="height: 35px" onclick="window.location.href='/MusicInstagram/index.html'; return false;"/>
                         </li>
                     </ul>
@@ -114,73 +244,7 @@ and open the template in the editor.
         <!--content container-->
         <div id="content_container" class="center-clear">
             <div class="box-three-sub-wrapper transparent-background">
-                <table class='profile friend'>
-                    <tr>
-                        <td width='300px'>
-                            <div class="userHead">
-                                <p>Album</p>
-                                <img src="images/face.png" alt/>
-                            </div>
-                        </td>
-                        <td>
-                            <p>Songs</p>
-                            <div class='last_created_samples albums'>
-                                <table>
-                                    <tr>
-                                        <td>
-                                            <img src="images/face.png" alt/><br/>
-                                            <label>Name1</label>
-                                        </td>
-                                        <td>
-                                            <img src="images/face.png" alt/><br/>
-                                            <label>Name2</label>
-                                        </td>
-                                        <td>
-                                            <img src="images/face.png" alt/><br/>
-                                            <label>Name3</label>
-                                        </td>                                                                                            
-                                    </tr>
-                                </table>
-                            </div>                             
-                        </td>
-                    </tr>
-                    <tr>
-                        <td width='300px'>
-                            <div class="userHead">
-                                <p>Album</p>
-                                <img src="images/face.png" alt/>
-                            </div>
-                        </td>
-                        <td>
-                            <p>Songs</p>
-                            <div class="last_created_samples albums">
-                                <table>                    
-                                    <tr>
-                                        <td>
-                                            <img src="images/face.png" alt/><br/>
-                                            <label>Sample</label>
-                                        </td>
-                                        <td>
-                                            <img src="images/face.png" alt/><br/>
-                                            <label>Sample</label>
-                                        </td>
-                                        <td>
-                                            <img src="images/face.png" alt/><br/>
-                                            <label>Sample</label>
-                                        </td>
-                                        <td>
-                                            <img src="images/face.png" alt/><br/>
-                                            <label>Sample</label>
-                                        </td>
-                                        <td>
-                                            <img src="images/face.png" alt/><br/>
-                                            <label>Sample</label>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>    
-                        </td>
-                    </tr>
+                <table class='profile friend' id="albums">
                 </table>
             </div>      
         </div>
@@ -191,19 +255,19 @@ and open the template in the editor.
             <div id="footer" class="center-clear">
                 <ul>
                     <li>
-                        <a href="#" class="active">MY PAGE</a>
+                        <a href="homePage.html" >MY PAGE</a>
                     </li>
                     <li>
-                        <a href="#">MY ALBUMS</a>
+                        <a class="active">MY ALBUMS</a>
                     </li>
                     <li>
-                        <a href="#">MUSIC</a>
+                        <a href="music.html" >MUSIC</a>
                     </li>
                     <li>
-                        <a href="#">FRIENDS</a>
+                        <a href="friends.html">FRIENDS</a>
                     </li>
                     <li>
-                        <a href="#">CREATE MUSIC</a>
+                        <a href="editData.html">EDIT DATA</a>
                     </li>
                 </ul>
                 <div>Copyright MusicInstagram. 2016</div>

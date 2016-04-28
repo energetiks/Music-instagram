@@ -54,12 +54,17 @@ public class SampleResource {
     final private int COUNT_OF_LIKE_ID = 31;
     final private int COUNT_OF_DISLIKE_ID = 32;
     final private int TIME_ID = 33;
+    final private int DIRECTORY_REF_ID = 34;
     
     final private int SAMPLE_TYPE_ID = 3;
     final private int FILE_TYPE_ID = 5;
     
+    final private int DIR_USER_REF_ID = 26;
+    final private int DIR_NAME_ID = 25;
+    
     final private int PATH_FILE_ID = 27;
     final private int TYPE_FILE_ID = 28;
+    
     
     
     final private int LOGIN_ID = 8;
@@ -74,6 +79,7 @@ public class SampleResource {
                              @FormParam("filter2") String filter2,
                              @FormParam("source_ref") int source_ref,
                              @FormParam("file_ref") String file_ref,
+                             @FormParam("directory_ref") int directory_ref,
                              @FormParam("login") String login) {
         JSONObject result = new JSONObject();
         Integer objId = (Integer) em.createNativeQuery("select objId from AttributeValue "
@@ -92,6 +98,7 @@ public class SampleResource {
         attrValue.put(TIME_ID,new Attribute("date", time.toString()));
         attrValue.put(COUNT_OF_LIKE_ID, new Attribute("int",0));
         attrValue.put(COUNT_OF_DISLIKE_ID, new Attribute("int",0));
+        attrValue.put(DIRECTORY_REF_ID, new Attribute("int",directory_ref));
         try {
             utx.begin();
             Objects newSample  = new Objects();
@@ -310,6 +317,99 @@ public class SampleResource {
             array.put(obj);
         }
         return array.toString(); 
+    }
+    
+    @GET
+    @Path("getSamplesFromDirectory")
+    @Produces(MediaType.APPLICATION_JSON+ ";charset=UTF-8")
+    public String getSamplesFromDirectory(@Context HttpServletRequest req,
+                                          @QueryParam("login") String login) {
+        JSONObject result = new JSONObject();
+        JSONArray mainArray = new JSONArray();
+        Integer objId = (Integer) em.createNativeQuery("select objId from AttributeValue "
+                                                     + "where stringValue = ? and attrId = ? ")
+                    .setParameter(1, login).setParameter(2, LOGIN_ID).getResultList().get(0);
+        
+         List<Integer> directoriesId = em.createNativeQuery("select objId from AttributeValue"
+                                            + " where  referenceValue = ? and"
+                                            + "  attrId = ?")
+                                    .setParameter(1, objId).setParameter(2, DIR_USER_REF_ID).getResultList();
+        JSONObject obj = new JSONObject();
+        JSONArray array = new JSONArray();
+        result.put("countOfDirectories", directoriesId.size());
+        int count = 1;
+        for(Integer directoryId : directoriesId) {
+            obj.put("Directory" + count,directoryId);
+            count = count + 1;
+        }
+        array.put(obj);
+        result.put("DIRECTORIES",array);
+        array = new JSONArray();
+        if (directoriesId.isEmpty()) {
+                return result.toString();
+        }
+        count = 1;
+        for(Integer directoryId : directoriesId) {
+            String nameOfDirectory = (String) em.createNativeQuery(" SELECT stringValue " +
+                                                                   " FROM ATTRIBUTEVALUE " +
+                                                                   " WHERE objId = ? and " +
+                                                                   "       attrId = ? ")
+                    .setParameter(1, directoryId).setParameter(2, DIR_NAME_ID).getResultList().get(0);
+            List<Integer> samplesId = em.createNativeQuery("SELECT sample.objId " +
+                                                           "FROM ATTRIBUTEVALUE dir, " +
+                                                           "     ATTRIBUTEVALUE sample " +
+                                                           "WHERE dir.OBJID = ? and " +
+                                                           "      dir.ATTRID = ? and " +
+                                                           "      dir.REFERENCEVALUE = ? and " +
+                                                           "      dir.OBJID = sample.REFERENCEVALUE and " +
+                                                           "      sample.ATTRID = ? ")
+                    .setParameter(1, directoryId).setParameter(2, DIR_USER_REF_ID)
+                    .setParameter(3, objId).setParameter(4, DIRECTORY_REF_ID).getResultList();
+            if (samplesId.isEmpty()) {
+                return result.toString();
+            }
+            SortedMap<CountOfLikeObject,List<AttributeValue>> mapOfLastSamples = new TreeMap<>();
+            for(Integer sampleId : samplesId) {
+                List<AttributeValue> attrs = em.createNativeQuery("select * from AttributeValue attrV where attrV.objId = ?", AttributeValue.class)
+                                    .setParameter(1, sampleId).getResultList();
+                Integer countOfLikes = (Integer) em.createNativeQuery("select numberValue from AttributeValue "
+                                                                + "where attrId = ? and objId = ? ")
+                        .setParameter(1, COUNT_OF_LIKE_ID).setParameter(2,sampleId).getResultList().get(0);
+                Integer countOfDisLikes = (Integer) em.createNativeQuery("select numberValue from AttributeValue "
+                                                                + "where attrId = ? and objId = ? ")
+                        .setParameter(1, COUNT_OF_DISLIKE_ID).setParameter(2,sampleId).getResultList().get(0);
+                CountOfLikeObject countOfLikeObject = new CountOfLikeObject(countOfLikes,countOfDisLikes,Long.valueOf(sampleId));
+                mapOfLastSamples.put(countOfLikeObject, attrs);
+            }
+            obj = new JSONObject();
+            obj.put("countOfSamples", samplesId.size());
+            array.put(obj);
+                
+            for(Map.Entry<CountOfLikeObject,List<AttributeValue>> entry : mapOfLastSamples.entrySet()) {
+                obj = new JSONObject();
+                obj.put("nameOfDirectory", nameOfDirectory);
+                List<AttributeValue> attrs = entry.getValue();
+                for (AttributeValue attr : attrs){
+                    if (attr.getNumberValue() != -1) {
+                        obj.put("Sample" + String.valueOf(attr.getAttrId()),attr.getNumberValue());
+                    } else
+                    if (!attr.getStringValue().equals("")) {
+                        obj.put("Sample" + String.valueOf(attr.getAttrId()),attr.getStringValue());
+                    } else
+                    if (attr.getReferenceValue() != -1) {
+                        obj.put("Sample" + String.valueOf(attr.getAttrId()),attr.getReferenceValue());
+                    } else
+                    if (!"1970-01-01 00:00:00.000".equals(attr.getDateValue())) {
+                        obj.put("Sample" + String.valueOf(attr.getAttrId()),attr.getDateValue());
+                    }
+                }
+                array.put(obj);
+            }
+            mainArray.put(array);
+            array = new JSONArray();
+        }
+        result.put("Directory",mainArray);
+        return result.toString(); 
     }
     
     

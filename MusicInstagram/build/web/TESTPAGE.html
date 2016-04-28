@@ -16,18 +16,30 @@
         <script>
             $(function(){
                 $("#insertUser").click(function(){
+//                $.ajax({ 
+//                    type: "POST", 
+//                    url: "webresources/directory/createSample", 
+//                    data:{name:$("#name").val(),duration:$("#duration").val(),filter1:$("#filter1").val(),
+//                          filter2:$("#filter2").val(),source_ref:$("#source_ref").val(),file_ref:$("#file_ref").val(),
+//                          login:$("#login").val()},
+//                    success: function(response2) { 
+//                       alert("SUCCESS!!");
+//                        
+//                    }, 
+//                    dataType: "json" 
+//                });
+                
                 $.ajax({ 
                     type: "POST", 
-                    url: "webresources/sample/createSample", 
-                    data:{name:$("#name").val(),duration:$("#duration").val(),filter1:$("#filter1").val(),
-                          filter2:$("#filter2").val(),source_ref:$("#source_ref").val(),file_ref:$("#file_ref").val(),
-                          login:$("#login").val()},
+                    url: "webresources/directory/createNewDirectory", 
+                    data:{name:$("#name").val(),login:$("#login").val()},
                     success: function(response2) { 
                        alert("SUCCESS!!");
                         
                     }, 
                     dataType: "json" 
                 });
+                
 
             });
         });
