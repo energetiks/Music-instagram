@@ -1,6 +1,18 @@
 package ru.bystrov.musicinstagram.service;
 
 import com.google.gson.Gson;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +32,7 @@ import javax.transaction.NotSupportedException;
 import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -29,6 +42,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import static jdk.nashorn.tools.ShellFunctions.input;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,91 +77,139 @@ public class SourceResource {
     final private int USER_REF_ID = 18;
 
     final private int SOURCE_TYPE_ID = 2;
+    final private int FILE_TYPE_ID = 5;
 
+    final private int LOGIN_ID = 8;
+    
+    final private int PATH_FILE_ID = 27;
+    final private int TYPE_FILE_ID = 28;
     public SourceResource() {
     }
 
     @POST
-    @Path("loadSource")
-    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
-    public String loadNewSource(@Context HttpServletRequest req,
-            @FormParam("name") String name,
-            @FormParam("duration") int duration,
-            @FormParam("genre") String genre,
-            @FormParam("language") String language,
-            @FormParam("album_name") String albumName,
-            @FormParam("year") String year,
-            @FormParam("musical_group_name") String musicalGroupName,
-            @FormParam("file_ref") Objects fileRef,
-            @FormParam("user_ref") Objects userRef) {
-        JSONObject result = new JSONObject();
-
-        HashMap<Integer, Attribute> attrValue = new HashMap<>();
-        attrValue.put(NAME_ID, new Attribute("String", name));
-        attrValue.put(DURATION_ID, new Attribute("int", duration));
-        attrValue.put(GENRE_ID, new Attribute("String", genre));
-        attrValue.put(LANGUAGE_ID, new Attribute("String", language));
-        attrValue.put(ALBUM_ID, new Attribute("String", albumName));
-        attrValue.put(YEAR_ID, new Attribute("String", year));
-        attrValue.put(MUSICAL_GROUP_NAME_ID, new Attribute("String", musicalGroupName));
-        attrValue.put(FILE_REF_ID, new Attribute("Reference", fileRef));
-        attrValue.put(USER_REF_ID, new Attribute("Reference", userRef));
+    @Path("upload")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.TEXT_PLAIN)
+    public String upload(
+            @FormDataParam("newSource") InputStream uploadedInputStream,
+            @FormDataParam("fileName") String fileName,
+            @FormDataParam("duration") Integer duration,
+            @FormDataParam("genre") String genre,
+            @FormDataParam("language") String language,
+            @FormDataParam("albumName") String albumName,
+            @FormDataParam("year") Integer year,
+            @FormDataParam("musicalGroupName") String musicalGroupName,
+            @FormDataParam("login") String login
+    ) throws FileNotFoundException, IOException {
         try {
+            JSONObject result = new JSONObject();
+            Integer objId = (Integer) em.createNativeQuery("select objId from AttributeValue "
+                    + "where stringValue = ? and attrId = ? ")
+                    .setParameter(1, login).setParameter(2, LOGIN_ID).getResultList().get(0);
+            
+            java.sql.Timestamp time = (java.sql.Timestamp) em.createNativeQuery("select CURRENT_TIMESTAMP from Objects").getResultList().get(0);
+            
+            HashMap<Integer,Attribute> attrValue = new HashMap<>();
+            attrValue.put(NAME_ID,new Attribute("String", fileName));
+            attrValue.put(DURATION_ID,new Attribute("int", duration));
+            attrValue.put(GENRE_ID,new Attribute("String", genre));
+            attrValue.put(LANGUAGE_ID,new Attribute("String", language));
+            attrValue.put(ALBUM_ID,new Attribute("String", albumName));
+            attrValue.put(YEAR_ID,new Attribute("String", year));
+            attrValue.put(MUSICAL_GROUP_NAME_ID,new Attribute("String", musicalGroupName));
+            attrValue.put(USER_REF_ID,new Attribute("Reference", objId));
+            
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+            // Fake code simulating the copy
+            // You can generally do better with nio if you need...
+            // And please, unlike me, do something about the Exceptions :D
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = uploadedInputStream.read(buffer)) > -1 ) {
+                baos.write(buffer, 0, len);
+            }
+            baos.flush();
+
+            // Open new InputStreams using the recorded bytes
+            // Can be repeated as many times as you wish
+            InputStream is1 = new ByteArrayInputStream(baos.toByteArray()); 
+            InputStream is2 = new ByteArrayInputStream(baos.toByteArray());
+            
+            
+            
             utx.begin();
-            Objects newSource = new Objects();
-
+            Objects newSource  = new Objects();
+            Objects newSourceFile  = new Objects();
+            
             Integer id = Integer.valueOf(em.createNativeQuery("select MAX(objId) from Objects").getResultList().get(0).toString());
-            newSource.setObjId(id + 1);
-            newSource.setName(name);
+            newSource.setObjId(id+1);
+            newSource.setName("Source" + fileName);
             newSource.setObjTypeId(SOURCE_TYPE_ID);
-
+            
+            newSourceFile.setObjId(id+2);
+            newSourceFile.setName("Source File " + fileName);
+            newSourceFile.setObjTypeId(FILE_TYPE_ID);
+            
+            attrValue.put(FILE_REF_ID,new Attribute("Reference", id+2));
+            
             em.persist(newSource);
-
-            AttributeValue newAttrValue;
-            id = Integer.valueOf(em.createNativeQuery("select MAX(attrValueId) from AttributeValue").getResultList().get(0).toString());
-            for (Map.Entry<Integer, Attribute> entry : attrValue.entrySet()) {
-                newAttrValue = new AttributeValue();
-                id = id + 1;
-                newAttrValue.setAttrId(id);
-
-                newAttrValue.setObjId(newSource.getObjId());
-                if (entry.getValue().getType().equals("String")) {
-                    newAttrValue.setStringValue(String.valueOf(entry.getValue().getValue()));
-                    newAttrValue.setNumberValue(-1);
-                    newAttrValue.setReferenceValue(-1);
-
-                }
-                if (entry.getValue().getType().equals("int")) {
-                    newAttrValue.setNumberValue((int) entry.getValue().getValue());
-                    newAttrValue.setStringValue("");
-                    newAttrValue.setReferenceValue(-1);
-                }
-                if (entry.getValue().getType().equals("Reference")) {
-                    newAttrValue.setReferenceValue((int) entry.getValue().getValue());
-                    newAttrValue.setNumberValue(-1);
-                    newAttrValue.setStringValue("");
-                }
-                em.persist(newAttrValue);
-            }
-
+            em.persist(newSourceFile);
+            MainResource resource = new MainResource();
+            resource.addAttributes(attrValue, newSource, em);
+            
+           
+            attrValue = new HashMap<>();
+            String pathToSource = "C:\\Users\\Test\\Desktop\\MusicInstagram\\Source Library\\".concat(GetHash(is1).concat(".mp3"));
+            attrValue.put(PATH_FILE_ID,new Attribute("String", pathToSource));
+            attrValue.put(TYPE_FILE_ID,new Attribute("String", "mp3"));
+            resource = new MainResource();
+            resource.addAttributes(attrValue, newSourceFile,em);
+            
             utx.commit();
-            result.put("result", "ok");
-            return result.toString();
-        } catch (NotSupportedException | SystemException | RollbackException | HeuristicMixedException | HeuristicRollbackException | SecurityException | IllegalStateException | JSONException ex) {
-            FacesContext ctx = FacesContext.getCurrentInstance();
-            ctx.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "DB Error:", ex.getLocalizedMessage()));
-            ex.printStackTrace(System.err);
-            try {
-                utx.rollback();
-                result.put("result", "failed");
-                return result.toString();
-            } catch (IllegalStateException | SecurityException | SystemException | JSONException exc) {
-
-                exc.printStackTrace(System.err);
-                result.put("result", "failed");
-                return result.toString();
-            }
+            writeToFile(is2, pathToSource);
+            return "Written to server disk";
+        } catch (NoSuchAlgorithmException | NotSupportedException | SystemException | RollbackException | HeuristicMixedException | HeuristicRollbackException | SecurityException | IllegalStateException ex) {
+            return "Error Written to server disk";
         }
+    }
+    
+    static String GetHash(InputStream is) throws IOException, NoSuchAlgorithmException
+    {
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        
+        
+        byte[] dataBytes = new byte[1024];
+ 
+        int nread = 0; 
+        while ((nread = is.read(dataBytes)) != -1) {
+          md.update(dataBytes, 0, nread);
+        };
+        byte[] mdbytes = md.digest();
+ 
+        //convert the byte to hex format
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < mdbytes.length; i++) {
+          sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
+        }
+        
+        
+        return sb.toString();
+    }
+    
+    private void writeToFile(
+            InputStream uploadedInputStream,
+            String uploadedFileLocation
+    ) throws FileNotFoundException, IOException {
+        OutputStream out;
+        int read;
+        byte[] bytes = new byte[1024];
+        out = new FileOutputStream(new File(uploadedFileLocation));
+        while ((read = uploadedInputStream.read(bytes)) != -1) {
+            out.write(bytes, 0, read);
+        }
+        out.flush();
+        out.close();
     }
 
     @GET
