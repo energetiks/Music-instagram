@@ -3,18 +3,20 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Test/Desktop/MusicInstagram/src/java/ru/bystrov/musicinstagram/service/SampleResource.java</file>
-            <file>file:/C:/Users/Test/Desktop/MusicInstagram/src/java/ru/bystrov/musicinstagram/service/FileResource.java</file>
-            <file>file:/C:/Users/Test/Desktop/MusicInstagram/web/index.html</file>
-            <file>file:/C:/Users/Test/Desktop/MusicInstagram/web/css/style.css</file>
-            <file>file:/C:/Users/Test/Desktop/MusicInstagram/src/java/ru/bystrov/musicinstagram/service/DirectoryService.java</file>
-            <file>file:/C:/Users/Test/Desktop/MusicInstagram/web/homePage.html</file>
-            <file>file:/C:/Users/Test/Desktop/MusicInstagram/web/friend.html</file>
-            <file>file:/C:/Users/Test/Desktop/MusicInstagram/web/albums.html</file>
-            <file>file:/C:/Users/Test/Desktop/MusicInstagram/web/registration.html</file>
-            <file>file:/C:/Users/Test/Desktop/MusicInstagram/web/friends.html</file>
-            <file>file:/C:/Users/Test/Desktop/MusicInstagram/web/TESTPAGE.html</file>
-            <file>file:/C:/Users/Test/Desktop/MusicInstagram/src/java/ru/bystrov/musicinstagram/service/UserResource.java</file>
+            <file>file:/home/ad/code/Music-instagram/MusicInstagram/src/java/ru/bystrov/musicinstagram/service/SourceResource.java</file>
+            <file>file:/home/ad/code/Music-instagram/MusicInstagram/src/java/ru/bystrov/musicinstagram/service/DirectoryService.java</file>
+            <file>file:/home/ad/code/Music-instagram/MusicInstagram/web/realtimeCreation.html</file>
+            <file>file:/home/ad/code/Music-instagram/MusicInstagram/web/index.html</file>
+            <file>file:/home/ad/code/Music-instagram/MusicInstagram/src/java/ru/bystrov/musicinstagram/service/SampleResource.java</file>
+            <file>file:/home/ad/code/Music-instagram/MusicInstagram/src/java/ru/bystrov/musicinstagram/entities/dataobject/CountOfLikeObject.java</file>
+            <file>file:/home/ad/code/Music-instagram/MusicInstagram/web/music.html</file>
+            <file>file:/home/ad/code/Music-instagram/MusicInstagram/src/java/ru/bystrov/musicinstagram/entities/dataobject/Attribute.java</file>
+            <file>file:/home/ad/code/Music-instagram/MusicInstagram/src/java/ru/bystrov/musicinstagram/entities/AttributeObjectTypes.java</file>
+            <file>file:/home/ad/code/Music-instagram/MusicInstagram/src/java/ru/bystrov/musicinstagram/service/UserResource.java</file>
+            <file>file:/home/ad/code/Music-instagram/MusicInstagram/src/java/ru/bystrov/musicinstagram/entities/Attributes.java</file>
+            <file>file:/home/ad/code/Music-instagram/MusicInstagram/nbproject/build-impl.xml</file>
+            <file>file:/home/ad/code/Music-instagram/MusicInstagram/web/editData.html</file>
+            <file>file:/home/ad/code/Music-instagram/MusicInstagram/web/quickCreation.html</file>
         </group>
     </open-files>
 </project-private>

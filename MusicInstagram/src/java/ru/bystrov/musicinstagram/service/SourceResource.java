@@ -1,5 +1,6 @@
 package ru.bystrov.musicinstagram.service;
 
+import com.google.gson.Gson;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,8 @@ import javax.annotation.Resource;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.HeuristicMixedException;
@@ -47,7 +50,7 @@ public class SourceResource {
     private EntityManager em;
     @Resource
     UserTransaction utx;
-    
+
     final private int NAME_ID = 10;
     final private int DURATION_ID = 11;
     final private int GENRE_ID = 12;
@@ -57,65 +60,64 @@ public class SourceResource {
     final private int MUSICAL_GROUP_NAME_ID = 16;
     final private int FILE_REF_ID = 17;
     final private int USER_REF_ID = 18;
-    
+
     final private int SOURCE_TYPE_ID = 2;
 
-    
     public SourceResource() {
     }
-    
+
     @POST
     @Path("loadSource")
-    @Produces(MediaType.APPLICATION_JSON+ ";charset=UTF-8")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     public String loadNewSource(@Context HttpServletRequest req,
-                             @FormParam("name") String name,
-                             @FormParam("duration") int duration,
-                             @FormParam("genre") String genre,
-                             @FormParam("language") String language,
-                             @FormParam("album_name") String albumName,
-                             @FormParam("year") String year,
-                             @FormParam("musical_group_name") String musicalGroupName,
-                             @FormParam("file_ref") Objects fileRef,
-                             @FormParam("user_ref") Objects userRef) {
+            @FormParam("name") String name,
+            @FormParam("duration") int duration,
+            @FormParam("genre") String genre,
+            @FormParam("language") String language,
+            @FormParam("album_name") String albumName,
+            @FormParam("year") String year,
+            @FormParam("musical_group_name") String musicalGroupName,
+            @FormParam("file_ref") Objects fileRef,
+            @FormParam("user_ref") Objects userRef) {
         JSONObject result = new JSONObject();
 
-        HashMap<Integer,Attribute> attrValue = new HashMap<>();
-        attrValue.put(NAME_ID,new Attribute("String", name));
-        attrValue.put(DURATION_ID,new Attribute("int", duration));
-        attrValue.put(GENRE_ID,new Attribute("String", genre));
-        attrValue.put(LANGUAGE_ID,new Attribute("String", language));
-        attrValue.put(ALBUM_ID,new Attribute("String", albumName));
-        attrValue.put(YEAR_ID,new Attribute("String", year));
-        attrValue.put(MUSICAL_GROUP_NAME_ID,new Attribute("String", musicalGroupName));
-        attrValue.put(FILE_REF_ID,new Attribute("Reference", fileRef));
-        attrValue.put(USER_REF_ID,new Attribute("Reference", userRef));
+        HashMap<Integer, Attribute> attrValue = new HashMap<>();
+        attrValue.put(NAME_ID, new Attribute("String", name));
+        attrValue.put(DURATION_ID, new Attribute("int", duration));
+        attrValue.put(GENRE_ID, new Attribute("String", genre));
+        attrValue.put(LANGUAGE_ID, new Attribute("String", language));
+        attrValue.put(ALBUM_ID, new Attribute("String", albumName));
+        attrValue.put(YEAR_ID, new Attribute("String", year));
+        attrValue.put(MUSICAL_GROUP_NAME_ID, new Attribute("String", musicalGroupName));
+        attrValue.put(FILE_REF_ID, new Attribute("Reference", fileRef));
+        attrValue.put(USER_REF_ID, new Attribute("Reference", userRef));
         try {
             utx.begin();
-            Objects newSource  = new Objects();
-            
+            Objects newSource = new Objects();
+
             Integer id = Integer.valueOf(em.createNativeQuery("select MAX(objId) from Objects").getResultList().get(0).toString());
-            newSource.setObjId(id+1);
+            newSource.setObjId(id + 1);
             newSource.setName(name);
             newSource.setObjTypeId(SOURCE_TYPE_ID);
-                
+
             em.persist(newSource);
-            
+
             AttributeValue newAttrValue;
             id = Integer.valueOf(em.createNativeQuery("select MAX(attrValueId) from AttributeValue").getResultList().get(0).toString());
-            for (Map.Entry<Integer, Attribute> entry : attrValue.entrySet()) {   
+            for (Map.Entry<Integer, Attribute> entry : attrValue.entrySet()) {
                 newAttrValue = new AttributeValue();
                 id = id + 1;
                 newAttrValue.setAttrId(id);
-                
+
                 newAttrValue.setObjId(newSource.getObjId());
                 if (entry.getValue().getType().equals("String")) {
                     newAttrValue.setStringValue(String.valueOf(entry.getValue().getValue()));
                     newAttrValue.setNumberValue(-1);
                     newAttrValue.setReferenceValue(-1);
-                    
+
                 }
                 if (entry.getValue().getType().equals("int")) {
-                    newAttrValue.setNumberValue((int)entry.getValue().getValue());
+                    newAttrValue.setNumberValue((int) entry.getValue().getValue());
                     newAttrValue.setStringValue("");
                     newAttrValue.setReferenceValue(-1);
                 }
@@ -125,10 +127,10 @@ public class SourceResource {
                     newAttrValue.setStringValue("");
                 }
                 em.persist(newAttrValue);
-            }           
-            
+            }
+
             utx.commit();
-            result.put("result","ok");
+            result.put("result", "ok");
             return result.toString();
         } catch (NotSupportedException | SystemException | RollbackException | HeuristicMixedException | HeuristicRollbackException | SecurityException | IllegalStateException | JSONException ex) {
             FacesContext ctx = FacesContext.getCurrentInstance();
@@ -136,32 +138,32 @@ public class SourceResource {
             ex.printStackTrace(System.err);
             try {
                 utx.rollback();
-                result.put("result","failed");
+                result.put("result", "failed");
                 return result.toString();
-            } catch (IllegalStateException | SecurityException | SystemException | JSONException exc) {    
-                
+            } catch (IllegalStateException | SecurityException | SystemException | JSONException exc) {
+
                 exc.printStackTrace(System.err);
-                result.put("result","failed");
+                result.put("result", "failed");
                 return result.toString();
             }
         }
     }
-    
+
     @GET
     @Path("deleteSource")
-    @Produces(MediaType.APPLICATION_JSON+ ";charset=UTF-8")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     public String deleteSourcebyId(@Context HttpServletRequest req,
-                                 @QueryParam("objId") int objId) {
+            @QueryParam("objId") int objId) {
         JSONObject result = new JSONObject();
         if (objId == 0) {
             result.put("result", "failed");
             return result.toString();
         }
-        try {    
+        try {
             utx.begin();
-            
+
             em.remove(em.find(Objects.class, objId));
-            List<AttributeValue> attributes = em.createNativeQuery("select * from AttributeValue where objId = ?",AttributeValue.class)
+            List<AttributeValue> attributes = em.createNativeQuery("select * from AttributeValue where objId = ?", AttributeValue.class)
                     .setParameter(1, objId).getResultList();
             attributes.stream().forEach((attr) -> {
                 em.remove(attr);
@@ -181,137 +183,151 @@ public class SourceResource {
                 return result.toString();
             }
         }
-        
+
     }
-    
+
     @GET
     @Path("getSources")
-    @Produces(MediaType.APPLICATION_JSON+ ";charset=UTF-8")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     public String getSources() {
         JSONArray array = new JSONArray();
         List<Integer> usersId = em.createNativeQuery("select o.objId from Objects o, ObjectTypes OT "
-                                            + " where o.objTypeId = OT.otid and"
-                                            + " OT.name = ?")
-                                    .setParameter(1, "Source").getResultList();
+                + " where o.objTypeId = OT.otid and"
+                + " OT.name = ?")
+                .setParameter(1, "Source").getResultList();
         JSONObject obj;
         List<AttributeValue> attrs;
-        for(int objId : usersId) {
+        for (int objId : usersId) {
             obj = new JSONObject();
             attrs = em.createNativeQuery("select * from AttributeValue attrV where attrV.objId = ?", AttributeValue.class)
-                                .setParameter(1, objId).getResultList();
-            
-            for (AttributeValue attr : attrs){
+                    .setParameter(1, objId).getResultList();
+
+            for (AttributeValue attr : attrs) {
                 if (attr.getNumberValue() != -1) {
-                    obj.put(String.valueOf(attr.getAttrId()),attr.getNumberValue());
-                } else
-                if (!attr.getStringValue().equals("")) {
-                    obj.put(String.valueOf(attr.getAttrId()),attr.getStringValue());
-                } else
-                if (attr.getReferenceValue() != -1) {
-                    obj.put(String.valueOf(attr.getAttrId()),attr.getReferenceValue());
+                    obj.put(String.valueOf(attr.getAttrId()), attr.getNumberValue());
+                } else if (!attr.getStringValue().equals("")) {
+                    obj.put(String.valueOf(attr.getAttrId()), attr.getStringValue());
+                } else if (attr.getReferenceValue() != -1) {
+                    obj.put(String.valueOf(attr.getAttrId()), attr.getReferenceValue());
                 }
             }
             array.put(obj);
         }
         return array.toString();
     }
-    
+
     @GET
     @Path("getSourceById")
-    @Produces(MediaType.APPLICATION_JSON+ ";charset=UTF-8")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     public String getSourceById(@Context HttpServletRequest req,
-                                 @QueryParam("objId") int objId) {
+            @QueryParam("objId") int objId) {
         List<AttributeValue> attrs = em.createNativeQuery("select * from AttributeValue attrV where attrV.objId = ?", AttributeValue.class)
-                                .setParameter(1, objId).getResultList();
+                .setParameter(1, objId).getResultList();
         JSONObject obj = new JSONObject();
-        for (AttributeValue attr : attrs){
+        for (AttributeValue attr : attrs) {
             if (attr.getNumberValue() != -1) {
-                obj.put(String.valueOf(attr.getAttrId()),attr.getNumberValue());
-            } else
-            if (!attr.getStringValue().equals("")) {
-                obj.put(String.valueOf(attr.getAttrId()),attr.getStringValue());
-            } else
-            if (attr.getReferenceValue() != -1) {
-                obj.put(String.valueOf(attr.getAttrId()),attr.getReferenceValue());
+                obj.put(String.valueOf(attr.getAttrId()), attr.getNumberValue());
+            } else if (!attr.getStringValue().equals("")) {
+                obj.put(String.valueOf(attr.getAttrId()), attr.getStringValue());
+            } else if (attr.getReferenceValue() != -1) {
+                obj.put(String.valueOf(attr.getAttrId()), attr.getReferenceValue());
             }
         }
         return obj.toString();
-    
+
     }
-    
+
     @GET
     @Path("getSourcesByName")
-    @Produces(MediaType.APPLICATION_JSON+ ";charset=UTF-8")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     public String getSourcesByName(@Context HttpServletRequest req,
-                                 @QueryParam("name") String name) {
+            @QueryParam("name") String name) {
         List<Integer> sourcesId = em.createNativeQuery("select attrV.objId "
-                                                        + "from AttributeValue attrV "
-                                                        + "where attrV.stringValue = ? and "
-                                                              + "attrV.attrId = ? ")
-            .setParameter(1, name).setParameter(2, NAME_ID).getResultList();
+                + "from AttributeValue attrV "
+                + "where attrV.stringValue = ? and "
+                + "attrV.attrId = ? ")
+                .setParameter(1, name).setParameter(2, NAME_ID).getResultList();
         return findSMTHbyParameter(sourcesId);
     }
-    
+
     @GET
     @Path("getSourcesByMusicalGroup")
-    @Produces(MediaType.APPLICATION_JSON+ ";charset=UTF-8")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     public String getSourcebyMusicalGroup(@Context HttpServletRequest req,
-                                        @QueryParam("musical_group_name") String musicalGroupName) {
+            @QueryParam("musical_group_name") String musicalGroupName) {
         List<Integer> sourcesId = em.createNativeQuery("select attrV.objId "
-                                                        + "from AttributeValue attrV "
-                                                        + "where attrV.stringValue = ? and "
-                                                              + "attrV.attrId = ?")
-            .setParameter(1, musicalGroupName).setParameter(2, MUSICAL_GROUP_NAME_ID).getResultList();
+                + "from AttributeValue attrV "
+                + "where attrV.stringValue = ? and "
+                + "attrV.attrId = ?")
+                .setParameter(1, musicalGroupName).setParameter(2, MUSICAL_GROUP_NAME_ID).getResultList();
         return findSMTHbyParameter(sourcesId);
     }
-    
+
     @GET
     @Path("getSourcesByAlbum")
-    @Produces(MediaType.APPLICATION_JSON+ ";charset=UTF-8")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     public String getSourcebyAlbum(@Context HttpServletRequest req,
-                                        @QueryParam("album_name") String albumName) {
+            @QueryParam("album_name") String albumName) {
         List<Integer> sourceId = em.createNativeQuery("select attrV.objId "
-                                                        + "from AttributeValue attrV "
-                                                        + "where attrV.stringValue = ? and "
-                                                              + "attrV.attrId = ?")
-            .setParameter(1, albumName).setParameter(2, ALBUM_ID).getResultList();
+                + "from AttributeValue attrV "
+                + "where attrV.stringValue = ? and "
+                + "attrV.attrId = ?")
+                .setParameter(1, albumName).setParameter(2, ALBUM_ID).getResultList();
         return findSMTHbyParameter(sourceId);
     }
-    
+
     @GET
     @Path("getSourcesByGenre")
-    @Produces(MediaType.APPLICATION_JSON+ ";charset=UTF-8")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
     public String getSourcebyGenre(@Context HttpServletRequest req,
-                                        @QueryParam("genre") String genre) {
+            @QueryParam("genre") String genre) {
         List<Integer> sourcesID = em.createNativeQuery("select attrV.objId "
-                                                        + "from AttributeValue attrV "
-                                                        + "where attrV.stringValue = ? and "
-                                                              + "attrV.attrId = ?")
-            .setParameter(1, genre).setParameter(2, GENRE_ID).getResultList();
+                + "from AttributeValue attrV "
+                + "where attrV.stringValue = ? and "
+                + "attrV.attrId = ?")
+                .setParameter(1, genre).setParameter(2, GENRE_ID).getResultList();
         return findSMTHbyParameter(sourcesID);
     }
-    
+
     public String findSMTHbyParameter(List<Integer> sourcesId) {
         JSONArray array = new JSONArray();
         JSONObject obj;
-        for(int objId : sourcesId) {
+        for (int objId : sourcesId) {
             obj = new JSONObject();
             List<AttributeValue> attrs = em.createNativeQuery("select * from AttributeValue attrV where attrV.objId = ?", AttributeValue.class)
-                                .setParameter(1, objId).getResultList();
-            
-            for (AttributeValue attr : attrs){
+                    .setParameter(1, objId).getResultList();
+
+            for (AttributeValue attr : attrs) {
                 if (attr.getNumberValue() != -1) {
-                    obj.put(String.valueOf(attr.getAttrId()),attr.getNumberValue());
-                } else
-                if (!attr.getStringValue().equals("")) {
-                    obj.put(String.valueOf(attr.getAttrId()),attr.getStringValue());
-                } else
-                if (attr.getReferenceValue() != -1) {
-                    obj.put(String.valueOf(attr.getAttrId()),attr.getReferenceValue());
+                    obj.put(String.valueOf(attr.getAttrId()), attr.getNumberValue());
+                } else if (!attr.getStringValue().equals("")) {
+                    obj.put(String.valueOf(attr.getAttrId()), attr.getStringValue());
+                } else if (attr.getReferenceValue() != -1) {
+                    obj.put(String.valueOf(attr.getAttrId()), attr.getReferenceValue());
                 }
             }
             array.put(obj);
         }
         return array.toString();
+    }
+
+    @GET
+    @Path("getPathById")
+    public String getPathById(@QueryParam("id") String sourceId) {
+        try {
+            Object opath = em.createNativeQuery(
+                    "select file.stringvalue "
+                    + "from attributevalue file, attributevalue source "
+                    + "where source.objid = ? and source.referencevalue = file.objid "
+                    + "and source.attrid = (select a.attrid from attributes a, attributeobjecttypes aot, objecttypes ot "
+                    + "where aot.attrid = a.attrid and aot.otid = ot.otid and a.name = 'file_ref' and ot.name = 'Source')"
+                    + "and file.attrid = (select a.attrid from attributes a, attributeobjecttypes aot, objecttypes ot "
+                    + "where aot.attrid = a.attrid and aot.otid = ot.otid and a.name = 'path' and ot.name = 'File')"
+            )
+                    .setParameter(1, sourceId).getSingleResult();
+            return (new Gson()).toJson(opath);
+        } catch (NoResultException | NonUniqueResultException e) {
+            return (new Gson()).toJson("File not found");
+        }
     }
 }

@@ -23,14 +23,28 @@ and open the template in the editor.
         <link rel="stylesheet" type="text/css" href="scripts/demo/colorpicker/css/colorpicker.css"/>
 
         <!-- auxiliary libraries -->
-        <script src="scripts/createMusic/jquery-1.11.3.min.js"></script>
-        <script src="scripts/createMusic/tuna.js"></script>
-        <script src="scripts/createMusic/recorder.js"></script>
+        <script src="scripts/createSamples/jquery-1.11.3.min.js"></script>
+        <script src="scripts/createSamples/tuna.js"></script>
+        <script src="scripts/createSamples/recorder.js"></script>
 
         <!-- main library -->
-        <script src="scripts/createMusic/player.js"></script>
+        <script src="scripts/createSamples/player.js"></script>
 
         <script>
+            // url parser
+            function getParameterByName(name, url) {
+                if (!url)
+                    url = window.location.href;
+                name = name.replace(/[\[\]]/g, "\\$&");
+                var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                        results = regex.exec(url);
+                if (!results)
+                    return null;
+                if (!results[2])
+                    return '';
+                return decodeURIComponent(results[2].replace(/\+/g, " "));
+            }
+
             $(function () {
                 var player = new Player();
                 var visualizer = new Visualizer(player.analyserNode, document.querySelector("#frequencyCanvas"));
@@ -41,20 +55,6 @@ and open the template in the editor.
                 effectsManager.updateNodes();
                 player.setSourceConnection(effectsManager.getInputNode());
                 var isRecording = false;
-                $("#downloadButton").on("click", function (event) {
-                    var fileName = "example.mp3";
-                    player.loadSound("./upload/" + fileName, function () {
-                        $("#toggleButton").attr('disabled', false);
-                        $("#stopButton").attr('disabled', false);
-                        $("#addEffectButton").attr('disabled', false);
-                        $("#recButton").attr('disabled', false);
-                        $("#clearRecButton").attr('disabled', false);
-                        $("#uploadRecButton").attr('disabled', false);
-                        $("#positionRange").attr('disabled', false);
-                        $("#volumeRange").attr('disabled', false);
-                        $("#effectsSelect").attr('disabled', false);
-                    });
-                });
                 $("#toggleButton").on("click", function (event) {
                     player.toggle();
                 });
@@ -120,6 +120,35 @@ and open the template in the editor.
                         element.value = element.max * player.getPosition();
                     }
                 }, 1000);
+
+                // get path and download source
+                $.ajax({
+                    type: "GET",
+                    url: "webresources/source/getPathById",
+                    data: {id: getParameterByName('id')},
+                    success: function (responseText) {
+                        var fileName = responseText;
+                        if (fileName === "File not found") {
+                            alert(fileName);
+                        } else {
+                            player.loadSound("upload/" + fileName, function () {
+                                $("#toggleButton").attr('disabled', false);
+                                $("#stopButton").attr('disabled', false);
+                                $("#addEffectButton").attr('disabled', false);
+                                $("#recButton").attr('disabled', false);
+                                $("#clearRecButton").attr('disabled', false);
+                                $("#uploadRecButton").attr('disabled', false);
+                                $("#positionRange").attr('disabled', false);
+                                $("#volumeRange").attr('disabled', false);
+                                $("#effectsSelect").attr('disabled', false);
+                            });
+                        }
+                    },
+                    error: function (responseText) {
+                        console.log(JSON.stringify(responseText));
+                    },
+                    dataType: "json"
+                });
             });
         </script>
     </head>
@@ -203,7 +232,8 @@ and open the template in the editor.
                             <span>My friends</span>                       
                         </li>
                         <li>
-                            <input type="button" value="Log out" style="height: 35px" onclick="window.location.href = '/Music_instagram/faces/index.html'; return false;"/>
+                            <input type="button" value="Log out" style="height: 35px" onclick="window.location.href = '/Music_instagram/faces/index.html';
+                                    return false;"/>
                         </li>
                     </ul>
 
@@ -216,7 +246,6 @@ and open the template in the editor.
         <!--content container-->
         <div id="content_container" class="center-clear">
             <div class="box-three-sub-wrapper transparent-background">
-                <input type="button" value="Download" id="downloadButton">
                 <input type="button" value="Play/Pause" id="toggleButton">
                 <input type="button" value="Stop" id="stopButton">
                 <br>
