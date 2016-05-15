@@ -119,7 +119,7 @@ public class DirectoryService {
         java.sql.Timestamp time = (java.sql.Timestamp) em.createNativeQuery("select CURRENT_TIMESTAMP from Objects").getResultList().get(0);
         
         HashMap<Integer,Attribute> attrValue = new HashMap<>();
-        attrValue.put(NAME_ID,new Attribute("String", name));
+        attrValue.put(NAME_ID,new Attribute("string", name));
         attrValue.put(USER_REF_ID,new Attribute("int", objId));
         attrValue.put(CREATED_TIME_ID,new Attribute("date",time.toString()));
         try {

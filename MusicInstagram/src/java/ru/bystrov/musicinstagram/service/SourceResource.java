@@ -110,14 +110,14 @@ public class SourceResource {
             java.sql.Timestamp time = (java.sql.Timestamp) em.createNativeQuery("select CURRENT_TIMESTAMP from Objects").getResultList().get(0);
             
             HashMap<Integer,Attribute> attrValue = new HashMap<>();
-            attrValue.put(NAME_ID,new Attribute("String", fileName));
+            attrValue.put(NAME_ID,new Attribute("string", fileName));
             attrValue.put(DURATION_ID,new Attribute("int", duration));
-            attrValue.put(GENRE_ID,new Attribute("String", genre));
-            attrValue.put(LANGUAGE_ID,new Attribute("String", language));
-            attrValue.put(ALBUM_ID,new Attribute("String", albumName));
-            attrValue.put(YEAR_ID,new Attribute("String", year));
-            attrValue.put(MUSICAL_GROUP_NAME_ID,new Attribute("String", musicalGroupName));
-            attrValue.put(USER_REF_ID,new Attribute("Reference", objId));
+            attrValue.put(GENRE_ID,new Attribute("string", genre));
+            attrValue.put(LANGUAGE_ID,new Attribute("string", language));
+            attrValue.put(ALBUM_ID,new Attribute("string", albumName));
+            attrValue.put(YEAR_ID,new Attribute("string", year));
+            attrValue.put(MUSICAL_GROUP_NAME_ID,new Attribute("string", musicalGroupName));
+            attrValue.put(USER_REF_ID,new Attribute("reference", objId));
             
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -151,7 +151,7 @@ public class SourceResource {
             newSourceFile.setName("Source File " + fileName);
             newSourceFile.setObjTypeId(FILE_TYPE_ID);
             
-            attrValue.put(FILE_REF_ID,new Attribute("Reference", id+2));
+            attrValue.put(FILE_REF_ID,new Attribute("reference", id+2));
             
             em.persist(newSource);
             em.persist(newSourceFile);

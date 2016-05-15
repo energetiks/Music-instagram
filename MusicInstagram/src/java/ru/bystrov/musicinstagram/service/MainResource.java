@@ -28,30 +28,41 @@ public class MainResource {
             newAttrValue.setAttrId(entry.getKey());
             newAttrValue.setObjId(newObject.getObjId());
             switch (entry.getValue().getType()) {
-                case "String":
+                case "string":
                     newAttrValue.setStringValue(String.valueOf(entry.getValue().getValue()));
                     newAttrValue.setNumberValue(-1);
                     newAttrValue.setReferenceValue(-1);
                     newAttrValue.setDateValue("1970-01-01 00:00:00.000");
+                    newAttrValue.setBooleanValue(false);
                     break;
                 case "int":
                     newAttrValue.setNumberValue((int)entry.getValue().getValue());
                     newAttrValue.setStringValue("");
                     newAttrValue.setReferenceValue(-1);
                     newAttrValue.setDateValue("1970-01-01 00:00:00.000");
+                    newAttrValue.setBooleanValue(false);
                     break;
                 case "reference":
                     newAttrValue.setReferenceValue((int) entry.getValue().getValue());
                     newAttrValue.setNumberValue(-1);
                     newAttrValue.setStringValue("");
                     newAttrValue.setDateValue("1970-01-01 00:00:00.000");
+                    newAttrValue.setBooleanValue(false);
                     break;
                 case "date":
                     newAttrValue.setDateValue((String) entry.getValue().getValue());
                     newAttrValue.setNumberValue(-1);
                     newAttrValue.setStringValue("");
                     newAttrValue.setReferenceValue(-1);
+                    newAttrValue.setBooleanValue(false);
                     break;
+                case "boolean":
+                    newAttrValue.setBooleanValue((Boolean) entry.getValue().getValue());
+                    newAttrValue.setNumberValue(-1);
+                    newAttrValue.setStringValue("");
+                    newAttrValue.setReferenceValue(-1);
+                    newAttrValue.setDateValue("1970-01-01 00:00:00.000");
+                    break;    
                 default:
                     break;
             }

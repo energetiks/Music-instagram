@@ -95,15 +95,15 @@ public class UserResource {
             
             utx.begin();
             HashMap<Integer,Attribute> attrValue = new HashMap<>();
-            attrValue.put(FIRST_NAME_ID,new Attribute("String", firstName));
-            attrValue.put(LAST_NAME_ID,new Attribute("String", lastName));
+            attrValue.put(FIRST_NAME_ID,new Attribute("string", firstName));
+            attrValue.put(LAST_NAME_ID,new Attribute("string", lastName));
             attrValue.put(AGE_ID,new Attribute("int", age));
-            attrValue.put(CITY_ID,new Attribute("String", city));
-            attrValue.put(COUNTRY_ID,new Attribute("String", country));
-            attrValue.put(UNIVERCITY_ID,new Attribute("String", univercity));
-            attrValue.put(PHONE_NUMBER_ID,new Attribute("String", phoneNumber));
-            attrValue.put(LOGIN_ID,new Attribute("String", login));
-            attrValue.put(PASSWORD_ID,new Attribute("String", password));
+            attrValue.put(CITY_ID,new Attribute("string", city));
+            attrValue.put(COUNTRY_ID,new Attribute("string", country));
+            attrValue.put(UNIVERCITY_ID,new Attribute("string", univercity));
+            attrValue.put(PHONE_NUMBER_ID,new Attribute("string", phoneNumber));
+            attrValue.put(LOGIN_ID,new Attribute("string", login));
+            attrValue.put(PASSWORD_ID,new Attribute("string", password));
             
             Objects newUser  = new Objects();
             Objects newPhotoFile = new Objects();
@@ -162,7 +162,7 @@ public class UserResource {
                 newAttrValue.setAttrId(entry.getKey());
                 newAttrValue.setObjId(newPhotoFile.getObjId());
                 switch (entry.getValue().getType()) {
-                    case "String":
+                    case "string":
                         newAttrValue.setStringValue(String.valueOf(entry.getValue().getValue()));
                         newAttrValue.setNumberValue(0);
                         newAttrValue.setReferenceValue(0);
