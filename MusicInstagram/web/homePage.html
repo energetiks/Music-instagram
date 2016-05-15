@@ -126,7 +126,7 @@ and open the template in the editor.
                         data:{login:"energetiks"},
                         success: function(data, response) {
                             if (data[0].countOfSamples >= 3) {
-                                $("#Sample1").html(data[1].Sample19);
+                                $("#Sample" + data[1]).html(data[1].Sample19);
                                 $("#Sample2").html(data[2].Sample19);
                                 $("#Sample3").html(data[3].Sample19);
                                 $("#Like1").html(data[1].Sample31);

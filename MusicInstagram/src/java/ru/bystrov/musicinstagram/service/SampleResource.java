@@ -70,6 +70,13 @@ public class SampleResource {
     final private int PATH_FILE_ID = 27;
     final private int TYPE_FILE_ID = 28;
     
+    final private int USERID_ID = 35;
+    final private int SAMPLEID_ID = 36;
+    final private int ISLIKE_ID = 37;
+    final private int ISDISLIKE_ID = 38;
+    
+    
+    
     
     
     final private int LOGIN_ID = 8;
@@ -154,8 +161,7 @@ public class SampleResource {
     @GET
     @Path("getSamplesByLoginInTimeOrder")
     @Produces(MediaType.APPLICATION_JSON+ ";charset=UTF-8")
-    public String getSamplesByLoginInTimeOrder(@Context HttpServletRequest req,
-                                                @QueryParam("login") String login) {
+    public String getSamplesByLoginInTimeOrder(@QueryParam("login") String login) {
     
         JSONObject result = new JSONObject();
         Integer objId = (Integer) em.createNativeQuery("select objId from AttributeValue "
@@ -175,6 +181,7 @@ public class SampleResource {
             return array.toString();
         }
         SortedMap<Timestamp,List<AttributeValue>> mapOfLastSamples = new TreeMap<>();
+        SortedMap<Timestamp,Integer> mapOfSamplesId = new TreeMap<>();
         
         for(Integer sampleId : samplesId) {
             List<AttributeValue> attrs = em.createNativeQuery("select * from AttributeValue attrV where attrV.objId = ?", AttributeValue.class)
@@ -183,10 +190,12 @@ public class SampleResource {
                                                             + "where attrId = ? and objId = ? ")
                     .setParameter(1, TIME_ID).setParameter(2,sampleId).getResultList().get(0);
             mapOfLastSamples.put(time, attrs);
+            mapOfSamplesId.put(time,sampleId);
         }
         for(Map.Entry<Timestamp,List<AttributeValue>> entry : mapOfLastSamples.entrySet()) {
             obj = new JSONObject();
             List<AttributeValue> attrs = entry.getValue();
+            obj.put("SampleId",mapOfSamplesId.get(entry.getKey()));
             for (AttributeValue attr : attrs){
                 if (attr.getNumberValue() != -1) {
                     obj.put("Sample" + String.valueOf(attr.getAttrId()),attr.getNumberValue());
@@ -237,6 +246,7 @@ public class SampleResource {
         for(Map.Entry<CountOfLikeObject,List<AttributeValue>> entry : mapOfLastSamples.entrySet()) {
             obj = new JSONObject();
             List<AttributeValue> attrs = entry.getValue();
+            obj.put("SampleId", entry.getKey().getObjId());
             for (AttributeValue attr : attrs){
                 if (attr.getNumberValue() != -1) {
                     obj.put("Sample" + String.valueOf(attr.getAttrId()),attr.getNumberValue());
@@ -302,9 +312,9 @@ public class SampleResource {
                                                            "      sample.ATTRID = ? ")
                     .setParameter(1, directoryId).setParameter(2, DIR_USER_REF_ID)
                     .setParameter(3, objId).setParameter(4, DIRECTORY_REF_ID).getResultList();
-            if (samplesId.isEmpty()) {
-                return result.toString();
-            }
+//            if (samplesId.isEmpty()) {
+//                return result.toString();
+//            }
             SortedMap<CountOfLikeObject,List<AttributeValue>> mapOfLastSamples = new TreeMap<>();
             for(Integer sampleId : samplesId) {
                 List<AttributeValue> attrs = em.createNativeQuery("select * from AttributeValue attrV where attrV.objId = ?", AttributeValue.class)
@@ -321,11 +331,12 @@ public class SampleResource {
             obj = new JSONObject();
             obj.put("countOfSamples", samplesId.size());
             array.put(obj);
-                
+            obj.put("nameOfDirectory", nameOfDirectory);    
             for(Map.Entry<CountOfLikeObject,List<AttributeValue>> entry : mapOfLastSamples.entrySet()) {
                 obj = new JSONObject();
-                obj.put("nameOfDirectory", nameOfDirectory);
+                
                 List<AttributeValue> attrs = entry.getValue();
+                obj.put("SampleId", entry.getKey().getObjId());
                 for (AttributeValue attr : attrs){
                     if (attr.getNumberValue() != -1) {
                         obj.put("Sample" + String.valueOf(attr.getAttrId()),attr.getNumberValue());
@@ -351,98 +362,168 @@ public class SampleResource {
     
     
     @GET
-    @Path("doLike")
+    @Path("doLikeOrDisLike")
     @Produces(MediaType.APPLICATION_JSON+ ";charset=UTF-8")
-    public String doLike(@Context HttpServletRequest req,
+    public String doLikeOrDisLike(@Context HttpServletRequest req,
                              @QueryParam("sampleId") int sampleId,
-                             @QueryParam("login") String login) throws RollbackException, HeuristicMixedException, HeuristicRollbackException, SecurityException, IllegalStateException, SystemException, NotSupportedException {
+                             @QueryParam("login") String login,
+                             @QueryParam("operation") String operation) {
         JSONObject result = new JSONObject();
         
         try {
             utx.begin();
-            Object[] attrValues = preparedOfDoLike(login, sampleId);
-            Integer userId = (Integer) attrValues[0]; 
-            Boolean isLike = (Boolean) attrValues[1];
-            Boolean isDisLike = (Boolean) attrValues[2];
-            AttributeValue countOfLikes = (AttributeValue) attrValues[3];
-            AttributeValue countOfDisLikes = (AttributeValue) attrValues[4];
-            AttributeValue isLikeId = (AttributeValue) attrValues[5];
-            AttributeValue isDisLikeId = (AttributeValue) attrValues[6];
+            Attribute[] attrValues = preparedOfDoLike(login, sampleId);
+            Integer userId = (Integer) attrValues[0].getValue(); 
+            Boolean isLike = (Boolean) attrValues[1].getValue();
+            Boolean isDisLike = (Boolean) attrValues[2].getValue();
+            AttributeValue countOfLikes = (AttributeValue) attrValues[3].getValue();
+            AttributeValue countOfDisLikes = (AttributeValue) attrValues[4].getValue();
+            AttributeValue isLikeId = (AttributeValue) attrValues[5].getValue();
+            AttributeValue isDisLikeId = (AttributeValue) attrValues[6].getValue();
             
-            if (isLike == true) {
-                countOfLikes.setNumberValue(countOfLikes.getNumberValue() - 1);
-                em.merge(countOfLikes);
-                isLikeId.setBooleanValue(false);
-                em.merge(isLikeId);
-                
-            } else {
-                if (isDisLike == false) {
-                    countOfLikes.setNumberValue(countOfLikes.getNumberValue() + 1);
+            if ("like".equals(operation)) {
+            
+                if (isLike == true) {
+                    countOfLikes.setNumberValue(countOfLikes.getNumberValue() - 1);
                     em.merge(countOfLikes);
-                    isLikeId.setBooleanValue(true);
+                    isLikeId.setBooleanValue(false);
                     em.merge(isLikeId);
+
                 } else {
-                    countOfDisLikes.setNumberValue(countOfDisLikes.getNumberValue() - 1);
-                    countOfLikes.setNumberValue(countOfLikes.getNumberValue() + 1);
-                    em.merge(countOfLikes);
-                    em.merge(countOfDisLikes);
-                    isLikeId.setBooleanValue(true);
-                    isDisLikeId.setBooleanValue(false);
-                    em.merge(isLikeId);
-                    em.merge(isDisLikeId);
+                    if (isDisLike == false) {
+                        countOfLikes.setNumberValue(countOfLikes.getNumberValue() + 1);
+                        em.merge(countOfLikes);
+                        isLikeId.setBooleanValue(true);
+                        em.merge(isLikeId);
+                    } else {
+                        countOfDisLikes.setNumberValue(countOfDisLikes.getNumberValue() - 1);
+                        countOfLikes.setNumberValue(countOfLikes.getNumberValue() + 1);
+                        em.merge(countOfLikes);
+                        em.merge(countOfDisLikes);
+                        isLikeId.setBooleanValue(true);
+                        isDisLikeId.setBooleanValue(false);
+                        em.merge(isLikeId);
+                        em.merge(isDisLikeId);
+                    }
                 }
             }
             
-            
-            
+            if ("dislike".equals(operation)) {
+                if (isDisLike == true) {
+                    countOfDisLikes.setNumberValue(countOfDisLikes.getNumberValue() - 1);
+                    em.merge(countOfDisLikes);
+                    isDisLikeId.setBooleanValue(false);
+                    em.merge(isDisLikeId);
+
+                } else {
+                    if (isLike == false) {
+                        countOfDisLikes.setNumberValue(countOfDisLikes.getNumberValue() + 1);
+                        em.merge(countOfDisLikes);
+                        isDisLikeId.setBooleanValue(true);
+                        em.merge(isDisLikeId);
+                    } else {
+                        countOfLikes.setNumberValue(countOfLikes.getNumberValue() - 1);
+                        countOfDisLikes.setNumberValue(countOfDisLikes.getNumberValue() + 1);
+                        em.merge(countOfDisLikes);
+                        em.merge(countOfLikes);
+                        isDisLikeId.setBooleanValue(true);
+                        isLikeId.setBooleanValue(false);
+                        em.merge(isDisLikeId);
+                        em.merge(isLikeId);
+                    }
+                }
+                
+            }
             utx.commit();
-            result.put("result", "ok");
+            
+            result.put("newCountOflike", countOfLikes.getNumberValue());
+            result.put("newCountOfDislike", countOfDisLikes.getNumberValue());
             return result.toString();
         } catch (NoResultException ex) {
-                utx.begin();
+            try {
                 String userName = (String) em.createNativeQuery(
-                    "SELECT a1.stringValue||' '||a2.stringValue  " +
-                    "FROM ATTRIBUTEVALUE a1, ATTRIBUTEVALUE a2, ATTRIBUTEVALUE login " +
-                    "where a1.OBJID = login.objId and " +
-                    "      a1.ATTRID = (select attrId from ATTRIBUTES where name = 'first_name') and " +
-                    "      a2.ATTRID = (select attrId from ATTRIBUTES where name = 'last_name') and " +
-                    "      a1.OBJID = a2.OBJID and " +
-                    "      login.ATTRID = (select attrId from ATTRIBUTES where name = 'login') and " +
-                    "      login.stringValue = ? ")
+                        "SELECT a1.stringValue||' '||a2.stringValue  " +
+                                "FROM ATTRIBUTEVALUE a1, ATTRIBUTEVALUE a2, ATTRIBUTEVALUE login " +
+                                "where a1.OBJID = login.objId and " +
+                                "      a1.ATTRID = (select attrId from ATTRIBUTES where name = 'first_name') and " +
+                                "      a2.ATTRID = (select attrId from ATTRIBUTES where name = 'last_name') and " +
+                                "      a1.OBJID = a2.OBJID and " +
+                                "      login.ATTRID = (select attrId from ATTRIBUTES where name = 'login') and " +
+                                "      login.stringValue = ? ")
                         .setParameter(1, login).getSingleResult();
-//                String sampleName = (String) em.createNamedQuery(
-//                        "SELECT stringValue " +
-//                        "FROM ATTRIBUTEVALUE " +
-//                        "where OBJID = 26 and " +
-//                        "      ATTRID = (select attrs.attrId " +
-//                        "                from ATTRIBUTES attrs, ATTRIBUTEOBJECTTYPES attrObj " +
-//                        "                where attrs.name = 'name' and " +
-//                        "                      attrObj.OTID = (select OTID from OBJECTTYPES where name = 'Sample' ) and " +
-//                        "                      attrs.ATTRID = attrObj.ATTRID )")
-//                        .setParameter(1, sampleId).getResultList().get(0);
+                String sampleName = (String) em.createNativeQuery(
+                        "SELECT stringValue " +
+                                "FROM ATTRIBUTEVALUE " +
+                                "where OBJID = ? and " +
+                                "      ATTRID = (select attrs.attrId " +
+                                "                from ATTRIBUTES attrs, ATTRIBUTEOBJECTTYPES attrObj " +
+                                "                where attrs.name = 'name' and " +
+                                "                      attrObj.OTID = (select OTID from OBJECTTYPES where name = 'Sample' ) and " +
+                                "                      attrs.ATTRID = attrObj.ATTRID )")
+                        .setParameter(1, sampleId).getResultList().get(0);
                 
                 Objects newLikeObject = new Objects();
                 
                 Integer id = Integer.valueOf(em.createNativeQuery("select MAX(objId) from Objects").getResultList().get(0).toString());
 
                 newLikeObject.setObjId(id+1);
-                newLikeObject.setName("LikesAndDisLikes by " + userName + " of " + sampleId);
+                newLikeObject.setName("LikesAndDisLikes by " + userName + " of " + sampleName);
                 newLikeObject.setObjTypeId(LIKES_TYPE_ID);
                 
                 em.persist(newLikeObject);
+                Integer userId = (Integer) em.createNativeQuery("select objId from AttributeValue "
+                        + "where stringValue = ? and attrId = ? ")
+                        .setParameter(1, login).setParameter(2, LOGIN_ID).getResultList().get(0);
                 
                 HashMap<Integer,Attribute> attrValue = new HashMap<>();
-                attrValue.put(35,new Attribute("reference", 2));
-                attrValue.put(36,new Attribute("reference", 26));
-                attrValue.put(37,new Attribute("boolean", true));
-                attrValue.put(38,new Attribute("boolean", false));
-                
+                String nameofBoolean = new String ();
+                String countOfLikeOrDislike = new String ();
+                attrValue.put(USERID_ID,new Attribute("reference", userId));
+                attrValue.put(SAMPLEID_ID,new Attribute("reference", sampleId));
+                if ("like".equals(operation)) {
+                    attrValue.put(ISLIKE_ID,new Attribute("boolean", true));
+                    attrValue.put(ISDISLIKE_ID,new Attribute("boolean", false));
+                    nameofBoolean = "isLike";
+                    countOfLikeOrDislike = "count_of_like";
+                } else
+                if ("dislike".equals(operation)) {
+                    attrValue.put(ISLIKE_ID,new Attribute("boolean", false));
+                    attrValue.put(ISDISLIKE_ID,new Attribute("boolean", true));
+                    nameofBoolean = "isDisLike";
+                    countOfLikeOrDislike = "count_of_dislike";
+                }
                 
                 MainResource resource = new MainResource();
                 resource.addAttributes(attrValue, newLikeObject, em);
+                
+                
+                Integer attrValueId = (Integer) em.createNativeQuery(
+                        "select attrValueId from AttributeValue " +
+                                "where objId = ? and " +
+                                "      attrId = (select attrId from attributes where name = ?)")
+                        .setParameter(1,newLikeObject.getObjId()).setParameter(2, nameofBoolean).getSingleResult();
+                AttributeValue isObjectLikeId = em.find(AttributeValue.class, attrValueId);
+                
+                attrValueId = (Integer) em.createNativeQuery(
+                        "select attrValueId from AttributeValue "
+                                + "where objId = ? and "
+                                + "attrId = (select attrId from attributes where name = ?)")
+                        .setParameter(1, sampleId).setParameter(2, countOfLikeOrDislike).getSingleResult();
+                AttributeValue countOfLikesOrDislikes = em.find(AttributeValue.class, attrValueId);
+        
+                countOfLikesOrDislikes.setNumberValue(countOfLikesOrDislikes.getNumberValue() + 1);
+                em.merge(countOfLikesOrDislikes);
+                isObjectLikeId.setBooleanValue(true);
+                em.merge(isObjectLikeId);
                 utx.commit();
-                result.put("result", "failed - ROLLBACK");
+                
+                result.put("result", "create LikeObject - success");
                 return result.toString();
+            } catch (RollbackException | HeuristicMixedException | HeuristicRollbackException | SecurityException | IllegalStateException | SystemException ex1) {
+                Logger.getLogger(SampleResource.class.getName()).log(Level.SEVERE, null, ex1);
+                result.put("result", "create LikeObject - error");
+                return result.toString();
+            }
             
         } catch (NotSupportedException | SystemException | RollbackException | HeuristicMixedException | HeuristicRollbackException | SecurityException | IllegalStateException | JSONException ex) {
             try {
@@ -456,26 +537,26 @@ public class SampleResource {
         } 
     }
     
-    private Object[] preparedOfDoLike(String login,
+    private Attribute[] preparedOfDoLike(String login,
                                       Integer sampleId) {
-        Object[] attrValues = new AttributeValue[6];
+        Attribute[] attrValues = new Attribute[7];
         Integer userId = (Integer) em.createNativeQuery("select objId from AttributeValue "
                                                         + "where stringValue = ? and attrId = ? ")
                     .setParameter(1, login).setParameter(2, LOGIN_ID).getResultList().get(0);
-         attrValues[0] = userId;
+        attrValues[0] = new Attribute();
+        attrValues[0].setType("int");
+        attrValues[0].setValue(userId);
         
-        Integer objId = (Integer) em.createNamedQuery(
-                "select objId " +
-                "from ATTRIBUTEVALUE " +
-                "where attrId = (select attrId " +
-                "                from ATTRIBUTES " +
-                "                where name = 'userId') and " +
-                "                      referenceValue = ?" +
-                "              INTERSECT " +
-                "               select objId " +
-                "               from ATTRIBUTEVALUE " +
-                "               where attrId = (select attrId from ATTRIBUTES where name = 'sampleId') and " +
-                "                     referenceValue = ?")
+        Integer objId = (Integer) em.createNativeQuery(
+                "    select objId " +
+                "    from ATTRIBUTEVALUE " +
+                "    where attrId = (select attrId from ATTRIBUTES where name = 'userId') and " +
+                "          referenceValue = ? " +
+                " INTERSECT " +
+                "    select objId " +
+                "    from ATTRIBUTEVALUE " +
+                "    where attrId = (select attrId from ATTRIBUTES where name = 'sampleId') and " +
+                "          referenceValue = ?")
                 .setParameter(1, userId).setParameter(2, sampleId).getSingleResult();
         
         
@@ -485,7 +566,9 @@ public class SampleResource {
             "where objId = ? and " +
             "      attrId = (select attrId from ATTRIBUTES where name = 'isLike')")
                 .setParameter(1,objId).getSingleResult();
-        attrValues[1] = isLike;
+        attrValues[1] = new Attribute();
+        attrValues[1].setType("boolean");
+        attrValues[1].setValue(isLike);
 
         Boolean isDisLike = (Boolean) em.createNativeQuery(
             "select booleanValue " +
@@ -493,7 +576,9 @@ public class SampleResource {
             "where objId = ? and " +
             "      attrId = (select attrId from ATTRIBUTES where name = 'isDisLike')")
                 .setParameter(1,objId).getSingleResult();
-        attrValues[2] = isDisLike;
+        attrValues[2] = new Attribute();
+        attrValues[2].setType("boolean");
+        attrValues[2].setValue(isDisLike);
 
 
         Integer attrValueId = (Integer) em.createNativeQuery(
@@ -502,7 +587,9 @@ public class SampleResource {
                     + "attrId = (select attrId from attributes where name = 'count_of_like')")
                 .setParameter(1, sampleId).getSingleResult();
         AttributeValue countOfLikes = em.find(AttributeValue.class, attrValueId);
-        attrValues[3] = countOfLikes;
+        attrValues[3] = new Attribute();
+        attrValues[3].setType("int");
+        attrValues[3].setValue(countOfLikes);
 
         attrValueId = (Integer) em.createNativeQuery(
                 "select attrValueId from AttributeValue "
@@ -510,7 +597,9 @@ public class SampleResource {
                     + "attrId = (select attrId from attributes where name = 'count_of_dislike') ")
                 .setParameter(1, sampleId).getSingleResult();
         AttributeValue countOfDisLikes = em.find(AttributeValue.class, attrValueId);
-        attrValues[4] = countOfDisLikes;
+        attrValues[4] = new Attribute();
+        attrValues[4].setType("int");
+        attrValues[4].setValue(countOfDisLikes);
 
 
         attrValueId = (Integer) em.createNativeQuery(
@@ -519,7 +608,9 @@ public class SampleResource {
                 "      attrId = (select attrId from attributes where name = 'isLike')")
                 .setParameter(1,objId).getSingleResult();
         AttributeValue isLikeId = em.find(AttributeValue.class, attrValueId);
-        attrValues[5] = isLikeId;
+        attrValues[5] = new Attribute();
+        attrValues[5].setType("object");
+        attrValues[5].setValue(isLikeId);
 
         attrValueId = (Integer) em.createNativeQuery(
                 "select attrValueId from AttributeValue " +
@@ -527,40 +618,10 @@ public class SampleResource {
                "attrId = (select attrId from attributes where name = 'isDisLike')")
                 .setParameter(1,objId).getSingleResult();
         AttributeValue isDisLikeId = em.find(AttributeValue.class, attrValueId);
-        attrValues[6] = isDisLikeId;
+        attrValues[6] = new Attribute();
+        attrValues[6].setType("object");
+        attrValues[6].setValue(isDisLikeId);
             
         return attrValues;
-    }
-    
-    @GET
-    @Path("doDislike")
-    @Produces(MediaType.APPLICATION_JSON+ ";charset=UTF-8")
-    public String doDislike(@Context HttpServletRequest req,
-                             @QueryParam("objId") int objId) {
-        JSONObject result = new JSONObject();
-        if (objId == 0) {
-            result.put("result", "failed");
-            return result.toString();
-        }
-        try {    
-            utx.begin();
-            Integer attrValueId = (Integer) em.createNativeQuery("select attrValueId from AttributeValue where objId = ? and attrId = ?")
-                    .setParameter(1, objId).setParameter(2, COUNT_OF_DISLIKE_ID).getResultList().get(0);
-            AttributeValue attrV = em.find(AttributeValue.class, attrValueId);
-            attrV.setNumberValue(attrV.getNumberValue() + 1);
-            em.merge(attrV);
-            utx.commit();
-            result.put("result", "ok");
-            return result.toString();
-        } catch (NotSupportedException | SystemException | RollbackException | HeuristicMixedException | HeuristicRollbackException | SecurityException | IllegalStateException | JSONException ex) {
-            try {
-                utx.rollback();
-                result.put("result", "failed - ROLLBACK");
-                return result.toString();
-            } catch (IllegalStateException | SecurityException | SystemException | JSONException ex1) {
-                result.put("result", "failed - ROLLBACK DENIED");
-                return result.toString();
-            }
-        } 
     }
 }
