@@ -2211,6 +2211,25 @@ ul.accordion-large li div{
 }
 
 
+
+.last_created_samples table tr td a img{
+    width: 20px;
+    height: 20px;
+    margin: 0px;
+}
+.last_created_samples table tr td label {
+    padding: 5px;
+}
+.last_created_samples table tr td  a label {
+    padding: 5px;
+}
+.last_created_samples table tr td a img:hover {
+	background-color:transparent;
+}
+.last_created_samples table tr td a img:active {
+	position:relative;
+	top:1px;
+}
 .sample {
 	background-color:transparent;
 	display:inline-block;
@@ -2228,21 +2247,8 @@ ul.accordion-large li div{
 	position:relative;
 	top:1px;
 }
-.last_created_samples table tr td a .like{
-    width: 20px;
-    height: 20px;
-    margin: 0px;
-}
-.last_created_samples table tr td label {
-    padding: 5px;
-}
-.last_created_samples table tr td  a label {
-    padding: 5px;
-}
-.last_created_samples table tr td a .like:hover {
-	background-color:transparent;
-}
-.last_created_samples table tr td a .like:active {
-	position:relative;
-	top:1px;
+
+.sample .photoSample {
+    width: 100px;
+    height: 120px;
 }
