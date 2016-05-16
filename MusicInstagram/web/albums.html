@@ -165,9 +165,7 @@
                                 type: "GET", 
                                 url: "webresources/sample/doLikeOrDisLike",
                                 data:{sampleId:sender.id.substr(12),login:result.nickName,operation:"dislike"},
-                                success: function(data, response) {
-                                    alert(data);
-                                    alert(data[0]);
+                                success: function(data) {
                                     $("#Like" + sender.id.substr(12)).text(data.newCountOflike);
                                     $("#DisLike" + sender.id.substr(12)).text(data.newCountOfDislike);
                                 },

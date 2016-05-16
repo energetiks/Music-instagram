@@ -477,20 +477,23 @@ public class SampleResource {
                 
                 HashMap<Integer,Attribute> attrValue = new HashMap<>();
                 String nameofBoolean = new String ();
-                String countOfLikeOrDislike = new String ();
+                String nameCountOfFirstOperation = new String ();
+                String nameCountOfSecondOperation = new String ();
                 attrValue.put(USERID_ID,new Attribute("reference", userId));
                 attrValue.put(SAMPLEID_ID,new Attribute("reference", sampleId));
                 if ("like".equals(operation)) {
                     attrValue.put(ISLIKE_ID,new Attribute("boolean", true));
                     attrValue.put(ISDISLIKE_ID,new Attribute("boolean", false));
                     nameofBoolean = "isLike";
-                    countOfLikeOrDislike = "count_of_like";
+                    nameCountOfFirstOperation = "count_of_like";
+                    nameCountOfSecondOperation = "count_of_dislike";
                 } else
                 if ("dislike".equals(operation)) {
                     attrValue.put(ISLIKE_ID,new Attribute("boolean", false));
                     attrValue.put(ISDISLIKE_ID,new Attribute("boolean", true));
                     nameofBoolean = "isDisLike";
-                    countOfLikeOrDislike = "count_of_dislike";
+                    nameCountOfFirstOperation = "count_of_dislike";
+                    nameCountOfSecondOperation = "count_of_like";
                 }
                 
                 MainResource resource = new MainResource();
@@ -508,16 +511,38 @@ public class SampleResource {
                         "select attrValueId from AttributeValue "
                                 + "where objId = ? and "
                                 + "attrId = (select attrId from attributes where name = ?)")
-                        .setParameter(1, sampleId).setParameter(2, countOfLikeOrDislike).getSingleResult();
-                AttributeValue countOfLikesOrDislikes = em.find(AttributeValue.class, attrValueId);
+                        .setParameter(1, sampleId).setParameter(2, nameCountOfFirstOperation).getSingleResult();
+                AttributeValue countOfFirstOperation = em.find(AttributeValue.class, attrValueId);
+                
+                attrValueId = (Integer) em.createNativeQuery(
+                        "select attrValueId from AttributeValue "
+                                + "where objId = ? and "
+                                + "attrId = (select attrId from attributes where name = ?)")
+                        .setParameter(1, sampleId).setParameter(2, nameCountOfSecondOperation).getSingleResult();
+                AttributeValue countOfSecondOperation = em.find(AttributeValue.class, attrValueId);
         
-                countOfLikesOrDislikes.setNumberValue(countOfLikesOrDislikes.getNumberValue() + 1);
-                em.merge(countOfLikesOrDislikes);
+                countOfFirstOperation.setNumberValue(countOfFirstOperation.getNumberValue() + 1);
+                em.merge(countOfFirstOperation);
                 isObjectLikeId.setBooleanValue(true);
                 em.merge(isObjectLikeId);
                 utx.commit();
                 
-                result.put("result", "create LikeObject - success");
+                if (null != operation) 
+                    switch (operation) {
+                    case "like":
+                        result.put("newCountOflike", countOfFirstOperation.getNumberValue());
+                        result.put("newCountOfDislike", countOfSecondOperation.getNumberValue());
+                        result.put("result", "Success");
+                        break;
+                    case "dislike":
+                        result.put("newCountOflike", countOfSecondOperation.getNumberValue());
+                        result.put("newCountOfDislike", countOfFirstOperation.getNumberValue());
+                        result.put("result", "Success");
+                        break;
+                    default:
+                        result.put("result", "Error operation");
+                        break;
+                }
                 return result.toString();
             } catch (RollbackException | HeuristicMixedException | HeuristicRollbackException | SecurityException | IllegalStateException | SystemException ex1) {
                 Logger.getLogger(SampleResource.class.getName()).log(Level.SEVERE, null, ex1);
