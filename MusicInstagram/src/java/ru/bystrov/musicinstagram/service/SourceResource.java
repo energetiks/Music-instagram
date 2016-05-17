@@ -160,8 +160,10 @@ public class SourceResource {
             
            
             attrValue = new HashMap<>();
-            String pathToSource = "C:\\Users\\Test\\Desktop\\MusicInstagram\\Source Library\\".concat(GetHash(is1).concat(".mp3"));
-            attrValue.put(PATH_FILE_ID,new Attribute("String", pathToSource));
+            String filename = GetHash(is1).concat(".mp3");
+            
+            String pathToSource = "C:\\Users\\Test\\Desktop\\Programms on java\\MusicInstagram\\Music-instagram\\MusicInstagram\\web\\Source Library\\".concat(filename);
+            attrValue.put(PATH_FILE_ID,new Attribute("String", "Source Library/".concat(fileName)));
             attrValue.put(TYPE_FILE_ID,new Attribute("String", "mp3"));
             resource = new MainResource();
             resource.addAttributes(attrValue, newSourceFile,em);

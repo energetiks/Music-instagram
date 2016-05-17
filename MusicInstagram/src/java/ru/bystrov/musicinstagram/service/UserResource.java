@@ -1,5 +1,11 @@
 package ru.bystrov.musicinstagram.service;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +25,7 @@ import javax.transaction.NotSupportedException;
 import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.FormParam;
@@ -28,6 +35,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -73,21 +81,20 @@ public class UserResource {
 
     public UserResource() {
     }
-    
     @POST
-    @Path("createUserFull")
-    @Produces(MediaType.APPLICATION_JSON+ ";charset=UTF-8")
-    public String createUserFull(@Context HttpServletRequest req,
-                             @FormParam("first_name") String firstName,
-                             @FormParam("last_name") String lastName,
-                             @FormParam("age") int age,
-                             @FormParam("city") String city,
-                             @FormParam("country") String country,
-                             @FormParam("univercity") String univercity,
-                             @FormParam("phone_number") String phoneNumber,
-                             @FormParam("photo_ref") String photoRef,
-                             @FormParam("login") String login,
-                             @FormParam("password") String password) {
+    @Path("addDataAboutUser")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.TEXT_PLAIN)
+    public String addDataAboutUser(
+                             @FormDataParam("firstName") String firstName,
+                             @FormDataParam("lastName") String lastName,
+                             @FormDataParam("age") int age,
+                             @FormDataParam("country") String country,
+                             @FormDataParam("city") String city,
+                             @FormDataParam("university") String university,
+                             @FormDataParam("phoneNumber") String phoneNumber,
+                             @FormDataParam("photo") InputStream is,
+                             @FormDataParam("login") String login) {
         JSONObject result = new JSONObject();
 
         
@@ -98,96 +105,77 @@ public class UserResource {
             attrValue.put(FIRST_NAME_ID,new Attribute("string", firstName));
             attrValue.put(LAST_NAME_ID,new Attribute("string", lastName));
             attrValue.put(AGE_ID,new Attribute("int", age));
-            attrValue.put(CITY_ID,new Attribute("string", city));
             attrValue.put(COUNTRY_ID,new Attribute("string", country));
-            attrValue.put(UNIVERCITY_ID,new Attribute("string", univercity));
+            attrValue.put(CITY_ID,new Attribute("string", city));
+            attrValue.put(UNIVERCITY_ID,new Attribute("string", university));
             attrValue.put(PHONE_NUMBER_ID,new Attribute("string", phoneNumber));
-            attrValue.put(LOGIN_ID,new Attribute("string", login));
-            attrValue.put(PASSWORD_ID,new Attribute("string", password));
             
-            Objects newUser  = new Objects();
-            Objects newPhotoFile = new Objects();
-            Integer id = Integer.valueOf(em.createNativeQuery("select MAX(objId) from Objects").getResultList().get(0).toString());
-            newUser.setObjId(id+1);
-            newUser.setName("User " + getName(attrValue));
-            newUser.setObjTypeId(USER_TYPE_ID);
+            Integer userId = (Integer) em.createNativeQuery("select objId from AttributeValue "
+                    + "where stringValue = ? and "
+                    + "attrId = (select attrId from ATTRIBUTES where name = 'login')")
+                    .setParameter(1, login).getResultList().get(0);
             
-            newPhotoFile.setObjId(id+2);
-            newPhotoFile.setName("Photo File " + getName(attrValue));
-            newPhotoFile.setObjTypeId(FILE_TYPE_ID);
-            
-            attrValue.put(PHOTO_REF_ID,new Attribute("reference", id+2));
-                
-            em.persist(newUser);
-            em.persist(newPhotoFile);
-            AttributeValue newAttrValue;
-            id = Integer.valueOf(em.createNativeQuery("select MAX(attrValueId) from AttributeValue").getResultList().get(0).toString());
             for (Map.Entry<Integer, Attribute> entry : attrValue.entrySet()) {
-                newAttrValue = new AttributeValue();
-                id = id + 1;
-                newAttrValue.setAttrValueId(id);
-                newAttrValue.setAttrId(entry.getKey());
-                newAttrValue.setObjId(newUser.getObjId());
+            
+                Integer attrValueId = (Integer) em.createNativeQuery(
+                        "SELECT attrValueID " +
+                        "FROM ATTRIBUTEVALUE " +
+                        "where objId = ? and " +
+                        "      attrId = ?")
+                        .setParameter(1, userId).setParameter(2, entry.getKey()).getSingleResult(); 
+                AttributeValue attribute = em.find(AttributeValue.class, attrValueId);
                 switch (entry.getValue().getType()) {
-                    case "String":
-                        newAttrValue.setStringValue(String.valueOf(entry.getValue().getValue()));
-                        newAttrValue.setNumberValue(0);
-                        newAttrValue.setReferenceValue(0);
+                    case "string":
+                        attribute.setStringValue((String) entry.getValue().getValue());
                         break;
                     case "int":
-                        newAttrValue.setNumberValue((int)entry.getValue().getValue());
-                        newAttrValue.setStringValue("");
-                        newAttrValue.setReferenceValue(0);
+                        attribute.setNumberValue((int) entry.getValue().getValue());
                         break;
                     case "reference":
-                        newAttrValue.setReferenceValue((int) entry.getValue().getValue());
-                        newAttrValue.setStringValue("");
-                        newAttrValue.setNumberValue(0);
+                        attribute.setReferenceValue((int) entry.getValue().getValue());
                         break;
+                    case "date":
+                        attribute.setDateValue((String) entry.getValue().getValue());
+                        break;
+                    case "boolean":
+                        attribute.setBooleanValue((Boolean) entry.getValue().getValue());
+                        break;    
                     default:
                         break;
                 }
-                em.persist(newAttrValue);
-            }           
+                em.merge(attribute);
+            }
+            
             
             
             //CREATE A FILE OBJECT!!!
             attrValue = new HashMap<>();
-            attrValue.put(PATH_FILE_ID,new Attribute("String", photoRef));
+            String pathToPhoto = "C:\\Users\\Test\\Desktop\\Programms on java\\MusicInstagram\\Music-instagram\\MusicInstagram\\web\\images\\userPhoto\\test.jpg";
+
+            attrValue.put(PATH_FILE_ID,new Attribute("String", "images/userPhoto/test.jpg"));
             attrValue.put(TYPE_FILE_ID,new Attribute("String", "jpg"));
+            
             for (Map.Entry<Integer, Attribute> entry : attrValue.entrySet()) {
-            newAttrValue = new AttributeValue();
-                id = id + 1;
-                newAttrValue.setAttrValueId(id);
-                newAttrValue.setAttrId(entry.getKey());
-                newAttrValue.setObjId(newPhotoFile.getObjId());
-                switch (entry.getValue().getType()) {
-                    case "string":
-                        newAttrValue.setStringValue(String.valueOf(entry.getValue().getValue()));
-                        newAttrValue.setNumberValue(0);
-                        newAttrValue.setReferenceValue(0);
-                        break;
-                    case "int":
-                        newAttrValue.setNumberValue((int)entry.getValue().getValue());
-                        newAttrValue.setStringValue("");
-                        newAttrValue.setReferenceValue(0);
-                        break;
-                    case "reference":
-                        newAttrValue.setReferenceValue((int) entry.getValue().getValue());
-                        newAttrValue.setStringValue("");
-                        newAttrValue.setNumberValue(0);
-                        break;
-                    default:
-                        break;
-                }
-                em.persist(newAttrValue);
+                Integer attrValueId = (Integer) em.createNativeQuery(
+                        "SELECT attrValueID " +
+                        "FROM ATTRIBUTEVALUE " +
+                        "where objId = (select referenceValue " +
+                        "               from ATTRIBUTEVALUE " +
+                        "               where objId= ? and " +
+                        "                     attrId = (select attrId " + 
+                        "                               from Attributes " +
+                        "                               where name='photo_ref'))  and " +
+                        "      attrId = ?")
+                        .setParameter(1, userId).setParameter(2, entry.getKey()).getSingleResult(); 
+                AttributeValue attribute = em.find(AttributeValue.class, attrValueId);
+                attribute.setStringValue((String) entry.getValue().getValue());
+                em.merge(attribute);
             }
-            
-            
+            writeToFile(is, pathToPhoto);
             result.put("result","ok");
             utx.commit();
             return result.toString();
-        } catch (NotSupportedException | SystemException | RollbackException | HeuristicMixedException | HeuristicRollbackException | SecurityException | IllegalStateException | JSONException ex) {
+        } catch (IOException| NotSupportedException | SystemException | RollbackException | HeuristicMixedException | HeuristicRollbackException | SecurityException | IllegalStateException | JSONException ex) {
             ex.printStackTrace(System.err);
             try {
                 utx.rollback();
@@ -201,6 +189,20 @@ public class UserResource {
         }
     }
     
+    private void writeToFile(
+            InputStream uploadedInputStream,
+            String uploadedFileLocation
+    ) throws FileNotFoundException, IOException {
+        OutputStream out;
+        int read;
+        byte[] bytes = new byte[1024];
+        out = new FileOutputStream(new File(uploadedFileLocation));
+        while ((read = uploadedInputStream.read(bytes)) != -1) {
+            out.write(bytes, 0, read);
+        }
+        out.flush();
+        out.close();
+    }
     @POST
     @Path("createUser")
     @Produces(MediaType.APPLICATION_JSON+ ";charset=UTF-8")
@@ -239,69 +241,18 @@ public class UserResource {
             em.persist(newUser);
             em.persist(newPhotoFile);
                 
-            em.persist(newUser);
-            AttributeValue newAttrValue;
-            id = Integer.valueOf(em.createNativeQuery("select MAX(attrValueId) from AttributeValue").getResultList().get(0).toString());
-            for (Map.Entry<Integer, Attribute> entry : attrValue.entrySet()) {
-                newAttrValue = new AttributeValue();
-                id = id + 1;
-                newAttrValue.setAttrValueId(id);
-                newAttrValue.setAttrId(entry.getKey());
-                newAttrValue.setObjId(newUser.getObjId());
-                switch (entry.getValue().getType()) {
-                    case "String":
-                        newAttrValue.setStringValue(String.valueOf(entry.getValue().getValue()));
-                        newAttrValue.setNumberValue(-1);
-                        newAttrValue.setReferenceValue(-1);
-                        break;
-                    case "int":
-                        newAttrValue.setNumberValue((int)entry.getValue().getValue());
-                        newAttrValue.setStringValue("");
-                        newAttrValue.setReferenceValue(-1);
-                        break;
-                    case "Reference":
-                        newAttrValue.setReferenceValue((int) entry.getValue().getValue());
-                        newAttrValue.setStringValue("");
-                        newAttrValue.setNumberValue(-1);
-                        break;
-                    default:
-                        break;
-                }
-                em.persist(newAttrValue);
-            }
+            
+            MainResource resource = new MainResource();
+            resource.addAttributes(attrValue, newUser, em);
             
             
             //CREATE A FILE OBJECT!!!
             attrValue = new HashMap<>();
             attrValue.put(PATH_FILE_ID,new Attribute("String", "images/userPhoto/user.jpg"));
             attrValue.put(TYPE_FILE_ID,new Attribute("String", "jpg"));
-            for (Map.Entry<Integer, Attribute> entry : attrValue.entrySet()) {
-            newAttrValue = new AttributeValue();
-                id = id + 1;
-                newAttrValue.setAttrValueId(id);
-                newAttrValue.setAttrId(entry.getKey());
-                newAttrValue.setObjId(newPhotoFile.getObjId());
-                switch (entry.getValue().getType()) {
-                    case "String":
-                        newAttrValue.setStringValue(String.valueOf(entry.getValue().getValue()));
-                        newAttrValue.setNumberValue(-1);
-                        newAttrValue.setReferenceValue(-1);
-                        break;
-                    case "int":
-                        newAttrValue.setNumberValue((int)entry.getValue().getValue());
-                        newAttrValue.setStringValue("");
-                        newAttrValue.setReferenceValue(-1);
-                        break;
-                    case "reference":
-                        newAttrValue.setReferenceValue((int) entry.getValue().getValue());
-                        newAttrValue.setStringValue("");
-                        newAttrValue.setNumberValue(-1);
-                        break;
-                    default:
-                        break;
-                }
-                em.persist(newAttrValue);
-            }
+            
+            resource = new MainResource();
+            resource.addAttributes(attrValue, newPhotoFile, em);
             
             
             result.put("result","ok");
@@ -508,7 +459,7 @@ public class UserResource {
     public String getPhotoByLogin(@Context HttpServletRequest req,
                            @QueryParam("login") String login) {
         try {    
-            utx.begin();
+           
              String photo = (String) em.createNativeQuery(
                      "select photo.stringValue "
                    + "from AttributeValue object, "
@@ -521,17 +472,12 @@ public class UserResource {
                      .setParameter(2, LOGIN_ID)
                      .setParameter(3, PHOTO_REF_ID)
                      .setParameter(4, PATH_FILE_ID).getResultList().get(0);
-            utx.commit();
+            
             JSONObject result = new JSONObject();
             result.put("photo", photo);
             return result.toString();
-        } catch (NotSupportedException | SystemException | RollbackException | HeuristicMixedException | HeuristicRollbackException | SecurityException | IllegalStateException | JSONException ex) {
-            try {
-                utx.rollback();
-                return "Exception!!!";
-            } catch (IllegalStateException | SecurityException | SystemException | JSONException ex1) {
-                return "Exception!!!";
-            }
+        } catch (SecurityException | IllegalStateException | JSONException ex) {
+            return "Exception!!!";
         }
     }
     
