@@ -1,0 +1,7 @@
+#slider-range .ui-widget-header {
+    background: lightgreen;
+    opacity: 0.5;
+}
+#slider-range .ui-state-default {
+    display: none;
+}
