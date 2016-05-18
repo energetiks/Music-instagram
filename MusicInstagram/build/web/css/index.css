@@ -18,7 +18,7 @@ body {
     width: 960px;
 }
 #panel {
-    padding-left: 300px;
+    padding-left: 150px;
     vertical-align: middle;
     background:url(../images/transparent_background.png);	
 }
@@ -28,12 +28,23 @@ body {
     color: #fff;
 }
 
-.reg {
+#panel_l {
+    padding-left: 200px;
+    vertical-align: middle;
+    background:url(../images/transparent_background.png);	
+}
+
+#panel_l label {
     float: right;
+    color: #fff;
+}
+
+.reg {
+    margin-left: 120px;
 }
 .submit {
-    margin-left: 86px;
+    margin-left: 120px;
 }
 .back {
-    margin-left: 140px;
+    margin-left: 190px;
 }

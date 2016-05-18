@@ -19,6 +19,20 @@
     </head>
     <body>
         <script>
+            
+            $(document).ready( function() {
+                $.ajax({
+                    type: "GET",
+                    url: "webresources/user/getSession",
+                    async: false,
+                    success: function (data, response) {
+                        if (data !== "success") {
+                            window.location.href = '/MusicInstagram/index.html';
+                        }
+                    }
+                });
+            });
+            
             $(function(){
                 $.ajax({ 
                     type: "GET", 
@@ -91,7 +105,7 @@
                                                     "Age: " + data[i].Friend3 + "<br>" +
                                                     "City: " + data[i].Friend5 + "<br>" +
                                                     "Country: " + data[i].Friend4 + "<br>" +
-                                                    "Univercity: " + data[i].Friend6 + "<br>" +
+                                                    "University: " + data[i].Friend6 + "<br>" +
                                                     "Phone number: " + data[i].Friend7 + "<br>");
                                 }
                             }
@@ -102,6 +116,17 @@
                 
                 
             });
+            
+            function exit() {
+                $.ajax({
+                    type: "POST",
+                    url: "webresources/user/exit",
+                    success: function(result, response) {
+                        window.location.href='/MusicInstagram/index.html';
+                    },
+                    dataType: "json"
+                });
+            };
             
         </script>
         <!--background changer-->
@@ -183,14 +208,17 @@
                             <span>My friends</span>                       
                         </li>
                         <li>
+                            <a href="findFriends.html">FIND FRIENDS</a>
+                            <span>Add friends</span>                       
+                        </li>
+                        <li>
                             <a href="editData.html">EDIT DATA</a>
                             <span>Edit your data</span>                       
                         </li>
                         <li>
-                            <input type="button" value="Log out" style="height: 35px" onclick="window.location.href='/MusicInstagram/index.html'; return false;"/>
+                            <input type="button" value="Log out" style="height: 35px" onclick="exit()"/>
                         </li>
-                    </ul>
-                    
+                    </ul>                    
                 </div>
             </div>
         </div>
@@ -214,16 +242,19 @@
                         <a href="homePage.html" >MY PAGE</a>
                     </li>
                     <li>
-                        <a href="albums.html">MY ALBUMS</a>
+                        <a href="albums.html" >MY ALBUMS</a>
                     </li>
                     <li>
-                        <a href="music.html">MUSIC</a>
+                        <a href="music.html" >MUSIC</a>
                     </li>
                     <li>
                         <a href="friends.html" class="active">FRIENDS</a>
                     </li>
                     <li>
-                        <a href="editData.html">EDIT DATA</a>                     
+                        <a href="findFriends.html" >FIND FRIENDS</a>
+                    </li>
+                    <li>
+                        <a href="editData.html" >EDIT DATA</a>
                     </li>
                 </ul>
                 <div>Copyright MusicInstagram. 2016</div>

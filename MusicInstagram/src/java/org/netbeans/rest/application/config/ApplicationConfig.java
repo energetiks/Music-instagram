@@ -36,7 +36,10 @@ public class ApplicationConfig extends Application {
      */
     private void addRestResourceClasses(Set<Class<?>> resources) {
         resources.add(ru.bystrov.musicinstagram.service.DirectoryService.class);
+        resources.add(ru.bystrov.musicinstagram.service.FileResource.class);
+        resources.add(ru.bystrov.musicinstagram.service.LoginResource.class);
         resources.add(ru.bystrov.musicinstagram.service.MainResource.class);
+        resources.add(ru.bystrov.musicinstagram.service.RegistrationResource.class);
         resources.add(ru.bystrov.musicinstagram.service.SampleResource.class);
         resources.add(ru.bystrov.musicinstagram.service.SourceResource.class);
         resources.add(ru.bystrov.musicinstagram.service.UserResource.class);

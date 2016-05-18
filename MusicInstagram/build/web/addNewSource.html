@@ -12,7 +12,7 @@ and open the template in the editor.
         <link rel="stylesheet" type="text/css" href="css/reset.css"/>
         <link rel="stylesheet" type="text/css" href="css/style.css"/>
         <link rel="stylesheet" type="text/css" href="css/default.css"/>
-
+        
         <link rel="stylesheet" type="text/css" href="scripts/nivo-slider/nivo-slider.css"/>
         <link rel="stylesheet" type="text/css" href="scripts/nivo-slider/themes/default/default.css"/>
 
@@ -20,10 +20,61 @@ and open the template in the editor.
 
         <link rel="stylesheet" type="text/css" href="scripts/autocomplete/jquery.autocomplete.css" />
 
-        <link rel="stylesheet" type="text/css" href="scripts/demo/colorpicker/css/colorpicker.css"/>
-
+        <link rel="stylesheet" type="text/css" href="scripts/demo/colorpicker/css/colorpicker.css"/> 
+        
+        <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
     </head>
     <body>
+        <script>
+            $(document).ready( function() {
+                $.ajax({
+                    type: "GET",
+                    url: "webresources/user/getSession",
+                    async: false,
+                    success: function (data, response) {
+                        if (data !== "success") {
+                            window.location.href = '/MusicInstagram/index.html';
+                        }
+                    }
+                });
+            });
+            
+            $(function(){
+                $("#addNewSource").on("click", function () {
+                    var documentData = new FormData();
+                    documentData.append('newSource', $('#newSource')[0].files[0]);
+                    documentData.append('fileName', $('#newSource').get(0).files[0].name);
+                    documentData.append('duration', $('#duration').val());
+                    documentData.append('genre', $('#genre').val());
+                    documentData.append('language', $('#language').val());
+                    documentData.append('albumName', $('#albumName').val());
+                    documentData.append('year', $('#yearOfCreation').val());
+                    documentData.append('musicalGroupName', $('#musicalGroupName').val());
+                    documentData.append('login', 'energetiks');
+                    $.ajax({
+                        url: "webresources/source/upload",
+                        type: 'POST',
+                        data: documentData,
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        success: function (responseText) {
+                        }
+                    });
+                });
+            });
+            
+            function exit() {
+                $.ajax({
+                    type: "POST",
+                    url: "webresources/user/exit",
+                    success: function(result, response) {
+                        window.location.href='/MusicInstagram/index.html';
+                    },
+                    dataType: "json"
+                });
+            };
+        </script>
         <!--background changer-->
         <div id="background_changer">
             <div class="alignleft_block backgrounds">
@@ -66,7 +117,7 @@ and open the template in the editor.
                 </ul>
             </div>
             <div class="alignleft_block open_close">
-                <a href="#" class="arrow">OPEN</a>
+                    <a href="#" class="arrow">OPEN</a>
             </div>  
         </div>
         <div id="body-wrapper">
@@ -76,10 +127,10 @@ and open the template in the editor.
                     <table id="userface">
                         <tr>
                             <td>
-                                <label id="username">nickname</label>
+                                <label id="userName"></label>
                             </td>
                             <td>
-                                <img src="images/face.png" style="border: 2px solid #000" alt="Small image"/>
+                                <img class="userPhoto" style="max-height: 100px; " alt="Small image"/>
                             </td>
                         </tr>
                     </table>
@@ -103,48 +154,45 @@ and open the template in the editor.
                             <span>My friends</span>                       
                         </li>
                         <li>
+                            <a href="findFriends.html">FIND FRIENDS</a>
+                            <span>Add friends</span>                       
+                        </li>
+                        <li>
+                            <a href="editData.html">EDIT DATA</a>
+                            <span>Edit your data</span>                       
+                        </li>
+                        <li>
                             <input type="button" value="Log out" style="height: 35px" onclick="exit()"/>
                         </li>
-                    </ul>
-
+                    </ul>                    
                 </div>
             </div>
         </div>
-
+        
         <div class="clear20"></div>
 
         <!--content container-->
         <div class="melody transparent-background">
             <div></div>
-        </div>
-
-        <div class="clear20"></div>
-
-        <div id="content_container" class="center-clear">
-            <div class="box-three-sub-wrapper transparent-background">
-                <div id="search_music">
-                    <input type="text" id="search_field">
-                    <select id="search_select">
-                        <option>song</option>
-                        <option>artist</option>
-                        <option>album</option>
-                    </select>
-                    <input type="button" id="search_find" value="Find!">
-                </div>
-
-                <table id="search-list">
-                    <thead>
-                        <tr>
-                            <th>id</th>
-                            <th>name</th>
-                            <th>play</th>
-                            <th>realtime</th>
-                            <th>quick</th>
-                        </tr>
-                    </thead>
-                </table>
+            <div>
+                <button type="button">Choose File</button>
+                <input id="newSource" type="file" accept="mp3/wav">
             </div>
+            <input type="text" id="duration" value="100"><br>
+            <input type="text" id="genre" value=""><br>
+            <input type="text" id="language" value="English"><br>
+            <input type="text" id="albumName" value=""><br>
+            <input type="text" id="yearOfCreation" value="2016"><br>
+            <input type="text" id="musicalGroupName" value=""><br>
+            
+            <button id="addNewSource" >
+                Add new source
+            </button>
         </div>
+        
+        <div class="clear20"></div>
+        
+        
 
         <div class="clear20"></div>
 
@@ -152,19 +200,22 @@ and open the template in the editor.
             <div id="footer" class="center-clear">
                 <ul>
                     <li>
-                        <a href="#" class="active">MY PAGE</a>
+                        <a href="homePage.html" >MY PAGE</a>
                     </li>
                     <li>
-                        <a href="#">MY ALBUMS</a>
+                        <a href="albums.html">MY ALBUMS</a>
                     </li>
                     <li>
-                        <a href="#">MUSIC</a>
+                        <a href="music.html" class="active">MUSIC</a>
                     </li>
                     <li>
-                        <a href="#">FRIENDS</a>
+                        <a href="friends.html">FRIENDS</a>
                     </li>
                     <li>
-                        <a href="#">CREATE MUSIC</a>
+                        <a href="findFriends.html">FIND FRIENDS</a>
+                    </li>
+                    <li>
+                        <a href="editData.html">EDIT DATA</a>
                     </li>
                 </ul>
                 <div>Copyright MusicInstagram. 2016</div>
@@ -182,67 +233,5 @@ and open the template in the editor.
         <script type="text/javascript" src="scripts/jquery-backgroundpos/jquery.backgroundpos.pack.js"></script>
         <script type="text/javascript" src="scripts/demo/colorpicker/js/colorpicker.js"></script>
         <script type="text/javascript" src="scripts/demo/demo.js"></script>
-
-        <script>
-            
-            $(document).ready( function() {
-                $.ajax({
-                    type: "GET",
-                    url: "webresources/user/getSession",
-                    async: false,
-                    success: function (data, response) {
-                        if (data !== "success") {
-                            window.location.href = '/MusicInstagram/index.html';
-                        }
-                    }
-                });
-            });
-            
-                                $("#search_find").on("click", function (event) {
-                                    $(".search-list-entry").remove();
-                                    $.ajax({
-                                        type: "GET",
-                                        url: "webresources/source/getSourceBySubstrName",
-                                        data: {
-                                            category: $("#effectsSelect :selected").text(),
-                                            name: $("#search_field").val()
-                                        },
-                                        success: function (responseText, statusText) {
-                                            if (statusText === 'success') {
-                                                for (var i = 0; i < responseText.length; i++) {
-                                                    var id = responseText[i][0];
-                                                    var name = responseText[i][1];
-                                                    var fileid = responseText[i][2];
-                                                    row = $('<tr class="search-list-entry" id="search-list-entry-'+id+'">' +
-                                                            '<td>' + id + '</td>' +
-                                                            '<td>' + name + '</td>' +
-                                                            '<td><input type="button" onclick=\'window.open("player.html?id='+fileid+'", "test", "width:100, height:200")\'></td>' +
-                                                            '<td><a href="realtimeCreation.html?id='+id+'">Realtime</a></td>' +
-                                                            '<td><a href="quickCreation.html?id='+id+'">Quick</a></td>' +
-                                                            '</tr>');
-                                                    row.appendTo('#search-list');
-                                                }
-                                                mainContentRows = responseText.length;
-                                            }
-                                        },
-                                        error: function (responseText) {
-                                            console.log(JSON.stringify(responseText));
-                                        },
-                                        dataType: "json"
-                                    });
-                                });
-                                
-            function exit() {
-                $.ajax({
-                    type: "POST",
-                    url: "webresources/user/exit",
-                    success: function(result, response) {
-                        window.location.href='/MusicInstagram/index.html';
-                    },
-                    dataType: "json"
-                });
-            };
-        </script>
     </body>
 </html>
-

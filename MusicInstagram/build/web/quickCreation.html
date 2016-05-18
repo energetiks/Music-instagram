@@ -25,45 +25,93 @@ and open the template in the editor.
 
         <!-- auxiliary libraries -->
         <script type="text/javascript" src="scripts/jquery-1.7.1.min.js"></script>
-        <script src="scripts/createMusic/tuna.js"></script>
-        <script src="scripts/createMusic/recorder.js"></script>
+        <script src="scripts/createSamples/tuna.js"></script>
+        <script src="scripts/createSamples/recorder.js"></script>
 
         <!-- range slider -->
-        <link rel="stylesheet" href="scripts/createMusic/jquery-ui-1.11.4/jquery-ui.css">
+        <link rel="stylesheet" href="scripts/createSamples/jquery-ui-1.11.4/jquery-ui.css">
         <link rel="stylesheet" href="css/my-jquery-ui.css">
-        <script src="scripts/createMusic/jquery-ui-1.11.4/jquery-ui.js"></script>
+        <script src="scripts/createSamples/jquery-ui-1.11.4/jquery-ui.js"></script>
 
         <!-- main library -->
-        <script src="scripts/createMusic/player.js"></script>
+        <script src="scripts/createSamples/player.js"></script>
 
         <script>
+            
+            $(document).ready( function() {
+                $.ajax({
+                    type: "GET",
+                    url: "webresources/user/getSession",
+                    async: false,
+                    success: function (data, response) {
+                        if (data !== "success") {
+                            window.location.href = '/MusicInstagram/index.html';
+                        }
+                    }
+                });
+            });
+            
+            // url parser
+            function getParameterByName(name, url) {
+                if (!url)
+                    url = window.location.href;
+                name = name.replace(/[\[\]]/g, "\\$&");
+                var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                        results = regex.exec(url);
+                if (!results)
+                    return null;
+                if (!results[2])
+                    return '';
+                return decodeURIComponent(results[2].replace(/\+/g, " "));
+            }
+
             $(function () {
+                var source_id = getParameterByName('id');
+
                 var player = new Player();
                 var visualizer = new Visualizer(player.analyserNode, document.querySelector("#frequencyCanvas"));
                 var effectsManager = new EffectsManager();
                 var buffer;
-                $("#downloadButton").on("click", function () {
-                    $("#generateButton").attr('disabled', true);
-                    $("#toggleButton").attr('disabled', true);
-                    $("#stopButton").attr('disabled', true);
-                    $("#uploadButton").attr('disabled', true);
-                    var fileName = "example.mp3";
-                    // download and decode
-                    var request = new XMLHttpRequest();
-                    request.open('GET', "./upload/" + fileName, true);
-                    request.responseType = 'arraybuffer';
-                    // Decode asynchronously
-                    request.onload = function () {
-                        player.context.decodeAudioData(request.response, function (buf) {
-                            buffer = buf;
-                            $("#generateButton").attr('disabled', false);
-                            drawTimeLine(buffer, $("#slider-range"));
-                        }, function () {
-                            console.log('Download error');
-                        });
-                    };
-                    request.send();
+
+                // get path and download source
+                $.ajax({
+                    type: "GET",
+                    url: "webresources/source/getPathById",
+                    data: {id: source_id},
+                    success: function (responseText) {
+                        var fileName = responseText;
+                        if (fileName === "File not found") {
+                            alert(fileName);
+                        } else {
+                            player.loadSound("upload/" + fileName, function () {
+                                $("#generateButton").attr('disabled', true);
+                                $("#toggleButton").attr('disabled', true);
+                                $("#stopButton").attr('disabled', true);
+                                $("#uploadButton").attr('disabled', true);
+                                // download
+                                var request = new XMLHttpRequest();
+                                request.open('GET', "./upload/" + fileName, true);
+                                request.responseType = 'arraybuffer';
+                                // Decode asynchronously
+                                request.onload = function () {
+                                    player.context.decodeAudioData(request.response, function (buf) {
+                                        buffer = buf;
+                                        $("#generateButton").attr('disabled', false);
+                                        drawTimeLine(buffer, $("#slider-range"));
+                                    }, function () {
+                                        console.log('Download error');
+                                    });
+                                };
+                                request.send();
+                            });
+                        }
+                    },
+                    error: function (responseText) {
+                        console.log(JSON.stringify(responseText));
+                    },
+                    dataType: "json"
                 });
+
                 $("#generateButton").on("click", function () {
                     $("#toggleButton").attr('disabled', true);
                     $("#stopButton").attr('disabled', true);
@@ -108,7 +156,7 @@ and open the template in the editor.
                     $("#positionRange").get(0).value = 0;
                 });
                 $("#uploadButton").on("click", function () {
-                    var worker = new Worker('js/recorderWorker.js');
+                    var worker = new Worker('scripts/createSamples/recorderWorker.js');
 
                     // initialize the new worker
                     worker.postMessage({
@@ -118,17 +166,25 @@ and open the template in the editor.
                             numChannels: player.buffer.numberOfChannels
                         }
                     });
+                    
+                    console.log("UPLOAD");
 
                     // callback for `exportWAV`
                     worker.onmessage = function (e) {
                         blob = e.data;
+                        console.log("UPLOAD");
 
                         var documentData = new FormData();
-                        documentData.append('uploadedFile', blob);
-                        fileName = "simple-record.wav";
-                        documentData.append('fileName', fileName);
+
+                        documentData.append("file", blob);
+                        documentData.append("name", $("#nameInput").val());
+                        documentData.append("duration", Math.round(player.buffer.duration));
+                        documentData.append("source", source_id);
+                        documentData.append("directory", $("#directoryInput").val()); // TODO make good field
+                        documentData.append("user", 0); // TODO
+
                         $.ajax({
-                            url: "./webresources/generic/upload",
+                            url: "./webresources/sample/uploadSample",
                             type: 'POST',
                             data: documentData,
                             cache: false,
@@ -204,6 +260,17 @@ and open the template in the editor.
                 $("#uploadButton").attr('disabled', true);
                 requestAnimationFrame(positionUpdate);
             });
+            
+            function exit() {
+                $.ajax({
+                    type: "POST",
+                    url: "webresources/user/exit",
+                    success: function(result, response) {
+                        window.location.href='/MusicInstagram/index.html';
+                    },
+                    dataType: "json"
+                });
+            };
         </script>
     </head>
     <body>
@@ -259,10 +326,10 @@ and open the template in the editor.
                     <table id="userface">
                         <tr>
                             <td>
-                                <label id="username">nickname</label>
+                                <label id="userName"></label>
                             </td>
                             <td>
-                                <img src="images/face.png" style="border: 2px solid #000" alt="Small image"/>
+                                <img class="userPhoto" style="max-height: 100px; " alt="Small image"/>
                             </td>
                         </tr>
                     </table>
@@ -286,10 +353,17 @@ and open the template in the editor.
                             <span>My friends</span>                       
                         </li>
                         <li>
-                            <input type="button" value="Log out" style="height: 35px" onclick="window.location.href = '/Music_instagram/faces/index.html'; return false;"/>
+                            <a href="findFriends.html">FIND FRIENDS</a>
+                            <span>Add friends</span>                       
                         </li>
-                    </ul>
-
+                        <li>
+                            <a href="editData.html">EDIT DATA</a>
+                            <span>Edit your data</span>                       
+                        </li>
+                        <li>
+                            <input type="button" value="Log out" style="height: 35px" onclick="exit()"/>
+                        </li>
+                    </ul>                    
                 </div>
             </div>
         </div>
@@ -299,11 +373,12 @@ and open the template in the editor.
         <!--content container-->
         <div id="content_container" class="center-clear">
             <div class="box-three-sub-wrapper transparent-background">
-                <input type="button" value="Download" id="downloadButton">
                 <input type="button" value="Generate" id="generateButton">
                 <input type="button" value="Play/Pause" id="toggleButton">
                 <input type="button" value="Stop" id="stopButton">
                 <input type="button" value="Upload" id="uploadButton">
+                <input type="text" value="Name" id="nameInput">
+                <input type="text" value="Directory" id="directoryInput">
                 <progress value=0 max=100></progress><span id="progress_percent">0%</span>
                 <br>
                 <input type="range" min="0" max="100" value="100" style="width: 500px" id="volumeRange">
@@ -341,19 +416,22 @@ and open the template in the editor.
             <div id="footer" class="center-clear">
                 <ul>
                     <li>
-                        <a href="#" class="active">MY PAGE</a>
+                        <a href="homePage.html" >MY PAGE</a>
                     </li>
                     <li>
-                        <a href="#">MY ALBUMS</a>
+                        <a href="albums.html" >MY ALBUMS</a>
                     </li>
                     <li>
-                        <a href="#">MUSIC</a>
+                        <a href="music.html">MUSIC</a>
                     </li>
                     <li>
-                        <a href="#">FRIENDS</a>
+                        <a href="friends.html" >FRIENDS</a>
                     </li>
                     <li>
-                        <a href="#">CREATE MUSIC</a>
+                        <a href="findFriends.html" >FIND FRIENDS</a>
+                    </li>
+                    <li>
+                        <a href="editData.html" >EDIT DATA</a>
                     </li>
                 </ul>
                 <div>Copyright MusicInstagram. 2016</div>

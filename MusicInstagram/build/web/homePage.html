@@ -28,198 +28,289 @@ and open the template in the editor.
     </head>
     <body>
         <script>
-            $(function(){
-                    var firstFriend;
-                    var secondFriend;
-                    var thirdFriend;
-                    
-                    $.ajax({ 
-                        type: "GET", 
-                        url: "webresources/user/getLogin",
-                        success: function(data, response) {
-                            $("#userName").text(data.nickName);
-                        },
-                        dataType: "json"
-                    });
-                    
-                    $.ajax({ 
-                        type: "GET", 
-                        url: "webresources/user/getPhotoByLogin",
-                        data:{login:"energetiks"},
-                        success: function(data, response) {
-                            $(".userPhoto").attr("src",data.photo);
-                        },
-                        dataType: "json"
-                    });
-                    
-                    $.ajax({ 
-                        type: "GET", 
-                        url: "webresources/user/getUserByLogin",
-                        data:{login:"energetiks"},
-                        success: function(data, response) {
-                            $("#infoAboutUser").html(
-                                "First Name: " + data.User1 + "<br>" + 
-                                "Last Name: " + data.User2 + "<br>" + 
-                                "Age: " + data.User3 + "<br>" +
-                                "City: " + data.User5 + "<br>" +
-                                "Country: " + data.User4 + "<br>" +
-                                "Univercity: " + data.User6 + "<br>" +
-                                "Phone number: " + data.User7 + "<br>" +
-                                "About me: ");
-                            $("#name").text(data.User1 + " " + data.User2);
-                        },
-                        dataType: "json"
-                    });
-                    
-                    $.ajax({ 
-                        type: "GET", 
-                        url: "webresources/user/getFriendsByLogin",
-                        data:{login:"energetiks"},
-                        success: function(data, response) {
-                            if (data[0].countOfFriend >= 3) {
-                                firstFriend = data[1].Friend8;
-                                secondFriend = data[2].Friend8;
-                                thirdFriend = data[3].Friend8;
-                                $("#firstFriendPhoto").attr("src",data[1].Friend30);
-                                $("#secondFriendPhoto").attr("src",data[2].Friend30);
-                                $("#thirdFriendPhoto").attr("src",data[3].Friend30);
-                                $("#firstFriend").html(data[1].Friend1 + "<br>" + data[1].Friend2);
-                                $("#secondFriend").html(data[2].Friend1 + "<br>" + data[2].Friend2);
-                                $("#thirdFriend").html(data[3].Friend1 + "<br>" + data[3].Friend2);
-                                
-                                
-                            }
-                            if (data[0].countOfFriend == 2) {
-                                firstFriend = data[1].Friend8;
-                                secondFriend = data[2].Friend8;
-                                $("#firstFriendPhoto").attr("src",data[1].Friend30);
-                                $("#secondFriendPhoto").attr("src",data[2].Friend30);
-                                $("#thirdFriendPhoto").hide();
-                                $("#firstFriend").html(data[1].Friend1 + "<br>" + data[1].Friend2);
-                                $("#secondFriend").html(data[2].Friend1 + "<br>" + data[2].Friend2);
-                                $("#thirdFriend").hide();
-                            }
-                            if (data[0].countOfFriend == 1) {
-                                firstFriend = data[1].Friend8;
-                                $("#firstFriendPhoto").attr("src",data[1].Friend30);
-                                $("#secondFriendPhoto").hide();
-                                $("#thirdFriendPhoto").hide();
-                                $("#firstFriend").html(data[1].Friend1 + "<br>" + data[1].Friend2);
-                                $("#secondFriend").hide();
-                                $("#thirdFriend").hide();
-                            }
-                            if (data[0].countOfFriend == 0) {
-                                $("#firstFriendPhoto").hide();
-                                $("#secondFriendPhoto").hide();
-                                $("#thirdFriendPhoto").hide();
-                                $("#firstFriend").hide();
-                                $("#secondFriend").hide();
-                                $("#thirdFriend").hide();
-                            }
-                        },
-                        dataType: "json"
-                    });
-                    
-                    $.ajax({ 
-                        type: "GET", 
-                        url: "webresources/sample/getSamplesByLoginInTimeOrder",
-                        data:{login:"energetiks"},
-                        success: function(data, response) {
-                            if (data[0].countOfSamples >= 3) {
-                                $("#Sample1").html(data[1].Sample19);
-                                $("#Sample2").html(data[2].Sample19);
-                                $("#Sample3").html(data[3].Sample19);
-                                $("#Like1").html(data[1].Sample31);
-                                $("#Like2").html(data[2].Sample31);
-                                $("#Like3").html(data[3].Sample31);
-                                $("#DisLike1").html(data[1].Sample32);
-                                $("#DisLike2").html(data[2].Sample32);
-                                $("#DisLike3").html(data[3].Sample32);
-                            }
-                            if (data[0].countOfSamples == 2) {
-                                $("#Sample1").html(data[1].Sample19);
-                                $("#Sample2").html(data[2].Sample19);
-                                $("#Sample3").hide();
-                                $("#Like1").html(data[1].Sample31);
-                                $("#Like2").html(data[2].Sample31);
-                                $("#Like3").hide();
-                                $("#PhotoLike3").hide();
-                                $("#DisLike1").html(data[1].Sample32);
-                                $("#DisLike2").html(data[2].Sample32);
-                                $("#DisLike3").hide();
-                                $("#PhotoDisLike3").hide();
-                            }
-                            if (data[0].countOfSamples == 1) {
-                                $("#Sample1").html(data[1].Sample19);
-                                $("#Sample2").hide();
-                                $("#Sample3").hide();
-                                $("#Like1").html(data[1].Sample31);
-                                $("#Like2").hide();
-                                $("#Like3").hide();
-                                $("#PhotoLike2").hide();
-                                $("#PhotoLike3").hide();
-                                $("#DisLike1").html(data[1].Sample32);
-                                $("#DisLike2").hide();
-                                $("#DisLike3").hide();
-                                $("#PhotoDisLike2").hide();
-                                $("#PhotoDisLike3").hide()
-                            }
-                            if (data[0].countOfSamples == 0) {
-                                $("#Sample1").hide();
-                                $("#Sample2").hide();
-                                $("#Sample3").hide();
-                                $("#Like1").hide();
-                                $("#Like2").hide();
-                                $("#Like3").hide();
-                                $("#PhotoLike1").hide();
-                                $("#PhotoLike2").hide();
-                                $("#PhotoLike3").hide();
-                                $("#DisLike1").hide();
-                                $("#DisLike2").hide();
-                                $("#DisLike3").hide();
-                                $("#PhotoDisLike1").hide();
-                                $("#PhotoDisLike2").hide();
-                                $("#PhotoDisLike3").hide();
-                            }
-                        },
-                        dataType: "json"
-                    });
-                    
-                    $.ajax({ 
-                        type: "GET", 
-                        url: "webresources/sample/getSamplesInLikeOrder",
-                        success: function(data, response) {
-                                var countOfSamples = data[0].countOfSamples;
-                                $("#SampleLike1").html(data[countOfSamples].Sample19);
-                                $("#SampleLike2").html(data[countOfSamples-1].Sample19);
-                                $("#SampleLike3").html(data[countOfSamples-2].Sample19);
-                                $("#SampleLike4").html(data[countOfSamples-3].Sample19);
-                                $("#SampleLike5").html(data[countOfSamples-4].Sample19);
-                                
-                                $("#CountOfLikes1").html(data[countOfSamples].Sample31);
-                                $("#CountOfLikes2").html(data[countOfSamples-1].Sample31);
-                                $("#CountOfLikes3").html(data[countOfSamples-2].Sample31);
-                                $("#CountOfLikes4").html(data[countOfSamples-3].Sample31);
-                                $("#CountOfLikes5").html(data[countOfSamples-4].Sample31);
-                                
-                                $("#CountOfDisLikes1").html(data[countOfSamples].Sample32);
-                                $("#CountOfDisLikes2").html(data[countOfSamples-1].Sample32);
-                                $("#CountOfDisLikes3").html(data[countOfSamples-2].Sample32);
-                                $("#CountOfDisLikes4").html(data[countOfSamples-3].Sample32);
-                                $("#CountOfDisLikes5").html(data[countOfSamples-4].Sample32);
+            
+            $(document).ready( function() {
+                $.ajax({
+                    type: "GET",
+                    url: "webresources/user/getSession",
+                    async: false,
+                    success: function (data, response) {
+                        if (data !== "success") {
+                            window.location.href = '/MusicInstagram/index.html';
                         }
-                    });
-                    
-                    $("#friend1").on("click", function () {
-                        document.location.href = 'friend.html?' + firstFriend;
-                    });
-                    $("#friend2").on("click", function () {
-                        document.location.href = 'friend.html?' + secondFriend;
-                    });
-                    $("#friend3").on("click", function () {
-                        document.location.href = 'friend.html?' + thirdFriend;
-                    });
+                    }
                 });
+            });
+            
+            $(function(){
+                var firstFriend;
+                var secondFriend;
+                var thirdFriend;
+
+                $.ajax({ 
+                    type: "GET", 
+                    url: "webresources/user/getLogin",
+                    success: function(data, response) {
+                        $("#userName").text(data.nickName);
+                    },
+                    dataType: "json"
+                });
+
+                $.ajax({ 
+                    type: "GET", 
+                    url: "webresources/user/getPhotoByLogin",
+                    data:{login:"energetiks"},
+                    success: function(data, response) {
+                        $(".userPhoto").attr("src",data.photo);
+                    },
+                    dataType: "json"
+                });
+
+                $.ajax({ 
+                    type: "GET", 
+                    url: "webresources/user/getUserByLogin",
+                    data:{login:"energetiks"},
+                    success: function(data, response) {
+                        $("#infoAboutUser").html(
+                            "First Name: " + data.User1 + "<br>" + 
+                            "Last Name: " + data.User2 + "<br>" + 
+                            "Age: " + data.User3 + "<br>" +
+                            "City: " + data.User5 + "<br>" +
+                            "Country: " + data.User4 + "<br>" +
+                            "University: " + data.User6 + "<br>" +
+                            "Phone number: " + data.User7 + "<br>");
+                        $("#name").text(data.User1 + " " + data.User2);
+                    },
+                    dataType: "json"
+                });
+
+                $.ajax({ 
+                    type: "GET", 
+                    url: "webresources/user/getFriendsByLogin",
+                    data:{login:"energetiks"},
+                    success: function(data, response) {
+                        if (data[0].countOfFriend >= 3) {
+                            firstFriend = data[1].Friend8;
+                            secondFriend = data[2].Friend8;
+                            thirdFriend = data[3].Friend8;
+                            $("#firstFriendPhoto").attr("src",data[1].Friend30);
+                            $("#secondFriendPhoto").attr("src",data[2].Friend30);
+                            $("#thirdFriendPhoto").attr("src",data[3].Friend30);
+                            $("#firstFriend").html(data[1].Friend1 + "<br>" + data[1].Friend2);
+                            $("#secondFriend").html(data[2].Friend1 + "<br>" + data[2].Friend2);
+                            $("#thirdFriend").html(data[3].Friend1 + "<br>" + data[3].Friend2);
+
+
+                        }
+                        if (data[0].countOfFriend == 2) {
+                            firstFriend = data[1].Friend8;
+                            secondFriend = data[2].Friend8;
+                            $("#firstFriendPhoto").attr("src",data[1].Friend30);
+                            $("#secondFriendPhoto").attr("src",data[2].Friend30);
+                            $("#thirdFriendPhoto").hide();
+                            $("#firstFriend").html(data[1].Friend1 + "<br>" + data[1].Friend2);
+                            $("#secondFriend").html(data[2].Friend1 + "<br>" + data[2].Friend2);
+                            $("#thirdFriend").hide();
+                        }
+                        if (data[0].countOfFriend == 1) {
+                            firstFriend = data[1].Friend8;
+                            $("#firstFriendPhoto").attr("src",data[1].Friend30);
+                            $("#secondFriendPhoto").hide();
+                            $("#thirdFriendPhoto").hide();
+                            $("#firstFriend").html(data[1].Friend1 + "<br>" + data[1].Friend2);
+                            $("#secondFriend").hide();
+                            $("#thirdFriend").hide();
+                        }
+                        if (data[0].countOfFriend == 0) {
+                            $("#firstFriendPhoto").hide();
+                            $("#secondFriendPhoto").hide();
+                            $("#thirdFriendPhoto").hide();
+                            $("#firstFriend").hide();
+                            $("#secondFriend").hide();
+                            $("#thirdFriend").hide();
+                        }
+                    },
+                    dataType: "json"
+                });
+
+                $.ajax({ 
+                    type: "GET", 
+                    url: "webresources/sample/getSamplesByLoginInTimeOrder",
+                    data:{login:"energetiks"},
+                    success: function(data, response) {
+                        var i;
+                        var countOfSamples = data[0].countOfSamples;
+                        if (countOfSamples > 3) { countOfSamples = 3; }
+                        var table = document.getElementById('lastCreatedSamples');
+                        var tr = document.createElement('TR');
+                        for(i = 1; i <= countOfSamples; i++) {
+                            var td = document.createElement('TD');
+                            var a1 = document.createElement('A');
+                            var img1 = document.createElement('IMG');
+                            img1.setAttribute("src","images/songImage.jpg");
+                            img1.setAttribute("style","min-height: 90px; width: auto;");
+                            var label1 = document.createElement('LABEL');
+                            label1.setAttribute("id","lCSample" + data[i].SampleId);
+                            var br1 = document.createElement('BR');
+                            var a2 = document.createElement('A');
+                            var img2 = document.createElement('IMG');
+                            img2.setAttribute("id","likeLCSample" + data[i].SampleId);
+                            img2.setAttribute("src","images/Like.jpg");
+                            img2.setAttribute("onclick","addLikeForTimeSample(this,'like'); return false;");
+                            var label2 = document.createElement('LABEL');
+                            label2.setAttribute("id","countOfLikesLCSample" + data[i].SampleId);
+                            var a3 = document.createElement('A');
+                            var img3 = document.createElement('IMG');
+                            img3.setAttribute("id","dislikeLCSam" + data[i].SampleId);
+                            img3.setAttribute("src","images/DisLike.jpg");
+                            img3.setAttribute("onclick","addLikeForTimeSample(this,'dislike'); return false;");
+                            var label3 = document.createElement('LABEL');
+                            label3.setAttribute("id","countOfDisLikesLCSample" + data[i].SampleId);
+
+
+                            a1.appendChild(img1);
+                            a1.appendChild(label1);
+                            a2.appendChild(img2);
+                            a3.appendChild(img3);
+                            td.appendChild(a1);
+                            td.appendChild(br1);
+                            td.appendChild(a2);
+                            td.appendChild(label2);
+                            td.appendChild(a3);
+                            td.appendChild(label3);
+                            tr.appendChild(td);
+                        }
+                        table.appendChild(tr);
+                        for(i = 1; i <= countOfSamples; i++) {
+                            $("#lCSample" + data[i].SampleId).html(data[i].Sample19);
+                            $("#countOfLikesLCSample" + data[i].SampleId).html(data[i].Sample31);
+                            $("#countOfDisLikesLCSample" + data[i].SampleId).html(data[i].Sample32);
+                        }
+                    },
+                    dataType: "json"
+                });
+
+                $.ajax({ 
+                    type: "GET", 
+                    url: "webresources/sample/getSamplesInLikeOrder",
+                    success: function(data, response) {
+                        var i;
+                        var count = 5;
+                        var countOfSamples = data[0].countOfSamples;
+                        if (countOfSamples < 5) { count = countOfSamples; }
+                        var table = document.getElementById('mostListenedSamples');
+                        var tr = document.createElement('TR');
+                        for(i = countOfSamples; i > countOfSamples-count; i--) {
+                            
+                            var td = document.createElement('TD');
+                            var a1 = document.createElement('A');
+                            var img1 = document.createElement('IMG');
+                            img1.setAttribute("src","images/songImage.jpg");
+                            img1.setAttribute("style","min-height: 90px; width: auto;");
+                            var br1 = document.createElement('BR');
+                            var label1 = document.createElement('LABEL');
+                            var br2 = document.createElement('BR');
+                            label1.setAttribute("id","mLSample" + data[i].SampleId);
+                            var a2 = document.createElement('A');
+                            var img2 = document.createElement('IMG');
+                            img2.setAttribute("id","likeMLSample" + data[i].SampleId);
+                            img2.setAttribute("src","images/Like.jpg");
+                            img2.setAttribute("onclick","addLikeForLikeSample(this,'like'); return false;");
+                            var label2 = document.createElement('LABEL');
+                            label2.setAttribute("id","countOfLikesMLSample" + data[i].SampleId);
+                            var a3 = document.createElement('A');
+                            var img3 = document.createElement('IMG');
+                            img3.setAttribute("id","dislikeSampl" + data[i].SampleId);
+                            img3.setAttribute("src","images/DisLike.jpg");
+                            img3.setAttribute("onclick","addLikeForLikeSample(this,'dislike'); return false;");
+                            var label3 = document.createElement('LABEL');
+                            label3.setAttribute("id","countOfDisLikesMLSample" + data[i].SampleId);
+
+
+                            a1.appendChild(img1);
+                            a2.appendChild(img2);
+                            a3.appendChild(img3);
+                            td.appendChild(a1);
+                            td.appendChild(br1);
+                            td.appendChild(label1);
+                            td.appendChild(br2);
+                            td.appendChild(a2);
+                            td.appendChild(label2);
+                            td.appendChild(a3);
+                            td.appendChild(label3);
+                            tr.appendChild(td);
+                        }
+                        table.appendChild(tr);
+                        for(i = countOfSamples; i > 0; i--) {
+                            $("#mLSample" + data[i].SampleId).html(data[i].Sample19);
+                            $("#countOfLikesMLSample" + data[i].SampleId).html(data[i].Sample31);
+                            $("#countOfDisLikesMLSample" + data[i].SampleId).html(data[i].Sample32);
+                        }
+                    }
+                });
+
+                $("#friend1").on("click", function () {
+                    document.location.href = 'friend.html?' + firstFriend;
+                });
+                $("#friend2").on("click", function () {
+                    document.location.href = 'friend.html?' + secondFriend;
+                });
+                $("#friend3").on("click", function () {
+                    document.location.href = 'friend.html?' + thirdFriend;
+                });
+            });
+            
+            function addLikeForTimeSample(sender,operation)  {
+                $.ajax({ 
+                    type: "GET", 
+                    url: "webresources/user/getLogin",
+                    success: function(result, response) {
+                            $.ajax({ 
+                                type: "GET", 
+                                url: "webresources/sample/doLikeOrDisLike",
+                                data:{sampleId:sender.id.substr(12),login:result.nickName,operation:operation},
+                                success: function(data, response) {
+                                    
+                                    $("#countOfLikesLCSample" + sender.id.substr(12)).text(data.newCountOflike);
+                                    $("#countOfDisLikesLCSample" + sender.id.substr(12)).text(data.newCountOfDislike);
+                                },
+                                dataType: "json"
+                            });
+                    },
+                    dataType: "json"
+                });
+            }
+            
+            function addLikeForLikeSample(sender,operation)  {
+                $.ajax({ 
+                    type: "GET", 
+                    url: "webresources/user/getLogin",
+                    success: function(result, response) {
+                            $.ajax({ 
+                                type: "GET", 
+                                url: "webresources/sample/doLikeOrDisLike",
+                                data:{sampleId:sender.id.substr(12),login:result.nickName,operation:operation},
+                                success: function(data, response) {
+                                    $("#countOfLikesMLSample" + sender.id.substr(12)).text(data.newCountOflike);
+                                    $("#countOfDisLikesMLSample" + sender.id.substr(12)).text(data.newCountOfDislike);
+                                },
+                                dataType: "json"
+                            });
+                    },
+                    dataType: "json"
+                });
+            };
+            
+            function exit() {
+                $.ajax({
+                    type: "POST",
+                    url: "webresources/user/exit",
+                    success: function(result, response) {
+                        window.location.href='/MusicInstagram/index.html';
+                    },
+                    dataType: "json"
+                });
+            };
         </script>
         <!--background changer-->
         <div id="background_changer">
@@ -302,11 +393,15 @@ and open the template in the editor.
                             <span>My friends</span>                       
                         </li>
                         <li>
+                            <a href="findFriends.html">FIND FRIENDS</a>
+                            <span>Add friends</span>                       
+                        </li>
+                        <li>
                             <a href="editData.html">EDIT DATA</a>
                             <span>Edit your data</span>                       
                         </li>
                         <li>
-                            <input type="button" value="Log out" style="height: 35px" onclick="window.location.href='/MusicInstagram/index.html'; return false;"/>
+                            <input type="button" value="Log out" style="height: 35px" onclick="exit()"/>
                         </li>
                     </ul>                    
                 </div>
@@ -333,72 +428,29 @@ and open the template in the editor.
                         <td>
                             <p>Last created samples</p>
                             <div class='last_created_samples'>                                
-                                <table>
-                                    <tr>
-                                        <td>
-                                            <a class="sample" style="background-color:transparent; border:2px;">
-                                                <img src="images/songImage.jpg" alt="Sample1">
-                                                <label id="Sample1"></label><br/>
-                                            </a>
-                                            <a id="PhotoLike1">
-                                                <img class="like" src="images/Like.jpg">
-                                            </a>
-                                            <label id="Like1"></label>
-                                            <a id="PhotoDisLike1">
-                                                <img class="like" src="images/DisLike.jpg">
-                                            </a>
-                                            <label id="DisLike1"></label>
-                                            
-                                        </td>
-                                        <td>
-                                            <a class="sample" style="background-color:transparent; border:2px;">
-                                                <img src="images/songImage.jpg" alt="Sample1">
-                                                <label id="Sample2"></label>
-                                            </a>
-                                            <a id="PhotoLike2">
-                                                <img class="like" src="images/Like.jpg">
-                                            </a>
-                                            <label id="Like2"></label>
-                                            <a id="PhotoDisLike2">
-                                                <img class="like" src="images/DisLike.jpg">
-                                            </a>
-                                            <label id="DisLike2"></label>
-                                        </td>
-                                        <td>
-                                            <a class="sample" style="background-color:transparent; border:2px;">
-                                                <img src="images/songImage.jpg" alt="Sample1">
-                                                <label id="Sample3"></label>
-                                            </a>
-                                            <a id="PhotoLike3">
-                                                <img class="like" src="images/Like.jpg">
-                                            </a>
-                                            <label id="Like3"></label>
-                                            <a id="PhotoDisLike3">
-                                                <img class="like" src="images/DisLike.jpg">
-                                            </a>
-                                            <label id="DisLike3"></label>
-                                        </td>                                                                                            
-                                    </tr>
+                                <table id="lastCreatedSamples">
                                 </table>
                             </div>
                             <p>Friends</p>
                             <div class='last_created_samples'>
-                                <table>
+                                <table id="friends">
                                     <tr>
                                         <td>
                                             <a id="friend1" class="sample">
-                                                <img id="firstFriendPhoto" alt="Friend1">
+                                                <img id="firstFriendPhoto" alt="Friend1"  style="min-height: 100px; width: auto;">
+                                                <br>
                                                 <label id="firstFriend"></label>
                                             </a>
+                                        </td>
                                         <td>
                                             <a id="friend2" class="sample">
-                                                <img id="secondFriendPhoto" alt="Friend2">
+                                                <img id="secondFriendPhoto" alt="Friend2"  style="min-height: 100px; width: auto;"><br>
                                                 <label id="secondFriend"></label>
                                             </a>
                                         </td>
                                         <td>
                                             <a id="friend3" class="sample">
-                                                <img id="thirdFriendPhoto" alt="Friend3">
+                                                <img id="thirdFriendPhoto" alt="Friend3"  style="min-height: 100px; width: auto;"><br>
                                                 <label id="thirdFriend"></label>
                                             </a>
                                         </td>                                                                                            
@@ -415,69 +467,7 @@ and open the template in the editor.
             <div class="box-three-sub-wrapper transparent-background">
                 <h3>MOST LISTENED</h3>
                 <div class="last_created_samples most-listened">
-                    <table>                    
-                        <tr>
-                            <td>
-                                <img src="images/songImage.jpg" alt=""><br/>
-                                <label id="SampleLike1"></label><br/>
-                                <a>
-                                    <img class="like" src="images/Like.jpg">
-                                </a>
-                                <label id="CountOfLikes1"></label>
-                                <a>
-                                    <img class="like" src="images/DisLike.jpg">
-                                </a>
-                                <label id="CountOfDisLikes1"></label>
-                            </td>
-                            <td>
-                                <img src="images/songImage.jpg" alt=""><br/>
-                                <label id="SampleLike2"></label><br/>
-                                <a>
-                                    <img class="like" src="images/Like.jpg">
-                                </a>
-                                <label id="CountOfLikes2"></label>
-                                <a>
-                                    <img class="like" src="images/DisLike.jpg">
-                                </a>
-                                <label id="CountOfDisLikes2"></label>
-                            </td>
-                            <td>
-                                <img src="images/songImage.jpg" alt=""><br/>
-                                <label id="SampleLike3"></label><br/>
-                                <a>
-                                    <img class="like" src="images/Like.jpg">
-                                </a>
-                                <label id="CountOfLikes3"></label>
-                                <a>
-                                    <img class="like" src="images/DisLike.jpg">
-                                </a>
-                                <label id="CountOfDisLikes3"></label>
-                            </td>
-                            <td>
-                                <img src="images/songImage.jpg" alt=""><br/>
-                                <label id="SampleLike4"></label><br/>
-                                <a>
-                                    <img class="like" src="images/Like.jpg">
-                                </a>
-                                <label id="CountOfLikes4"></label>
-                                <a>
-                                    <img class="like" src="images/DisLike.jpg">
-                                </a>
-                                <label id="CountOfDisLikes4"></label>
-                            </td>
-                            <td>
-                                <img src="images/songImage.jpg" alt=""><br/>
-                                <label id="SampleLike5"></label><br/>
-                                <a>
-                                    <img class="like" src="images/Like.jpg">
-                                </a>
-                                <label id="CountOfLikes5"></label>
-                                <a>
-                                    <img class="like" src="images/DisLike.jpg">
-                                </a>
-                                <label id="CountOfDisLikes5"></label>
-                            </td>
-                        </tr>
+                    <table id="mostListenedSamples">
                     </table>
                 </div>
             </div>      
@@ -499,6 +489,9 @@ and open the template in the editor.
                     </li>
                     <li>
                         <a href="friends.html">FRIENDS</a>
+                    </li>
+                    <li>
+                        <a href="findFriends.html">FIND FRIENDS</a>
                     </li>
                     <li>
                         <a href="editData.html">EDIT DATA</a>

@@ -25,6 +25,20 @@
     </head>
     <body>
         <script>
+            
+            $(document).ready( function() {
+                $.ajax({
+                    type: "GET",
+                    url: "webresources/user/getSession",
+                    async: false,
+                    success: function (data, response) {
+                        if (data !== "success") {
+                            window.location.href = '/MusicInstagram/index.html';
+                        }
+                    }
+                });
+            });
+            
             $(function(){
                 
 
@@ -72,7 +86,18 @@
                     dataType: "json"
                 });
 
-            });    
+            });
+            
+            function exit() {
+                $.ajax({
+                    type: "POST",
+                    url: "webresources/user/exit",
+                    success: function(result, response) {
+                        window.location.href='/MusicInstagram/index.html';
+                    },
+                    dataType: "json"
+                });
+            };
         </script>
         <!--background changer-->
         <div id="background_changer">
@@ -163,7 +188,7 @@
                             <span>Edit your data</span>                       
                         </li>
                         <li>
-                            <input type="button" value="Log out" style="height: 35px" onclick="window.location.href='/MusicInstagram/index.html'; return false;"/>
+                            <input type="button" value="Log out" style="height: 35px" onclick="exit()"/>
                         </li>
                     </ul>                    
                 </div>

@@ -19,6 +19,7 @@ import javax.annotation.Resource;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
 import javax.transaction.NotSupportedException;
@@ -557,7 +558,8 @@ public class UserResource {
             utx.begin();
             
             JSONObject result = new JSONObject();
-            result.put("nickName", "energetiks");
+            HttpSession session = req.getSession();
+            result.put("nickName", session.getAttribute("name"));
             return result.toString();
         } catch (NotSupportedException | SystemException | SecurityException | IllegalStateException | JSONException ex) {
             try {

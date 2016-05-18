@@ -12,21 +12,6 @@ and open the template in the editor.
         <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>        
     </head>
     <body>
-        <script>
-            $(function(){
-                $(".reg").click(function(){
-                $.ajax({ 
-                    type: "POST", 
-                    url: "webresources/user/createUser", 
-                    data:{login:$("#login").val(),password:$("#password").val()},
-                    success: function(response) { 
-
-                    }, 
-                    dataType: "json" 
-                });
-            });
-        });
-        </script>
         <div id="wrapper">
             <div id="panel">
                 <form>
@@ -44,7 +29,7 @@ and open the template in the editor.
                                     <label>Username</label>
                                 </td>
                                 <td>
-                                    <input id="login" type="text"/>
+                                    <input id="username" type="text"/>
                                 </td>
                             </tr>
                             <tr>
@@ -60,7 +45,12 @@ and open the template in the editor.
                                     <label>Confirm password</label>
                                 </td>
                                 <td>
-                                    <input type="password"/>
+                                    <input id="confirmed_password" type="password"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <label id="error_message" style="color: red; width: 600px; text-align: center"></label>
                                 </td>
                             </tr>
                         </tbody>
@@ -68,7 +58,7 @@ and open the template in the editor.
                             <tr>
                                 <td colspan="2">
                                     <input type="button" onclick="window.location.href='/MusicInstagram/index.html'; return false;" value="back" class="back"/>
-                                    <input type="button" onclick="window.location.href='/MusicInstagram/editData.html'; return false;" value="registration" class="reg"/>
+                                    <input type="button" onclick="registrateUser()" value="registration" class="reg" />
                                 </td>
                             </tr>
                         </tfoot>
@@ -76,5 +66,30 @@ and open the template in the editor.
                 </form>
             </div>
         </div>
+        <script type="text/javascript" src="scripts/jquery-1.7.1.min.js"></script>
+        <script type="text/javascript">
+
+            registrateUser = function() {
+                
+                $.ajax({
+                    type: 'POST',
+                    url: "./webresources/user/registration",
+                    data: {username: $('#username').val(), 
+                            password: $('#password').val(), 
+                            confirmed_password: $('#confirmed_password').val()},
+                    success: function(responseText, statusText)  {
+                            if (statusText === 'success') {
+                                if (responseText === "Login: " + $('#username').val() + " successfully registered!") {
+                                    window.location.href='/MusicInstagram/editData.html';
+                                }
+                                else {
+                                    $('#error_message').text(responseText);
+                                }
+                            }
+                        },
+                    dataType: "json"
+                });   
+            };
+        </script>
     </body>
 </html>

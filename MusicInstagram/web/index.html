@@ -12,7 +12,7 @@ and open the template in the editor.
     </head>
     <body>
         <div id="wrapper">
-            <div id="panel">
+            <div id="panel_l">
                 <form>
                     <table cellpadding="10" cellspacing="1">
                         <thead>
@@ -25,26 +25,31 @@ and open the template in the editor.
                         <tbody>
                             <tr>
                                 <td>
-                                    <label>Username</label>
+                                    <label>        Username</label>
                                 </td>
                                 <td>
-                                    <input type="text"/>
+                                    <input id="username" type="text"/>
                                 </td>
                             </tr>
                             <tr>
                                 <td>
-                                    <label>Password</label>
+                                    <label>        Password</label>
                                 </td>
                                 <td>
-                                    <input type="password"/>
+                                    <input id="password" type="password"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <label id="error_message" style="color: red; width: 600px; text-align: center"></label>
                                 </td>
                             </tr>
                         </tbody>
                         <tfoot>
                             <tr>
                                 <td colspan="2">
-                                    <input type="button" onclick="window.location.href='/MusicInstagram/homePage.html'; return false;" value="login" class="submit"/>
                                     <input type="button" onclick="window.location.href='/MusicInstagram/registration.html'; return false;" value="registration" class="reg"/>
+                                    <input type="button" onclick="login()" value="login" class="submit"/>
                                 </td>
                             </tr>
                         </tfoot>
@@ -52,5 +57,28 @@ and open the template in the editor.
                 </form>
             </div>
         </div>
+        <script type="text/javascript" src="scripts/jquery-1.7.1.min.js"></script>
+        <script type="text/javascript">
+            
+            login = function() {
+                    $.ajax({
+                        type: "POST",
+                        url: "./webresources/user/login",
+                        data: {username: $('#username').val(),
+                               password: $('#password').val() },
+                        success: function(responseText, statusText) {
+                            if (statusText === 'success') {
+                                if (responseText === 'Success') {
+                                    window.location.href='/MusicInstagram/homePage.html';
+                                }
+                                else {
+                                    $('#error_message').text(responseText);
+                                }
+                            }
+                        },
+                        dataType: "json"
+                    });                 
+            };
+        </script>
     </body>
 </html>
