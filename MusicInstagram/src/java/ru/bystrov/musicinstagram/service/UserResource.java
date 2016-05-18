@@ -164,7 +164,7 @@ public class UserResource {
                         "               from ATTRIBUTEVALUE " +
                         "               where objId= ? and " +
                         "                     attrId = (select attrId " + 
-                        "                               from Attributes " +
+                        "                               from Attributes " + 
                         "                               where name='photo_ref'))  and " +
                         "      attrId = ?")
                         .setParameter(1, userId).setParameter(2, entry.getKey()).getSingleResult(); 

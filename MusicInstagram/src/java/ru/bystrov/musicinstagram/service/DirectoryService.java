@@ -149,7 +149,7 @@ public class DirectoryService {
             } catch (IllegalStateException | SecurityException | SystemException | JSONException exc) { 
                 exc.printStackTrace(System.err);
                 result.put("result","failed");
-                return result.toString();
+                return result.toString(); 
             }
         }
     }

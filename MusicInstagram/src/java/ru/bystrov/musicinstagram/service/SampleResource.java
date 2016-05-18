@@ -311,7 +311,7 @@ public class SampleResource {
                     obj.put("Sample" + String.valueOf(attr.getAttrId()),attr.getNumberValue());
                 } else
                 if (!attr.getStringValue().equals("")) {
-                    obj.put("Sample" + String.valueOf(attr.getAttrId()),attr.getStringValue());
+                    obj.put("Sample" + String.valueOf(attr.getAttrId()),attr.getStringValue()); 
                 } else
                 if (attr.getReferenceValue() != -1) {
                     obj.put("Sample" + String.valueOf(attr.getAttrId()),attr.getReferenceValue());

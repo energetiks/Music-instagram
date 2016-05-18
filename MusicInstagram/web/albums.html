@@ -43,7 +43,7 @@
                             url: "webresources/user/getPhotoByLogin",
                             data:{login:result.nickName},
                             success: function(data, response) {
-                                $("#userPhoto").attr("src",data.photo);
+                                $(".userPhoto").attr("src",data.photo);
                             },
                             dataType: "json"
                         });
@@ -317,7 +317,7 @@
                         <a href="friends.html">FRIENDS</a>
                     </li>
                     <li>
-                        <a href="findFriends.html">FIND FRIENDS</a>
+                        <a href="findFriends.html">FIND FRIENDS</a> 
                     </li>
                     <li>
                         <a href="editData.html">EDIT DATA</a>

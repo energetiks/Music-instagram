@@ -32,7 +32,7 @@ public class MainResource {
                     newAttrValue.setStringValue(String.valueOf(entry.getValue().getValue()));
                     newAttrValue.setNumberValue(-1);
                     newAttrValue.setReferenceValue(-1);
-                    newAttrValue.setDateValue("1970-01-01 00:00:00.000");
+                    newAttrValue.setDateValue("1970-01-01 00:00:00.000"); 
                     newAttrValue.setBooleanValue(false);
                     break;
                 case "int":
