@@ -402,11 +402,17 @@ public class SourceResource {
     public String getSourceBySubstrName(@QueryParam("name") String substr) {
         try {
             Object result = em.createNativeQuery(
-                    "select av.objid, av.stringvalue\n" +
-                    "from attributevalue av\n" +
-                    "where av.attrid = (select a.attrid from attributes a, attributeobjecttypes aot, objecttypes ot \n" +
-                    "where aot.attrid = a.attrid and aot.otid = ot.otid and a.name = 'name' and ot.name = 'Source')\n" +
-                    "and av.stringvalue LIKE ?"
+"select name.objid, name.stringvalue, path.objid\n" +
+"from attributevalue path, attributevalue file_ref, attributevalue name\n" +
+"where file_ref.REFERENCEVALUE = path.objid\n" +
+"and file_ref.objid = name.objid\n" +
+"and file_ref.attrid = (select a.attrid from attributes a, attributeobjecttypes aot, objecttypes ot\n" +
+"where aot.attrid = a.attrid and aot.otid = ot.otid and a.name = 'file_ref' and ot.name = 'Source')\n" +
+"and path.attrid = (select a.attrid from attributes a, attributeobjecttypes aot, objecttypes ot \n" +
+"where aot.attrid = a.attrid and aot.otid = ot.otid and a.name = 'path' and ot.name = 'File')\n" +
+"and name.attrid = (select a.attrid from attributes a, attributeobjecttypes aot, objecttypes ot\n" +
+"where aot.attrid = a.attrid and aot.otid = ot.otid and a.name = 'name' and ot.name = 'Source')\n" +
+"and name.stringvalue like ?"
             )
                     .setParameter(1, "%" + substr + "%").getResultList();
             return (new Gson()).toJson(result);
