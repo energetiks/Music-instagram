@@ -40,6 +40,8 @@
             }
 
             $(function () {
+                var source_id = getParameterByName('id');
+                
                 var player = new Player();
                 var visualizer = new Visualizer(player.analyserNode, document.querySelector("#frequencyCanvas"));
                 var recorder = new Recorder(player.analyserNode);
@@ -118,12 +120,14 @@
 
                 function uploadSample(blob) {
                     var documentData = new FormData();
-                    documentData.append('file', blob);
-                    documentData.append('name', $("#nameInput").val());
-                    //documentData.append('duration', 0.0); // TODO
-                    documentData.append('source_ref', getParameterByName('id'));
-                    //documentData.append('directory_ref', 0); // TODO
-                    //documentData.append('login', "Empty"); // TODO
+                    
+                    documentData.append("file", blob);
+                    documentData.append("name", $("#nameInput").val());
+                    documentData.append("duration", 0); // TODO, from blob size (it is raw format)
+                    documentData.append("source", source_id);
+                    documentData.append("directory", $("#directoryInput").val()); // TODO make good field
+                    documentData.append("user", 0); // TODO
+                   
                     $.ajax({
                         url: "./webresources/sample/uploadSample",
                         type: 'POST',
@@ -150,7 +154,7 @@
                 $.ajax({
                     type: "GET",
                     url: "webresources/source/getPathById",
-                    data: {id: getParameterByName('id')},
+                    data: {id: source_id},
                     success: function (responseText) {
                         var fileName = responseText;
                         if (fileName === "File not found") {
@@ -289,6 +293,7 @@
                 <input type="button" value="Clear" id="clearRecButton">
                 <input type="button" value="Upload" id="uploadRecButton">
                 <input type="text" value="Name" id="nameInput">
+                <input type="text" value="Directory" id="directoryInput">
                 <progress value=0 max=100></progress><span id="progress_percent">0%</span>
                 <br>
                 <select id="effectsSelect">

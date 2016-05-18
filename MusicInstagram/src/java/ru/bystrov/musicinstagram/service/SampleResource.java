@@ -191,28 +191,25 @@ public class SampleResource {
     public String upload(
             @FormDataParam("file") InputStream file,
             @FormDataParam("name") String name,
-            @FormDataParam("duration") double duration,
-            @FormDataParam("source_ref") int source_ref,
-            @FormDataParam("directory_ref") int directory_ref,
-            @FormDataParam("login") String login
-    ) throws FileNotFoundException, IOException {
+            @FormDataParam("duration") int duration,
+            @FormDataParam("source") int source_objid,
+            @FormDataParam("directory") int directory_objid,
+            @FormDataParam("user") int user_objid
+    ) {
         try {
             JSONObject result = new JSONObject();
-            //Integer objId = (Integer) em.createNativeQuery("select objId from AttributeValue "
-            //        + "where stringValue = ? and attrId = ? ")
-            //        .setParameter(1, login).setParameter(2, LOGIN_ID).getResultList().get(0);
             
             java.sql.Timestamp time = (java.sql.Timestamp) em.createNativeQuery("select CURRENT_TIMESTAMP from Objects").getResultList().get(0);
             
             HashMap<Integer,Attribute> attrValue = new HashMap<>();
             attrValue.put(NAME_ID,new Attribute("string", name));
             attrValue.put(DURATION_ID,new Attribute("int", duration));            
-            attrValue.put(SOURCE_REF_ID,new Attribute("reference", source_ref));
-            //attrValue.put(USER_REF_ID,new Attribute("reference", objId));
+            attrValue.put(SOURCE_REF_ID,new Attribute("reference", source_objid));
+            attrValue.put(USER_REF_ID,new Attribute("reference", user_objid));
             attrValue.put(TIME_ID,new Attribute("date", time.toString()));
             attrValue.put(COUNT_OF_LIKE_ID, new Attribute("int",0));
             attrValue.put(COUNT_OF_DISLIKE_ID, new Attribute("int",0));
-            attrValue.put(DIRECTORY_REF_ID, new Attribute("int",directory_ref));
+            attrValue.put(DIRECTORY_REF_ID, new Attribute("int",directory_objid));
             
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -226,12 +223,11 @@ public class SampleResource {
             }
             baos.flush();
 
+            utx.begin();
             // Open new InputStreams using the recorded bytes
             // Can be repeated as many times as you wish
             InputStream is1 = new ByteArrayInputStream(baos.toByteArray()); 
             InputStream is2 = new ByteArrayInputStream(baos.toByteArray());
-            
-            
             
             Objects newSample  = new Objects();
             Objects newSampleFile = new Objects();
@@ -245,27 +241,29 @@ public class SampleResource {
             newSampleFile.setName("Sample File " + name);
             newSampleFile.setObjTypeId(FILE_TYPE_ID);
                 
-            attrValue.put(FILE_REF_ID,new Attribute("reference", id+2));
+            attrValue.put(FILE_REF_ID, new Attribute("reference", id+2));
             
             em.persist(newSample);
             em.persist(newSampleFile);
             
             MainResource resource = new MainResource();
             resource.addAttributes(attrValue, newSample, em);
-            
            
             attrValue = new HashMap<>();
-            String filename = GetHash(is1);
+            String hashName = GetHash(is1);
             
-            String pathToSource = "/home/ad/code/Music-instagram/MusicInstagram/web/upload/".concat(filename);
-            attrValue.put(PATH_FILE_ID,new Attribute("string", filename));
+            String pathToSource = "/home/ad/code/Music-instagram/MusicInstagram/web/upload/".concat(hashName);
+            attrValue.put(PATH_FILE_ID,new Attribute("string", hashName));
             resource = new MainResource();
-            resource.addAttributes(attrValue, newSampleFile,em);
+            resource.addAttributes(attrValue, newSampleFile, em);
             
             utx.commit();
             writeToFile(is2, pathToSource);
             return "Written to server disk";
-        } catch (NoSuchAlgorithmException | SystemException | RollbackException | HeuristicMixedException | HeuristicRollbackException | SecurityException | IllegalStateException ex) {
+        } catch (IOException | NotSupportedException | 
+                NoSuchAlgorithmException | SystemException | RollbackException | 
+                HeuristicMixedException | HeuristicRollbackException | 
+                SecurityException | IllegalStateException ex) {
             return "Error Written to server disk";
         }
     }
