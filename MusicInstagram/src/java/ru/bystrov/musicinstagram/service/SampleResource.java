@@ -1,6 +1,5 @@
 package ru.bystrov.musicinstagram.service;
 
-import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Resource;

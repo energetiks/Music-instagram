@@ -150,9 +150,9 @@ public class UserResource {
             
             //CREATE A FILE OBJECT!!!
             attrValue = new HashMap<>();
-            String pathToPhoto = "C:\\Users\\Test\\Desktop\\Programms on java\\MusicInstagram\\Music-instagram\\MusicInstagram\\web\\images\\userPhoto\\test.jpg";
+            String pathToPhoto = "C:\\Users\\Test\\Desktop\\Programms on java\\MusicInstagram\\Music-instagram\\MusicInstagram\\web\\images\\userPhoto\\" + login + ".jpg";
 
-            attrValue.put(PATH_FILE_ID,new Attribute("String", "images/userPhoto/test.jpg"));
+            attrValue.put(PATH_FILE_ID,new Attribute("String", "images/userPhoto/" + login + ".jpg"));
             attrValue.put(TYPE_FILE_ID,new Attribute("String", "jpg"));
             
             for (Map.Entry<Integer, Attribute> entry : attrValue.entrySet()) {
@@ -340,31 +340,149 @@ public class UserResource {
     @Produces(MediaType.APPLICATION_JSON+ ";charset=UTF-8")
     public String getUsers(@Context HttpServletRequest req) {
         JSONArray array = new JSONArray();
-        List<Integer> usersId = em.createNativeQuery("select o.objId from Objects o, ObjectTypes OT "
+        List<Long> usersId =  em.createNativeQuery(
+                                              " select o.objId from Objects o, ObjectTypes OT "
                                             + " where o.objTypeId = OT.otid and"
                                             + " OT.name = ?")
                                     .setParameter(1, "User").getResultList();
         JSONObject obj;
         
+        for(Long objId : usersId) {
+            obj = new JSONObject();
+            List<AttributeValue> attrs = em.createNativeQuery("select * from AttributeValue attrV where attrV.objId = ?", AttributeValue.class)
+                                .setParameter(1, objId).getResultList();
+            
+            for (AttributeValue attr : attrs){
+                
+                if (attr.getNumberValue() != -1) {
+                    obj.put("User" + String.valueOf(attr.getAttrId()),attr.getNumberValue());
+                } else
+                if (!attr.getStringValue().equals("")) {
+                    obj.put("User" + String.valueOf(attr.getAttrId()),attr.getStringValue());
+                } else
+                if (attr.getReferenceValue() != -1) {
+                    obj.put("User" +String.valueOf(attr.getAttrId()),attr.getReferenceValue());
+                }
+            }
+            array.put(obj);
+        }
+        return array.toString();
+    }
+    
+    @GET
+    @Path("getUsersByName")
+    @Produces(MediaType.APPLICATION_JSON+ ";charset=UTF-8")
+    public String getUsersByName(@QueryParam("login") String login,
+                                 @QueryParam("name") String name) {
+        JSONArray array = new JSONArray();
+        List<Integer> usersId =  em.createNativeQuery(
+                                    "select atV1.objId " +
+                                    "from AttributeValue atV1, " +
+                                    "     AttributeValue atV2, " +
+                                    "     AttributeValue atV3 " +
+                                    "where atV2.ATTRID = (select attrId " +
+                                    "                     from Attributes " +
+                                    "                     where name='last_name') and " +
+                                    "      atV1.attrId = (select attrId " +
+                                    "                     from Attributes " +
+                                    "                     where name='first_name') and " +
+                                    "      atV3.attrId = (select attrId " +
+                                    "                     from Attributes " +
+                                    "                     where name='login') and " +
+                                    "      atV1.OBJID = atV2.OBJID and " +
+                                    "      atV1.OBJID = atV3.OBJID and " +
+                                    "      atV1.STRINGVALUE||' '||atV2.STRINGVALUE like ? and " +
+                                    "      atV3.STRINGVALUE != ?")
+                                    .setParameter(1, "%"+name+"%")
+                                    .setParameter(2,login).getResultList();
+        JSONObject obj;
+        JSONObject result = new JSONObject();
+        result.put("countOfUsers",usersId.size());
+        for(Integer objId : usersId) {
+            obj = new JSONObject();
+            List<AttributeValue> attrs = em.createNativeQuery("select * from AttributeValue attrV where attrV.objId = ?", AttributeValue.class)
+                                .setParameter(1, objId).getResultList();
+            obj.put("UserId",objId);
+            for (AttributeValue attr : attrs){
+                if (attr.getNumberValue() != -1) {
+                    obj.put("User" + String.valueOf(attr.getAttrId()),attr.getNumberValue());
+                } else
+                if (!attr.getStringValue().equals("")) {
+                    obj.put("User" + String.valueOf(attr.getAttrId()),attr.getStringValue());
+                } else
+                if (attr.getReferenceValue() != -1) {
+                    if (attr.getAttrId() == PHOTO_REF_ID) {
+                        String photoRef = (String) em.createNativeQuery("select attrV.stringValue "
+                                                            + "from AttributeValue attrV "
+                                                            + "where attrV.objId = ? and attrV.attrId = ? ")
+                                .setParameter(1, attr.getReferenceValue()).setParameter(2, PATH_FILE_ID).getResultList().get(0);
+                        obj.put(String.valueOf("User" + attr.getAttrId()),photoRef);
+                    } else {
+                        obj.put(String.valueOf("User" + attr.getAttrId()),attr.getReferenceValue());
+                    }
+                }
+            }
+            array.put(obj);
+        }
+        result.put("Users", array);
+        return result.toString();
+    }
+    @GET
+    @Path("getUsersByField")
+    @Produces(MediaType.APPLICATION_JSON+ ";charset=UTF-8")
+    public String getUsersByField(@QueryParam("login") String login,
+                                 @QueryParam("search") String searchField,
+                                 @QueryParam("field") String field) {
+        
+        JSONArray array = new JSONArray();
+        List<Integer> usersId =  em.createNativeQuery(
+                                    "select atV1.objId " +
+                                    "from AttributeValue atV1, " +
+                                    "     AttributeValue atV3 " +
+                                    "where atV1.attrId = (select attrId " +
+                                    "                     from Attributes " +
+                                    "                     where name=?) and " +
+                                    "      atV3.attrId = (select attrId " +
+                                    "                     from Attributes " +
+                                    "                     where name='login') and " +
+                                    "      atV1.OBJID = atV3.OBJID and " +
+                                    "      atV1.STRINGVALUE like ? and " +
+                                    "      atV3.STRINGVALUE != ?")
+                                    .setParameter(1, field)
+                                    .setParameter(2, "%"+searchField+"%")
+                                    .setParameter(3,login).getResultList();
+        JSONObject obj;
+        JSONObject result = new JSONObject();
+        result.put("countOfUsers",usersId.size());
         for(Integer objId : usersId) {
             obj = new JSONObject();
             List<AttributeValue> attrs = em.createNativeQuery("select * from AttributeValue attrV where attrV.objId = ?", AttributeValue.class)
                                 .setParameter(1, objId).getResultList();
             
             for (AttributeValue attr : attrs){
+                
                 if (attr.getNumberValue() != -1) {
-                    obj.put(String.valueOf(attr.getAttrId()),attr.getNumberValue());
+                    obj.put("User" + String.valueOf(attr.getAttrId()),attr.getNumberValue());
                 } else
                 if (!attr.getStringValue().equals("")) {
-                    obj.put(String.valueOf(attr.getAttrId()),attr.getStringValue());
+                    obj.put("User" + String.valueOf(attr.getAttrId()),attr.getStringValue());
                 } else
                 if (attr.getReferenceValue() != -1) {
-                    obj.put(String.valueOf(attr.getAttrId()),attr.getReferenceValue());
+                    if (attr.getAttrId() == PHOTO_REF_ID) {
+                        String photoRef = (String) em.createNativeQuery("select attrV.stringValue "
+                                                            + "from AttributeValue attrV "
+                                                            + "where attrV.objId = ? and attrV.attrId = ? ")
+                                .setParameter(1, attr.getReferenceValue()).setParameter(2, PATH_FILE_ID).getResultList().get(0);
+                        obj.put(String.valueOf("User" + attr.getAttrId()),photoRef);
+                    } else {
+                        obj.put(String.valueOf("User" + attr.getAttrId()),attr.getReferenceValue());
+                    }
                 }
             }
             array.put(obj);
         }
-        return array.toString();
+        result.put("Users", array);
+        return result.toString();
     }
     
     @GET
@@ -375,7 +493,7 @@ public class UserResource {
         JSONArray array = new JSONArray();
         Integer objId = (Integer) em.createNativeQuery("select objId from AttributeValue "
                                                      + "where stringValue = ? and attrId = ? ")
-                    .setParameter(1, login).setParameter(2, LOGIN_ID).getResultList().get(0);
+                    .setParameter(1, login).setParameter(2, LOGIN_ID).getSingleResult();
         
         
         List<Integer> friendsId = em.createNativeQuery(" select attrV.referencevalue "
@@ -479,6 +597,48 @@ public class UserResource {
         } catch (SecurityException | IllegalStateException | JSONException ex) {
             return "Exception!!!";
         }
+    }
+    
+    @POST
+    @Path("addFriend")
+    @Produces(MediaType.APPLICATION_JSON+ ";charset=UTF-8")
+    public String addFriend(@FormParam("login") String login,
+                            @FormParam("friendId") Integer friendId) {
+        JSONObject result = new JSONObject();
+        try {
+            utx.begin();
+            Integer objId = (Integer) em.createNativeQuery("select objId from AttributeValue "
+                    + "where stringValue = ? and attrId = ? ")
+                    .setParameter(1, login).setParameter(2, LOGIN_ID).getSingleResult();
+            
+            AttributeValue attrV = new AttributeValue();
+            
+            Integer attrValueId = Integer.valueOf(em.createNativeQuery("select MAX(attrValueId) from AttributeValue").getResultList().get(0).toString());
+            attrV.setAttrValueId(attrValueId+1);
+            attrV.setObjId(objId);
+            attrV.setAttrId(FRIEND_REF_ID);
+            attrV.setNumberValue(-1);
+            attrV.setStringValue("");
+            attrV.setDateValue("1970-01-01 00:00:00.000");
+            attrV.setBooleanValue(false);
+            attrV.setReferenceValue(friendId);
+            
+            em.persist(attrV);
+            utx.commit();
+            
+            result.put("result","success");
+            return result.toString();
+        } catch (NotSupportedException| RollbackException | HeuristicMixedException | HeuristicRollbackException | SecurityException | IllegalStateException | SystemException ex) {
+            try {
+                Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, null, ex);
+                utx.rollback();
+                return result.toString();
+            } catch (IllegalStateException | SecurityException | SystemException ex1) {
+                Logger.getLogger(UserResource.class.getName()).log(Level.SEVERE, null, ex1);
+                return result.toString();
+            }
+        }
+        
     }
     
     private String getName(HashMap<Integer,Attribute> attributes) {

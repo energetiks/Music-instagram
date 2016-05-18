@@ -121,32 +121,7 @@
                                         $("#nameSample" + data.Directory[i-1][size - j + 1].SampleId).html(data.Directory[i-1][size - j + 1].Sample19);
                                         $("#Like" + data.Directory[i-1][size - j + 1].SampleId).html(data.Directory[i-1][size - j + 1].Sample31);
                                         $("#DisLike" + data.Directory[i-1][size - j + 1].SampleId).html(data.Directory[i-1][size - j + 1].Sample32);
-                                    }                         
-//                                    <tr>
-//                                        <td>
-//                                            <p id="albumName" class="userHead">Album</p>
-//                                            <div class='last_created_samples albums'>
-//                                                <table>
-//                                                <tr>
-//                                                <td>
-//                                                <a class="sample" style="background-color:transparent; border:2px;">
-//                                                    <img src="images/songImage.jpg" alt="Sample1">
-//                                                    <label id="Sample1"></label><br/>
-//                                                </a>
-//                                                <a id="PhotoLike1">
-//                                                    <img class="like" src="images/Like.jpg">
-//                                                </a>
-//                                                <label id="Like1"></label>
-//                                                <a id="PhotoDisLike1">
-//                                                    <img class="like" src="images/DisLike.jpg">
-//                                                </a>
-//                                                <label id="DisLike1"></label>
-//                                                </td>
-//                                                </tr>
-//                                                </table>
-//                                            </div>                             
-//                                        </td>
-//                                    </tr>
+                                    }     
                                 }
                             }
                             
@@ -249,10 +224,10 @@
                     <table id="userface">
                         <tr>
                             <td>
-                                <label id="userName">nickname</label>
+                                <label id="userName"></label>
                             </td>
                             <td>
-                                <img id="userPhoto" style="max-height: 100px;" alt="Small image"/>
+                                <img class="userPhoto" style="max-height: 100px; " alt="Small image"/>
                             </td>
                         </tr>
                     </table>
@@ -276,14 +251,17 @@
                             <span>My friends</span>                       
                         </li>
                         <li>
+                            <a href="findFriends.html">FIND FRIENDS</a>
+                            <span>Add friends</span>                       
+                        </li>
+                        <li>
                             <a href="editData.html">EDIT DATA</a>
                             <span>Edit your data</span>                       
                         </li>
                         <li>
                             <input type="button" value="Log out" style="height: 35px" onclick="window.location.href='/MusicInstagram/index.html'; return false;"/>
                         </li>
-                    </ul>
-                    
+                    </ul>                    
                 </div>
             </div>
         </div>
@@ -306,13 +284,16 @@
                         <a href="homePage.html" >MY PAGE</a>
                     </li>
                     <li>
-                        <a class="active">MY ALBUMS</a>
+                        <a href="albums.html" class="active">MY ALBUMS</a>
                     </li>
                     <li>
                         <a href="music.html" >MUSIC</a>
                     </li>
                     <li>
                         <a href="friends.html">FRIENDS</a>
+                    </li>
+                    <li>
+                        <a href="findFriends.html">FIND FRIENDS</a>
                     </li>
                     <li>
                         <a href="editData.html">EDIT DATA</a>

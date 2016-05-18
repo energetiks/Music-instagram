@@ -20,9 +20,35 @@ and open the template in the editor.
 
         <link rel="stylesheet" type="text/css" href="scripts/autocomplete/jquery.autocomplete.css" />
 
-        <link rel="stylesheet" type="text/css" href="scripts/demo/colorpicker/css/colorpicker.css"/>        
+        <link rel="stylesheet" type="text/css" href="scripts/demo/colorpicker/css/colorpicker.css"/> 
+        
+        <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
     </head>
     <body>
+        <script>
+            $(function(){
+                
+
+                $.ajax({ 
+                    type: "GET", 
+                    url: "webresources/user/getLogin",
+                    success: function(result, response) {
+                        $("#userName").text(result.nickName);
+                        $.ajax({ 
+                            type: "GET", 
+                            url: "webresources/user/getPhotoByLogin",
+                            data:{login:result.nickName},
+                            success: function(data, response) {
+                                $(".userPhoto").attr("src",data.photo);
+                            },
+                            dataType: "json"
+                        });
+                    },
+                    dataType: "json"
+                });
+
+            });    
+        </script>
         <!--background changer-->
         <div id="background_changer">
             <div class="alignleft_block backgrounds">
@@ -75,10 +101,10 @@ and open the template in the editor.
                     <table id="userface">
                         <tr>
                             <td>
-                                <label id="username">nickname</label>
+                                <label id="userName"></label>
                             </td>
                             <td>
-                                <img src="images/face.png" style="border: 2px solid #000" alt="Small image"/>
+                                <img class="userPhoto" style="max-height: 100px; " alt="Small image"/>
                             </td>
                         </tr>
                     </table>
@@ -102,15 +128,19 @@ and open the template in the editor.
                             <span>My friends</span>                       
                         </li>
                         <li>
+                            <a href="findFriends.html">FIND FRIENDS</a>
+                            <span>Add friends</span>                       
+                        </li>
+                        <li>
+                            <a href="editData.html">EDIT DATA</a>
+                            <span>Edit your data</span>                       
+                        </li>
+                        <li>
                             <input type="button" value="Log out" style="height: 35px" onclick="window.location.href='/MusicInstagram/index.html'; return false;"/>
                         </li>
-                    </ul>
-                    
+                    </ul>                    
                 </div>
-            </div>
-        </div>
-        
-        <div class="clear20"></div>
+            </div>="clear20"></div>
 
         <!--content container-->
         <!--content container-->
@@ -141,19 +171,22 @@ and open the template in the editor.
             <div id="footer" class="center-clear">
                 <ul>
                     <li>
-                        <a href="#" class="active">MY PAGE</a>
+                        <a href="homePage.html" >MY PAGE</a>
                     </li>
                     <li>
-                        <a href="#">MY ALBUMS</a>
+                        <a href="albums.html" >MY ALBUMS</a>
                     </li>
                     <li>
-                        <a href="#">MUSIC</a>
+                        <a href="music.html" class="active">MUSIC</a>
                     </li>
                     <li>
-                        <a href="#">FRIENDS</a>
+                        <a href="friends.html" >FRIENDS</a>
                     </li>
                     <li>
-                        <a href="#">CREATE MUSIC</a>
+                        <a href="findFriends.html" >FIND FRIENDS</a>
+                    </li>
+                    <li>
+                        <a href="editData.html" >EDIT DATA</a>
                     </li>
                 </ul>
                 <div>Copyright MusicInstagram. 2016</div>
