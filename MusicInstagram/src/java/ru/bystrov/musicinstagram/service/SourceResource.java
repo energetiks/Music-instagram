@@ -378,6 +378,7 @@ public class SourceResource {
 
     @GET
     @Path("getPathById")
+    @Produces(MediaType.APPLICATION_JSON)
     public String getPathById(@QueryParam("id") String sourceId) {
         try {
             Object opath = em.createNativeQuery(
@@ -395,4 +396,24 @@ public class SourceResource {
             return (new Gson()).toJson("File not found");
         }
     }
+    
+    @GET
+    @Path("getSourceBySubstrName")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getSourceBySubstrName(@QueryParam("name") String substr) {
+        try {
+            Object result = em.createNativeQuery(
+                    "select av.objid, av.stringvalue\n" +
+                    "from attributevalue av\n" +
+                    "where av.attrid = (select a.attrid from attributes a, attributeobjecttypes aot, objecttypes ot \n" +
+                    "where aot.attrid = a.attrid and aot.otid = ot.otid and a.name = 'name' and ot.name = 'Source')\n" +
+                    "and av.stringvalue LIKE ?"
+            )
+                    .setParameter(1, "%" + substr + "%").getResultList();
+            return (new Gson()).toJson(result);
+        } catch (NoResultException | NonUniqueResultException e) {
+            return (new Gson()).toJson("File not found");
+        }
+    }
+    
 }
