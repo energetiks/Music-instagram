@@ -39,6 +39,8 @@ public class AttributeValue implements Serializable {
     private int referenceValue;
     @Column
     private String dateValue;
+    @Column
+    private Boolean booleanValue;
 
     public int getAttrValueId() {
         return attrValueId;
@@ -99,6 +101,14 @@ public class AttributeValue implements Serializable {
 
     public void setDateValue(String dateValue) {
         this.dateValue = dateValue;
+    }
+
+    public Boolean getBooleanValue() {
+        return booleanValue;
+    }
+
+    public void setBooleanValue(Boolean booleanValue) {
+        this.booleanValue = booleanValue;
     }
     
 }

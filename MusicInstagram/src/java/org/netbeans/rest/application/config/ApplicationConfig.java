@@ -7,6 +7,7 @@ package org.netbeans.rest.application.config;
 
 import java.util.Set;
 import javax.ws.rs.core.Application;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 /**
  *
@@ -18,6 +19,11 @@ public class ApplicationConfig extends Application {
     @Override
     public Set<Class<?>> getClasses() {
         Set<Class<?>> resources = new java.util.HashSet<>();
+        
+        // !!!!!!!!!!!!!!!!!!!! NEXT LINE IS VERY IMPORTANT FOR FILE UPLOADING !!!!!!!!!!!!!!!!!!!!
+        resources.add(MultiPartFeature.class);
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! END OF VERY IMPORTANT LINE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        
         addRestResourceClasses(resources);
         return resources;
     }
@@ -30,6 +36,7 @@ public class ApplicationConfig extends Application {
      */
     private void addRestResourceClasses(Set<Class<?>> resources) {
         resources.add(ru.bystrov.musicinstagram.service.DirectoryService.class);
+        resources.add(ru.bystrov.musicinstagram.service.MainResource.class);
         resources.add(ru.bystrov.musicinstagram.service.SampleResource.class);
         resources.add(ru.bystrov.musicinstagram.service.SourceResource.class);
         resources.add(ru.bystrov.musicinstagram.service.UserResource.class);

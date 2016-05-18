@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package ru.bystrov.musicinstagram.service;
 
 import java.sql.Timestamp;
@@ -124,7 +119,7 @@ public class DirectoryService {
         java.sql.Timestamp time = (java.sql.Timestamp) em.createNativeQuery("select CURRENT_TIMESTAMP from Objects").getResultList().get(0);
         
         HashMap<Integer,Attribute> attrValue = new HashMap<>();
-        attrValue.put(NAME_ID,new Attribute("String", name));
+        attrValue.put(NAME_ID,new Attribute("string", name));
         attrValue.put(USER_REF_ID,new Attribute("int", objId));
         attrValue.put(CREATED_TIME_ID,new Attribute("date",time.toString()));
         try {
@@ -137,44 +132,10 @@ public class DirectoryService {
             newDirectory.setObjTypeId(DIRECTORY_TYPE_ID);
             
             em.persist(newDirectory);
-            AttributeValue newAttrValue;
-            id = Integer.valueOf(em.createNativeQuery("select MAX(attrValueId) from AttributeValue").getResultList().get(0).toString());
-            for (Map.Entry<Integer, Attribute> entry : attrValue.entrySet()) {   
-                newAttrValue = new AttributeValue();
-                id = id + 1;
-                newAttrValue.setAttrValueId(id);
-                newAttrValue.setAttrId(entry.getKey());
-                newAttrValue.setObjId(newDirectory.getObjId());
-                switch (entry.getValue().getType()) {
-                    case "String":
-                        newAttrValue.setStringValue(String.valueOf(entry.getValue().getValue()));
-                        newAttrValue.setNumberValue(-1);
-                        newAttrValue.setReferenceValue(-1);
-                        newAttrValue.setDateValue("1970-01-01 00:00:00.000");
-                        break;
-                    case "int":
-                        newAttrValue.setNumberValue((int)entry.getValue().getValue());
-                        newAttrValue.setStringValue("");
-                        newAttrValue.setReferenceValue(-1);
-                        newAttrValue.setDateValue("1970-01-01 00:00:00.000");
-                        break;
-                    case "reference":
-                        newAttrValue.setReferenceValue((int) entry.getValue().getValue());
-                        newAttrValue.setNumberValue(-1);
-                        newAttrValue.setStringValue("");
-                        newAttrValue.setDateValue("1970-01-01 00:00:00.000");
-                        break;
-                    case "date":
-                        newAttrValue.setDateValue((String) entry.getValue().getValue());
-                        newAttrValue.setNumberValue(-1);
-                        newAttrValue.setStringValue("");
-                        newAttrValue.setReferenceValue(-1);
-                        break;
-                    default:
-                        break;
-                }
-                em.persist(newAttrValue);
-            }
+            
+            MainResource resource = new MainResource();
+            resource.addAttributes(attrValue, newDirectory, em);
+            
             utx.commit();
             result.put("result","ok");
             return result.toString(); 
@@ -191,14 +152,7 @@ public class DirectoryService {
                 return result.toString();
             }
         }
-        
-
     }
-//    
-//    public String renameDirectory() {
-//        
-//    }
-//    
     
     
 }

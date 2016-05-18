@@ -1,4 +1,10 @@
-<!DOCTYPE html><html>
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <title>Music instagram</title>
@@ -6,7 +12,6 @@
         <link rel="stylesheet" type="text/css" href="css/reset.css"/>
         <link rel="stylesheet" type="text/css" href="css/style.css"/>
         <link rel="stylesheet" type="text/css" href="css/default.css"/>
-        <script type="text/javascript" src="scripts/jquery-1.7.1.min.js"></script>
         
         <link rel="stylesheet" type="text/css" href="scripts/nivo-slider/nivo-slider.css"/>
         <link rel="stylesheet" type="text/css" href="scripts/nivo-slider/themes/default/default.css"/>
@@ -15,94 +20,36 @@
 
         <link rel="stylesheet" type="text/css" href="scripts/autocomplete/jquery.autocomplete.css" />
 
-        <link rel="stylesheet" type="text/css" href="scripts/demo/colorpicker/css/colorpicker.css"/>        
+        <link rel="stylesheet" type="text/css" href="scripts/demo/colorpicker/css/colorpicker.css"/> 
+        
+        <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
     </head>
     <body>
         <script>
             $(function(){
-                $.ajax({ 
-                    type: "GET", 
-                    url: "webresources/user/getLogin",
-                    success: function(result, response) {
-                        $("#userName").text(result.nickName);
-                        $.ajax({ 
-                            type: "GET", 
-                            url: "webresources/user/getPhotoByLogin",
-                            data:{login:result.nickName},
-                            success: function(data, response) {
-                                $(".userPhoto").attr("src",data.photo);
-                            },
-                            dataType: "json"
-                        });
-                        
-                        $.ajax({ 
-                            type: "GET", 
-                            url: "webresources/user/getFriendsByLogin",
-                            data:{login:result.nickName},
-                            success: function(data, response) {
-                                var i;
-                                var table = document.getElementById('friendsTable');
-                                for (i = 1; i <= data[0].countOfFriend; i++) {
-                                    var tr = document.createElement('TR');
-                                    var td1 = document.createElement('TD');
-                                    var div1 = document.createElement('DIV');
-                                    div1.setAttribute('class','userHead');
-                                    
-                                    var p = document.createElement('P');
-                                    p.setAttribute('id','friendName' + i);
-                                    
-                                    var img = document.createElement('IMG');
-                                    img.setAttribute('id','friendPhoto' + i);
-                                    img.setAttribute('style','height:140px;');
-                                    img.setAttribute('src',data[i].Friend30);
-                                    
-                                    var br = document.createElement('BR');
-                                    var btn = document.createElement('INPUT');
-                                    btn.setAttribute('id','friend' + i);
-                                    btn.setAttribute('type','button');
-                                    btn.setAttribute('value','Full Info');
-                                    btn.setAttribute('style','height: 25px; width:65px; margin: 10px;');
-                                    btn.setAttribute('onclick',"window.location.href='friend.html?" + data[i].Friend8 + "'; return false;");
-
-                                    var td2 = document.createElement('TD');
-                                    var div2 = document.createElement('DIV');
-                                    div2.setAttribute("class","userTextArea");
-
-                                    var p2 = document.createElement('P');
-                                    p2.setAttribute("id","friendInfo" + i);
-                                    p2.setAttribute("style","text-align:left;");
-
-                                    div1.appendChild(p);
-                                    div1.appendChild(img);
-                                    div1.appendChild(br);
-                                    div1.appendChild(btn);
-
-                                    div2.appendChild(p2);
-
-                                    td1.appendChild(div1);
-                                    td2.appendChild(div2);
-
-                                    tr.appendChild(td1);
-                                    tr.appendChild(td2);
-
-                                    table.appendChild(tr);
-                                    $("#friendName" + i).html(data[i].Friend1 + " " + data[i].Friend2);
-                                    $("#friendInfo" + i).html(
-                                                    "Age: " + data[i].Friend3 + "<br>" +
-                                                    "City: " + data[i].Friend5 + "<br>" +
-                                                    "Country: " + data[i].Friend4 + "<br>" +
-                                                    "University: " + data[i].Friend6 + "<br>" +
-                                                    "Phone number: " + data[i].Friend7 + "<br>");
-                                }
-                            }
-                        });
-                    },
-                    dataType: "json"
+                $("#addNewSource").on("click", function () {
+                    var documentData = new FormData();
+                    documentData.append('newSource', $('#newSource')[0].files[0]);
+                    documentData.append('fileName', $('#newSource').get(0).files[0].name);
+                    documentData.append('duration', $('#duration').val());
+                    documentData.append('genre', $('#genre').val());
+                    documentData.append('language', $('#language').val());
+                    documentData.append('albumName', $('#albumName').val());
+                    documentData.append('year', $('#yearOfCreation').val());
+                    documentData.append('musicalGroupName', $('#musicalGroupName').val());
+                    documentData.append('login', 'energetiks');
+                    $.ajax({
+                        url: "webresources/source/upload",
+                        type: 'POST',
+                        data: documentData,
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        success: function (responseText) {
+                        }
+                    });
                 });
-                
-                
             });
-            
         </script>
         <!--background changer-->
         <div id="background_changer">
@@ -201,12 +148,27 @@
         <div class="clear20"></div>
 
         <!--content container-->
-        <div id="content_container" class="center-clear">
-            <div class="box-three-sub-wrapper transparent-background">
-                <table class='profile friend' id="friendsTable">
-                </table>
+        <div class="melody transparent-background">
+            <div></div>
+            <div>
+                <button type="button">Choose File</button>
+                <input id="newSource" type="file" accept="mp3/wav">
             </div>
+            <input type="text" id="duration" value="100"><br>
+            <input type="text" id="genre" value=""><br>
+            <input type="text" id="language" value="English"><br>
+            <input type="text" id="albumName" value=""><br>
+            <input type="text" id="yearOfCreation" value="2016"><br>
+            <input type="text" id="musicalGroupName" value=""><br>
+            
+            <button id="addNewSource" >
+                Add new source
+            </button>
         </div>
+        
+        <div class="clear20"></div>
+        
+        
 
         <div class="clear20"></div>
 
@@ -217,19 +179,19 @@
                         <a href="homePage.html" >MY PAGE</a>
                     </li>
                     <li>
-                        <a href="albums.html" >MY ALBUMS</a>
+                        <a href="albums.html">MY ALBUMS</a>
                     </li>
                     <li>
-                        <a href="music.html" >MUSIC</a>
+                        <a href="music.html" class="active">MUSIC</a>
                     </li>
                     <li>
-                        <a href="friends.html" class="active">FRIENDS</a>
+                        <a href="friends.html">FRIENDS</a>
                     </li>
                     <li>
-                        <a href="findFriends.html" >FIND FRIENDS</a>
+                        <a href="findFriends.html">FIND FRIENDS</a>
                     </li>
                     <li>
-                        <a href="editData.html" >EDIT DATA</a>
+                        <a href="editData.html">EDIT DATA</a>
                     </li>
                 </ul>
                 <div>Copyright MusicInstagram. 2016</div>
