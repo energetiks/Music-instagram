@@ -273,25 +273,30 @@ public class UserResource {
         }
     }
     
-    @GET
-    @Path("deleteUser")
+    @POST
+    @Path("deleteFriend")
     @Produces(MediaType.APPLICATION_JSON+ ";charset=UTF-8")
-    public String deleteUserById(@Context HttpServletRequest req,
-                                 @QueryParam("objId") int objId) {
+    public String deleteFriend(@Context HttpServletRequest req,
+                                 @FormParam("myLogin") String myLogin,
+                                 @FormParam("login") String login) {
         JSONObject result = new JSONObject();
-        if (objId == 0) {
-            result.put("result", "failed");
-            return result.toString();
-        }
         try {    
             utx.begin();
+            Integer myObjId = (Integer) em.createNativeQuery("select objId from AttributeValue "
+                                                     + "where stringValue = ? and attrId = ? ")
+                    .setParameter(1, myLogin).setParameter(2, LOGIN_ID).getSingleResult();
+            Integer objId = (Integer) em.createNativeQuery("select objId from AttributeValue "
+                                                     + "where stringValue = ? and attrId = ? ")
+                    .setParameter(1, login).setParameter(2, LOGIN_ID).getSingleResult();
+            Integer attrValueId = (Integer) em.createNativeQuery("select attrValueId from AttributeValue "
+                                                     + "where objId = ? and "
+                                                     + "      attrId = (select attrId from Attributes where name='friend_ref') and "
+                                                     + "      referenceValue = ?")
+                                                     .setParameter(1, myObjId)
+                                                     .setParameter(2, objId).getSingleResult();
             
-            em.remove(em.find(Objects.class, objId));
-            List<AttributeValue> attributes = em.createNativeQuery("select * from AttributeValue where objId = ?",AttributeValue.class)
-                    .setParameter(1, objId).getResultList();
-            attributes.stream().forEach((attr) -> {
-                em.remove(attr);
-            });
+            em.remove(em.find(AttributeValue.class, attrValueId));
+            
             utx.commit();
             result.put("result", "ok");
             return result.toString();

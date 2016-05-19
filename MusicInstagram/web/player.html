@@ -10,7 +10,16 @@
         <script src="scripts/createSamples/recorder.js"></script>
 
         <!-- main library -->
-        <script src="scripts/createSamples/player.js"></script>  
+        <script src="scripts/createSamples/player.js"></script> 
+        
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+
+        <!-- Optional theme -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+
+        <!-- Latest compiled and minified JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 
         <script>
             
@@ -95,9 +104,9 @@
             });
         </script>
     </head>
-    <body>
-        <input type="button" value="Play/Pause" id="toggleButton">
-        <input type="button" value="Stop" id="stopButton">
+    <body style="background: #8da5b7;">
+        <input type="button" value="Play/Pause" id="toggleButton" class="btn btn-success">
+        <input type="button" value="Stop" id="stopButton" class="btn btn-warning">
         <br>
         <input type="range" min="0" max="100" value="100" style="width: 500px" id="volumeRange">
         <br>

@@ -48,8 +48,9 @@ and open the template in the editor.
                         <tfoot>
                             <tr>
                                 <td colspan="2">
-                                    <input type="button" onclick="window.location.href='/MusicInstagram/registration.html'; return false;" value="registration" class="reg"/>
                                     <input type="button" onclick="login()" value="login" class="submit"/>
+                                    <input type="button" onclick="window.location.href='/MusicInstagram/registration.html'; return false;" value="registration" class="reg"/>
+
                                 </td>
                             </tr>
                         </tfoot>
@@ -69,7 +70,7 @@ and open the template in the editor.
                         success: function(responseText, statusText) {
                             if (statusText === 'success') {
                                 if (responseText === 'Success') {
-                                    window.location.href='/MusicInstagram/homePage.html';
+                                    window.location.href='/MusicInstagram/editData.html';
                                 }
                                 else {
                                     $('#error_message').text(responseText);

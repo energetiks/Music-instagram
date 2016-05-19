@@ -35,7 +35,7 @@ import ru.bystrov.musicinstagram.entities.dataobject.Attribute;
  *
  * @author defesteban
  */
-@Path("user")
+@Path("registration")
 @SessionScoped
 public class RegistrationResource {
 
@@ -102,21 +102,21 @@ public class RegistrationResource {
         String securePassword;
 
         HashMap<Integer, Attribute> attrValue = new HashMap<>();
-        attrValue.put(FIRST_NAME_ID, new Attribute("String", "User"));
-        attrValue.put(LAST_NAME_ID, new Attribute("String", ""));
+        attrValue.put(FIRST_NAME_ID, new Attribute("string", "User"));
+        attrValue.put(LAST_NAME_ID, new Attribute("string", ""));
         attrValue.put(AGE_ID, new Attribute("int", 0));
-        attrValue.put(COUNTRY_ID, new Attribute("String", ""));
-        attrValue.put(CITY_ID, new Attribute("String", ""));
-        attrValue.put(UNIVERCITY_ID, new Attribute("String", ""));
-        attrValue.put(PHONE_NUMBER_ID, new Attribute("String", ""));
-        attrValue.put(LOGIN_ID, new Attribute("String", login));
+        attrValue.put(COUNTRY_ID, new Attribute("string", ""));
+        attrValue.put(CITY_ID, new Attribute("string", ""));
+        attrValue.put(UNIVERCITY_ID, new Attribute("string", ""));
+        attrValue.put(PHONE_NUMBER_ID, new Attribute("string", ""));
+        attrValue.put(LOGIN_ID, new Attribute("string", login));
         try {
 
             salt = passwordHash.getSalt();
             securePassword = passwordHash.getSecurePassword(password, salt);
 
-            attrValue.put(PASSWORD_ID, new Attribute("String", securePassword));
-            attrValue.put(SALT_ID, new Attribute("String", salt));
+            attrValue.put(PASSWORD_ID, new Attribute("string", securePassword));
+            attrValue.put(SALT_ID, new Attribute("string", salt));
 
             utx.begin();
 
@@ -137,7 +137,6 @@ public class RegistrationResource {
             em.persist(newUser);
             em.persist(newPhotoFile);
 
-            em.persist(newUser);
             AttributeValue newAttrValue;
             id = Integer.valueOf(em.createNativeQuery("select MAX(attrValueId) from AttributeValue").getResultList().get(0).toString());
             for (Map.Entry<Integer, Attribute> entry : attrValue.entrySet()) {
@@ -147,7 +146,7 @@ public class RegistrationResource {
                 newAttrValue.setAttrId(entry.getKey());
                 newAttrValue.setObjId(newUser.getObjId());
                 switch (entry.getValue().getType()) {
-                    case "String":
+                    case "string":
                         newAttrValue.setStringValue(String.valueOf(entry.getValue().getValue()));
                         newAttrValue.setNumberValue(-1);
                         newAttrValue.setReferenceValue(-1);
@@ -157,7 +156,7 @@ public class RegistrationResource {
                         newAttrValue.setStringValue("");
                         newAttrValue.setReferenceValue(-1);
                         break;
-                    case "Reference":
+                    case "reference":
                         newAttrValue.setReferenceValue((int) entry.getValue().getValue());
                         newAttrValue.setStringValue("");
                         newAttrValue.setNumberValue(-1);
@@ -170,8 +169,8 @@ public class RegistrationResource {
 
             //CREATE A FILE OBJECT!!!
             attrValue = new HashMap<>();
-            attrValue.put(PATH_FILE_ID, new Attribute("String", "images/userPhoto/user.jpg"));
-            attrValue.put(TYPE_FILE_ID, new Attribute("String", "jpg"));
+            attrValue.put(PATH_FILE_ID, new Attribute("string", "images/userPhoto/user.jpg"));
+            attrValue.put(TYPE_FILE_ID, new Attribute("string", "jpg"));
             for (Map.Entry<Integer, Attribute> entry : attrValue.entrySet()) {
                 newAttrValue = new AttributeValue();
                 id = id + 1;
@@ -179,7 +178,7 @@ public class RegistrationResource {
                 newAttrValue.setAttrId(entry.getKey());
                 newAttrValue.setObjId(newPhotoFile.getObjId());
                 switch (entry.getValue().getType()) {
-                    case "String":
+                    case "string":
                         newAttrValue.setStringValue(String.valueOf(entry.getValue().getValue()));
                         newAttrValue.setNumberValue(-1);
                         newAttrValue.setReferenceValue(-1);
@@ -214,7 +213,7 @@ public class RegistrationResource {
         }
     }
 
-    public String checkUser(String login, String password, String confirmedPassword) {
+    private String checkUser(String login, String password, String confirmedPassword) {
 
         if (getUserIdByLogin(login) != null) {
             return "This login is already exist!";
