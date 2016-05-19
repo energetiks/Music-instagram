@@ -31,12 +31,11 @@ public class FileResource {
     public String getPathById(@QueryParam("id") String fileId) {
         try {
             Object opath = em.createNativeQuery(
-                    "select stringvalue\n" +
-                    "from attributevalue\n" +
-                    "where attrid = (select a.attrid from attributes a, attributeobjecttypes aot, objecttypes ot \n" +
+                    "select stringValue " +
+                    "from attributevalue " +
+                    "where attrid = (select a.attrid from attributes a, attributeobjecttypes aot, objecttypes ot " +
                     "where aot.attrid = a.attrid and aot.otid = ot.otid and a.name = 'path' and ot.name = 'File')" +
-                    "and ? = objid"
-            )
+                    "and ? = objid")
                     .setParameter(1, fileId).getSingleResult();
             return (new Gson()).toJson(opath);
         } catch (NoResultException | NonUniqueResultException e) {

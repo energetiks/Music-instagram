@@ -269,7 +269,7 @@ public class SampleResource {
                 Integer dirId = id+3;
                 HashMap<Integer,Attribute> attrValueForDir = new HashMap<>();
                 attrValueForDir.put(DIR_NAME_ID,new Attribute("string", name));
-                attrValueForDir.put(DIR_USER_REF_ID,new Attribute("int", objId));
+                attrValueForDir.put(DIR_USER_REF_ID,new Attribute("reference", objId));
                 MainResource resource = new MainResource();
                 resource.addAttributes(attrValueForDir, newDirectory, em);
             }
