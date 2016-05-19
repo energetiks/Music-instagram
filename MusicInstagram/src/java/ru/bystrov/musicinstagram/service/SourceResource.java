@@ -162,7 +162,7 @@ public class SourceResource {
             String filename = GetHash(is1);
             
             String pathToSource = "C:\\Users\\Test\\Desktop\\Programms on java\\MusicInstagram\\Music-instagram\\MusicInstagram\\web\\upload\\".concat(filename);
-            attrValue.put(PATH_FILE_ID,new Attribute("string", filename));
+            attrValue.put(PATH_FILE_ID,new Attribute("string", "upload/" + filename));
             resource = new MainResource();
             resource.addAttributes(attrValue, newSourceFile,em);
             

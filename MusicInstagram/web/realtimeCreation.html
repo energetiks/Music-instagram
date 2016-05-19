@@ -133,34 +133,41 @@
                 }, 1000);
 
                 function uploadSample(blob) {
-                    var documentData = new FormData();
-                    
-                    documentData.append("file", blob);
-                    documentData.append("name", $("#nameInput").val());
-                    documentData.append("duration", 0); // TODO, from blob size (it is raw format)
-                    documentData.append("source", source_id);
-                    documentData.append("directory", $("#directoryInput").val()); // TODO make good field
-                    documentData.append("user", 0); // TODO
+                    $.ajax({ 
+                        type: "GET", 
+                        url: "webresources/user/getLogin",
+                        success: function(result, response) {
+                            var documentData = new FormData();
+                            alert(result.nickName);
+                            documentData.append("file", blob);
+                            documentData.append("name", $("#nameInput").val());
+                            documentData.append("duration", 0); // TODO, from blob size (it is raw format)
+                            documentData.append("source", source_id);
+                            documentData.append("directory", $("#directoryInput").val()); // TODO make good field
+                            documentData.append("login", result.nickName); // TODO
                    
-                    $.ajax({
-                        url: "./webresources/sample/uploadSample",
-                        type: 'POST',
-                        data: documentData,
-                        cache: false,
-                        contentType: false,
-                        processData: false,
-                        success: function (responseText) {
-                            $('#progress_percent').text(responseText);
+                            $.ajax({
+                                url: "./webresources/sample/uploadSample",
+                                type: 'POST',
+                                data: documentData,
+                                cache: false,
+                                contentType: false,
+                                processData: false,
+                                success: function (responseText) {
+                                    $('#progress_percent').text(responseText);
+                                },
+                                xhr: function () {
+                                    var myXhr = $.ajaxSettings.xhr();
+                                    if (myXhr.upload) {
+                                        myXhr.upload.addEventListener('progress', progress, false);
+                                    } else {
+                                        console.log('Upload progress is not supported.');
+                                    }
+                                    return myXhr;
+                                }
+                            });
                         },
-                        xhr: function () {
-                            var myXhr = $.ajaxSettings.xhr();
-                            if (myXhr.upload) {
-                                myXhr.upload.addEventListener('progress', progress, false);
-                            } else {
-                                console.log('Upload progress is not supported.');
-                            }
-                            return myXhr;
-                        }
+                        dataType:'json'
                     });
                 }
 

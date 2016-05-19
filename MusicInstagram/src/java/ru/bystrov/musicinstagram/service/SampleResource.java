@@ -75,6 +75,8 @@ public class SampleResource {
     final private int FILE_TYPE_ID = 5;
     final private int LIKES_TYPE_ID = 6;
     
+    
+    final private int  DIRECTORY_TYPE_ID = 4;
     final private int DIR_USER_REF_ID = 26;
     final private int DIR_NAME_ID = 25;
     
@@ -193,23 +195,25 @@ public class SampleResource {
             @FormDataParam("name") String name,
             @FormDataParam("duration") int duration,
             @FormDataParam("source") int source_objid,
-            @FormDataParam("directory") int directory_objid,
-            @FormDataParam("user") int user_objid
-    ) {
+            @FormDataParam("directory") String directory,
+            @FormDataParam("login") String login) {
         try {
             JSONObject result = new JSONObject();
             
+            Integer objId = (Integer) em.createNativeQuery("select objId from AttributeValue "
+                                                        + "where stringValue = ? and attrId = ? ")
+                    .setParameter(1, login).setParameter(2, LOGIN_ID).getResultList().get(0);
             java.sql.Timestamp time = (java.sql.Timestamp) em.createNativeQuery("select CURRENT_TIMESTAMP from Objects").getResultList().get(0);
             
             HashMap<Integer,Attribute> attrValue = new HashMap<>();
             attrValue.put(NAME_ID,new Attribute("string", name));
             attrValue.put(DURATION_ID,new Attribute("int", duration));            
             attrValue.put(SOURCE_REF_ID,new Attribute("reference", source_objid));
-            attrValue.put(USER_REF_ID,new Attribute("reference", user_objid));
+            attrValue.put(USER_REF_ID,new Attribute("reference", objId));
             attrValue.put(TIME_ID,new Attribute("date", time.toString()));
             attrValue.put(COUNT_OF_LIKE_ID, new Attribute("int",0));
             attrValue.put(COUNT_OF_DISLIKE_ID, new Attribute("int",0));
-            attrValue.put(DIRECTORY_REF_ID, new Attribute("int",directory_objid));
+            attrValue.put(DIRECTORY_REF_ID, new Attribute("string",directory));
             
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -232,6 +236,7 @@ public class SampleResource {
             Objects newSample  = new Objects();
             Objects newSampleFile = new Objects();
             
+            
             Integer id = Integer.valueOf(em.createNativeQuery("select MAX(objId) from Objects").getResultList().get(0).toString());
             newSample.setObjId(id+1);
             newSample.setName("Sample " + name);
@@ -246,14 +251,39 @@ public class SampleResource {
             em.persist(newSample);
             em.persist(newSampleFile);
             
+            try{
+               Integer dirId = (Integer) em.createNativeQuery("select a1.objId from AttributeValue a1, AttributeValue a2 "
+                                                        + "where a1.stringValue = ? and "
+                                                        + "      a1.attrId = ? and "
+                                                        + "      a1.objId = a2.objId and "
+                                                        + " a2.referenceValue = ? and "
+                                                        + " a2.attrId = ?")
+                                            .setParameter(1, directory).setParameter(2, DIR_NAME_ID)
+                                            .setParameter(3, objId).setParameter(4, DIR_USER_REF_ID).getSingleResult();
+            } catch(NoResultException ex) {
+                Objects newDirectory = new Objects();
+                newDirectory.setObjId(id+3);
+                newDirectory.setName("Directory " + name);
+                newDirectory.setObjTypeId(DIRECTORY_TYPE_ID);
+                em.persist(newDirectory);
+                Integer dirId = id+3;
+                HashMap<Integer,Attribute> attrValueForDir = new HashMap<>();
+                attrValueForDir.put(DIR_NAME_ID,new Attribute("string", name));
+                attrValueForDir.put(DIR_USER_REF_ID,new Attribute("int", objId));
+                MainResource resource = new MainResource();
+                resource.addAttributes(attrValueForDir, newDirectory, em);
+            }
+        
+            attrValue.put(DIRECTORY_REF_ID, new Attribute("reference", id+3));
+            
             MainResource resource = new MainResource();
             resource.addAttributes(attrValue, newSample, em);
            
             attrValue = new HashMap<>();
             String hashName = GetHash(is1);
             
-            String pathToSource = "/home/ad/code/Music-instagram/MusicInstagram/web/upload/".concat(hashName);
-            attrValue.put(PATH_FILE_ID,new Attribute("string", hashName));
+            String pathToSource = "C:\\Users\\Test\\Desktop\\Programms on java\\MusicInstagram\\Music-instagram\\MusicInstagram\\web\\upload\\".concat(hashName);
+            attrValue.put(PATH_FILE_ID,new Attribute("string", "upload/" + hashName));
             resource = new MainResource();
             resource.addAttributes(attrValue, newSampleFile, em);
             

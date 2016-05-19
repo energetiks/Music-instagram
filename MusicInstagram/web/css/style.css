@@ -2391,6 +2391,14 @@ div #addNewSource {
   
   }
   
+ .mainStyleButton:hover {
+	background-color:transparent;
+}
+.mainStyleButton:active {
+	position:relative;
+	top:1px;
+}
+  
   
 .logOut {
 	background-color:#3bb3e0;
