@@ -122,7 +122,7 @@
                                                 img.setAttribute("src",data.Users[i].User30);
                                                 var br2 = document.createElement('BR');
                                                 var button = document.createElement('BUTTON');
-                                                button.setAttribute("class","btn_success");
+                                                button.setAttribute("class","mainStyleButton");
                                                 button.setAttribute("id",data.Users[i].UserId);
                                                 button.setAttribute("onclick","addFriend(this); return false;");
 
@@ -140,7 +140,7 @@
                                         }
                                         for(i = 0; i < data.countOfUsers; i++) {
                                             $("#friend" + i + " label").text(data.Users[i].User1 + " " + data.Users[i].User2);
-                                            $("#friend" + i + " button").text("Add as friend");
+                                            $("#friend" + i + " button").text("Add  friend");
                                         }
                                         
                                     },

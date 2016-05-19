@@ -287,7 +287,7 @@ public class SampleResource {
             attrValue = new HashMap<>();
             String hashName = GetHash(is1);
             
-            String pathToSource = "/home/ad/code/Music-instagram/MusicInstagram/web/upload/".concat(hashName);
+            String pathToSource = "C:\\Users\\Test\\Desktop\\Programms on java\\MusicInstagram\\Music-instagram\\MusicInstagram\\web\\upload\\".concat(hashName);
             attrValue.put(PATH_FILE_ID,new Attribute("string", hashName));
             resource = new MainResource();
             resource.addAttributes(attrValue, newSampleFile, em);
