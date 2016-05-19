@@ -23,7 +23,7 @@ and open the template in the editor.
         <link rel="stylesheet" type="text/css" href="scripts/demo/colorpicker/css/colorpicker.css"/> 
         
         
-        <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+        <script type="text/javascript" src="scripts/jquery-1.7.1.min.js"></script>
         
     </head>
     <body>
@@ -36,7 +36,7 @@ and open the template in the editor.
                     async: false,
                     success: function (data, response) {
                         if (data !== "success") {
-                            window.location.href = '/MusicInstagram/index.html';
+                            window.location.href = '/MusicInstagram/index.html'; 
                         }
                     }
                 });
@@ -50,213 +50,221 @@ and open the template in the editor.
                 $.ajax({ 
                     type: "GET", 
                     url: "webresources/user/getLogin",
-                    success: function(data, response) {
-                        $("#userName").text(data.nickName);
+                    success: function(result, response) {
+                        $("#userName").text(result.nickName);
+                    
+
+                        $.ajax({ 
+                            type: "GET", 
+                            url: "webresources/user/getPhotoByLogin",
+                            data:{login:result.nickName},
+                            success: function(data, response) {
+                                $(".userPhoto").attr("src",data.photo);
+                            },
+                            dataType: "json"
+                        });
+
+                        $.ajax({ 
+                            type: "GET", 
+                            url: "webresources/user/getUserByLogin",
+                            data:{login:result.nickName},
+                            success: function(data, response) {
+                                $("#infoAboutUser").html(
+                                    "First Name: " + data.User1 + "<br>" + 
+                                    "Last Name: " + data.User2 + "<br>" + 
+                                    "Age: " + data.User3 + "<br>" +
+                                    "City: " + data.User5 + "<br>" +
+                                    "Country: " + data.User4 + "<br>" +
+                                    "University: " + data.User6 + "<br>" +
+                                    "Phone number: " + data.User7 + "<br>");
+                                $("#name").text(data.User1 + " " + data.User2);
+                            },
+                            dataType: "json"
+                        });
+
+                        $.ajax({ 
+                            type: "GET", 
+                            url: "webresources/user/getFriendsByLogin",
+                            data:{login:result.nickName},
+                            success: function(data, response) {
+                                if (data[0].countOfFriend >= 3) {
+                                    firstFriend = data[1].Friend8;
+                                    secondFriend = data[2].Friend8;
+                                    thirdFriend = data[3].Friend8;
+                                    $("#firstFriendPhoto").attr("src",data[1].Friend30);
+                                    $("#secondFriendPhoto").attr("src",data[2].Friend30);
+                                    $("#thirdFriendPhoto").attr("src",data[3].Friend30);
+                                    $("#firstFriend").html(data[1].Friend1 + "<br>" + data[1].Friend2);
+                                    $("#secondFriend").html(data[2].Friend1 + "<br>" + data[2].Friend2);
+                                    $("#thirdFriend").html(data[3].Friend1 + "<br>" + data[3].Friend2);
+
+
+                                }
+                                if (data[0].countOfFriend == 2) {
+                                    firstFriend = data[1].Friend8;
+                                    secondFriend = data[2].Friend8;
+                                    $("#firstFriendPhoto").attr("src",data[1].Friend30);
+                                    $("#secondFriendPhoto").attr("src",data[2].Friend30);
+                                    $("#thirdFriendPhoto").hide();
+                                    $("#firstFriend").html(data[1].Friend1 + "<br>" + data[1].Friend2);
+                                    $("#secondFriend").html(data[2].Friend1 + "<br>" + data[2].Friend2);
+                                    $("#thirdFriend").hide();
+                                }
+                                if (data[0].countOfFriend == 1) {
+                                    firstFriend = data[1].Friend8;
+                                    $("#firstFriendPhoto").attr("src",data[1].Friend30);
+                                    $("#secondFriendPhoto").hide();
+                                    $("#thirdFriendPhoto").hide();
+                                    $("#firstFriend").html(data[1].Friend1 + "<br>" + data[1].Friend2);
+                                    $("#secondFriend").hide();
+                                    $("#thirdFriend").hide();
+                                }
+                                if (data[0].countOfFriend == 0) {
+                                    $("#firstFriendPhoto").hide();
+                                    $("#secondFriendPhoto").hide();
+                                    $("#thirdFriendPhoto").hide();
+                                    $("#firstFriend").hide();
+                                    $("#secondFriend").hide();
+                                    $("#thirdFriend").hide();
+                                }
+                            },
+                            dataType: "json"
+                        });
+
+                        $.ajax({ 
+                            type: "GET", 
+                            url: "webresources/sample/getSamplesByLoginInTimeOrder",
+                            data:{login:result.nickName},
+                            success: function(data, response) {
+                                var i;
+                                var countOfSamples = data[0].countOfSamples;
+                                if (countOfSamples > 3) { countOfSamples = 3; }
+                                var table = document.getElementById('lastCreatedSamples');
+                                var tr = document.createElement('TR');
+                                for(i = 1; i <= countOfSamples; i++) {
+                                    var td = document.createElement('TD');
+                                    var a1 = document.createElement('A');
+                                    a1.setAttribute("onclick","window.open('player.html?id=" + data[i].Sample23 + "', 'player', 'width:700, height:400'); return false;");
+                                    var img1 = document.createElement('IMG');
+                                    img1.setAttribute("src","images/songImage.jpg");
+                                    img1.setAttribute("style","min-height: 90px; width: auto;");
+                                    var label1 = document.createElement('LABEL');
+                                    label1.setAttribute("id","lCSample" + data[i].SampleId);
+                                    label1.setAttribute("style","font-size: 18px;");
+                                    var br1 = document.createElement('BR');
+                                    var a2 = document.createElement('A');
+                                    var img2 = document.createElement('IMG');
+                                    img2.setAttribute("id","likeLCSample" + data[i].SampleId);
+                                    img2.setAttribute("src","images/Like.jpg");
+                                    img2.setAttribute("onclick","addLikeForTimeSample(this,'like'); return false;");
+                                    var label2 = document.createElement('LABEL');
+                                    label2.setAttribute("id","countOfLikesLCSample" + data[i].SampleId);
+                                    label2.setAttribute("style","font-size: 18px; padding 0px;");
+                                    var a3 = document.createElement('A');
+                                    var img3 = document.createElement('IMG');
+                                    img3.setAttribute("id","dislikeLCSam" + data[i].SampleId);
+                                    img3.setAttribute("src","images/DisLike.jpg");
+                                    img3.setAttribute("onclick","addLikeForTimeSample(this,'dislike'); return false;");
+                                    var label3 = document.createElement('LABEL');
+                                    label3.setAttribute("id","countOfDisLikesLCSample" + data[i].SampleId);
+                                    label3.setAttribute("style","font-size: 18px; padding 0px;");
+
+                                    a1.appendChild(img1);
+                                    a1.appendChild(label1);
+                                    a2.appendChild(img2);
+                                    a3.appendChild(img3);
+                                    td.appendChild(a1);
+                                    td.appendChild(br1);
+                                    td.appendChild(a2);
+                                    td.appendChild(label2);
+                                    td.appendChild(a3);
+                                    td.appendChild(label3);
+                                    tr.appendChild(td);
+                                }
+                                table.appendChild(tr);
+                                for(i = 1; i <= countOfSamples; i++) {
+                                    $("#lCSample" + data[i].SampleId).html(data[i].Sample19);
+                                    $("#countOfLikesLCSample" + data[i].SampleId).html(data[i].Sample31);
+                                    $("#countOfDisLikesLCSample" + data[i].SampleId).html(data[i].Sample32);
+                                }
+                            },
+                            dataType: "json"
+                        });
+
+                        $.ajax({ 
+                            type: "GET", 
+                            url: "webresources/sample/getSamplesInLikeOrder",
+                            success: function(data, response) {
+                                var i;
+                                var count = 5;
+                                var countOfSamples = data[0].countOfSamples;
+                                if (countOfSamples < 5) { count = countOfSamples; }
+                                var table = document.getElementById('mostListenedSamples');
+                                var tr = document.createElement('TR');
+                                for(i = countOfSamples; i > countOfSamples-count; i--) {
+
+                                    var td = document.createElement('TD');
+                                    var a1 = document.createElement('A');
+                                    a1.setAttribute("onclick","window.open('player.html?id=" + data[i].Sample23 + "', 'player', 'width:700, height:400'); return false;");
+                                    var img1 = document.createElement('IMG');
+                                    img1.setAttribute("src","images/songImage.jpg");
+                                    img1.setAttribute("style","min-height: 90px; width: auto;");
+                                    var br1 = document.createElement('BR');
+                                    var label1 = document.createElement('LABEL');
+                                    var br2 = document.createElement('BR');
+                                    label1.setAttribute("id","mLSample" + data[i].SampleId);
+                                    label1.setAttribute("style","font-size: 18px;");
+                                    var a2 = document.createElement('A');
+                                    var img2 = document.createElement('IMG');
+                                    img2.setAttribute("id","likeMLSample" + data[i].SampleId);
+                                    img2.setAttribute("src","images/Like.jpg");
+                                    img2.setAttribute("onclick","addLikeForLikeSample(this,'like'); return false;");
+                                    var label2 = document.createElement('LABEL');
+                                    label2.setAttribute("id","countOfLikesMLSample" + data[i].SampleId);
+                                    label2.setAttribute("style","font-size: 18px; padding 0px;");
+                                    var a3 = document.createElement('A');
+                                    var img3 = document.createElement('IMG');
+                                    img3.setAttribute("id","dislikeSampl" + data[i].SampleId);
+                                    img3.setAttribute("src","images/DisLike.jpg");
+                                    img3.setAttribute("onclick","addLikeForLikeSample(this,'dislike'); return false;");
+                                    var label3 = document.createElement('LABEL');
+                                    label3.setAttribute("id","countOfDisLikesMLSample" + data[i].SampleId);
+                                    label3.setAttribute("style","font-size: 18px; padding 0px;");
+
+
+                                    a1.appendChild(img1);
+                                    a2.appendChild(img2);
+                                    a3.appendChild(img3);
+                                    td.appendChild(a1);
+                                    td.appendChild(br1);
+                                    td.appendChild(label1);
+                                    td.appendChild(br2);
+                                    td.appendChild(a2);
+                                    td.appendChild(label2);
+                                    td.appendChild(a3);
+                                    td.appendChild(label3);
+                                    tr.appendChild(td);
+                                }
+                                table.appendChild(tr);
+                                for(i = countOfSamples; i > 0; i--) {
+                                    $("#mLSample" + data[i].SampleId).html(data[i].Sample19);
+                                    $("#countOfLikesMLSample" + data[i].SampleId).html(data[i].Sample31);
+                                    $("#countOfDisLikesMLSample" + data[i].SampleId).html(data[i].Sample32);
+                                }
+                            }
+                        });
+
+                        $("#friend1").on("click", function () {
+                            document.location.href = 'friend.html?' + firstFriend;
+                        });
+                        $("#friend2").on("click", function () {
+                            document.location.href = 'friend.html?' + secondFriend;
+                        });
+                        $("#friend3").on("click", function () {
+                            document.location.href = 'friend.html?' + thirdFriend;
+                        });
                     },
                     dataType: "json"
-                });
-
-                $.ajax({ 
-                    type: "GET", 
-                    url: "webresources/user/getPhotoByLogin",
-                    data:{login:"energetiks"},
-                    success: function(data, response) {
-                        $(".userPhoto").attr("src",data.photo);
-                    },
-                    dataType: "json"
-                });
-
-                $.ajax({ 
-                    type: "GET", 
-                    url: "webresources/user/getUserByLogin",
-                    data:{login:"energetiks"},
-                    success: function(data, response) {
-                        $("#infoAboutUser").html(
-                            "First Name: " + data.User1 + "<br>" + 
-                            "Last Name: " + data.User2 + "<br>" + 
-                            "Age: " + data.User3 + "<br>" +
-                            "City: " + data.User5 + "<br>" +
-                            "Country: " + data.User4 + "<br>" +
-                            "University: " + data.User6 + "<br>" +
-                            "Phone number: " + data.User7 + "<br>");
-                        $("#name").text(data.User1 + " " + data.User2);
-                    },
-                    dataType: "json"
-                });
-
-                $.ajax({ 
-                    type: "GET", 
-                    url: "webresources/user/getFriendsByLogin",
-                    data:{login:"energetiks"},
-                    success: function(data, response) {
-                        if (data[0].countOfFriend >= 3) {
-                            firstFriend = data[1].Friend8;
-                            secondFriend = data[2].Friend8;
-                            thirdFriend = data[3].Friend8;
-                            $("#firstFriendPhoto").attr("src",data[1].Friend30);
-                            $("#secondFriendPhoto").attr("src",data[2].Friend30);
-                            $("#thirdFriendPhoto").attr("src",data[3].Friend30);
-                            $("#firstFriend").html(data[1].Friend1 + "<br>" + data[1].Friend2);
-                            $("#secondFriend").html(data[2].Friend1 + "<br>" + data[2].Friend2);
-                            $("#thirdFriend").html(data[3].Friend1 + "<br>" + data[3].Friend2);
-
-
-                        }
-                        if (data[0].countOfFriend == 2) {
-                            firstFriend = data[1].Friend8;
-                            secondFriend = data[2].Friend8;
-                            $("#firstFriendPhoto").attr("src",data[1].Friend30);
-                            $("#secondFriendPhoto").attr("src",data[2].Friend30);
-                            $("#thirdFriendPhoto").hide();
-                            $("#firstFriend").html(data[1].Friend1 + "<br>" + data[1].Friend2);
-                            $("#secondFriend").html(data[2].Friend1 + "<br>" + data[2].Friend2);
-                            $("#thirdFriend").hide();
-                        }
-                        if (data[0].countOfFriend == 1) {
-                            firstFriend = data[1].Friend8;
-                            $("#firstFriendPhoto").attr("src",data[1].Friend30);
-                            $("#secondFriendPhoto").hide();
-                            $("#thirdFriendPhoto").hide();
-                            $("#firstFriend").html(data[1].Friend1 + "<br>" + data[1].Friend2);
-                            $("#secondFriend").hide();
-                            $("#thirdFriend").hide();
-                        }
-                        if (data[0].countOfFriend == 0) {
-                            $("#firstFriendPhoto").hide();
-                            $("#secondFriendPhoto").hide();
-                            $("#thirdFriendPhoto").hide();
-                            $("#firstFriend").hide();
-                            $("#secondFriend").hide();
-                            $("#thirdFriend").hide();
-                        }
-                    },
-                    dataType: "json"
-                });
-
-                $.ajax({ 
-                    type: "GET", 
-                    url: "webresources/sample/getSamplesByLoginInTimeOrder",
-                    data:{login:"energetiks"},
-                    success: function(data, response) {
-                        var i;
-                        var countOfSamples = data[0].countOfSamples;
-                        if (countOfSamples > 3) { countOfSamples = 3; }
-                        var table = document.getElementById('lastCreatedSamples');
-                        var tr = document.createElement('TR');
-                        for(i = 1; i <= countOfSamples; i++) {
-                            var td = document.createElement('TD');
-                            var a1 = document.createElement('A');
-                            var img1 = document.createElement('IMG');
-                            img1.setAttribute("src","images/songImage.jpg");
-                            img1.setAttribute("style","min-height: 90px; width: auto;");
-                            var label1 = document.createElement('LABEL');
-                            label1.setAttribute("id","lCSample" + data[i].SampleId);
-                            var br1 = document.createElement('BR');
-                            var a2 = document.createElement('A');
-                            var img2 = document.createElement('IMG');
-                            img2.setAttribute("id","likeLCSample" + data[i].SampleId);
-                            img2.setAttribute("src","images/Like.jpg");
-                            img2.setAttribute("onclick","addLikeForTimeSample(this,'like'); return false;");
-                            var label2 = document.createElement('LABEL');
-                            label2.setAttribute("id","countOfLikesLCSample" + data[i].SampleId);
-                            var a3 = document.createElement('A');
-                            var img3 = document.createElement('IMG');
-                            img3.setAttribute("id","dislikeLCSam" + data[i].SampleId);
-                            img3.setAttribute("src","images/DisLike.jpg");
-                            img3.setAttribute("onclick","addLikeForTimeSample(this,'dislike'); return false;");
-                            var label3 = document.createElement('LABEL');
-                            label3.setAttribute("id","countOfDisLikesLCSample" + data[i].SampleId);
-
-
-                            a1.appendChild(img1);
-                            a1.appendChild(label1);
-                            a2.appendChild(img2);
-                            a3.appendChild(img3);
-                            td.appendChild(a1);
-                            td.appendChild(br1);
-                            td.appendChild(a2);
-                            td.appendChild(label2);
-                            td.appendChild(a3);
-                            td.appendChild(label3);
-                            tr.appendChild(td);
-                        }
-                        table.appendChild(tr);
-                        for(i = 1; i <= countOfSamples; i++) {
-                            $("#lCSample" + data[i].SampleId).html(data[i].Sample19);
-                            $("#countOfLikesLCSample" + data[i].SampleId).html(data[i].Sample31);
-                            $("#countOfDisLikesLCSample" + data[i].SampleId).html(data[i].Sample32);
-                        }
-                    },
-                    dataType: "json"
-                });
-
-                $.ajax({ 
-                    type: "GET", 
-                    url: "webresources/sample/getSamplesInLikeOrder",
-                    success: function(data, response) {
-                        var i;
-                        var count = 5;
-                        var countOfSamples = data[0].countOfSamples;
-                        if (countOfSamples < 5) { count = countOfSamples; }
-                        var table = document.getElementById('mostListenedSamples');
-                        var tr = document.createElement('TR');
-                        for(i = countOfSamples; i > countOfSamples-count; i--) {
-                            
-                            var td = document.createElement('TD');
-                            var a1 = document.createElement('A');
-                            var img1 = document.createElement('IMG');
-                            img1.setAttribute("src","images/songImage.jpg");
-                            img1.setAttribute("style","min-height: 90px; width: auto;");
-                            var br1 = document.createElement('BR');
-                            var label1 = document.createElement('LABEL');
-                            var br2 = document.createElement('BR');
-                            label1.setAttribute("id","mLSample" + data[i].SampleId);
-                            var a2 = document.createElement('A');
-                            var img2 = document.createElement('IMG');
-                            img2.setAttribute("id","likeMLSample" + data[i].SampleId);
-                            img2.setAttribute("src","images/Like.jpg");
-                            img2.setAttribute("onclick","addLikeForLikeSample(this,'like'); return false;");
-                            var label2 = document.createElement('LABEL');
-                            label2.setAttribute("id","countOfLikesMLSample" + data[i].SampleId);
-                            var a3 = document.createElement('A');
-                            var img3 = document.createElement('IMG');
-                            img3.setAttribute("id","dislikeSampl" + data[i].SampleId);
-                            img3.setAttribute("src","images/DisLike.jpg");
-                            img3.setAttribute("onclick","addLikeForLikeSample(this,'dislike'); return false;");
-                            var label3 = document.createElement('LABEL');
-                            label3.setAttribute("id","countOfDisLikesMLSample" + data[i].SampleId);
-
-
-                            a1.appendChild(img1);
-                            a2.appendChild(img2);
-                            a3.appendChild(img3);
-                            td.appendChild(a1);
-                            td.appendChild(br1);
-                            td.appendChild(label1);
-                            td.appendChild(br2);
-                            td.appendChild(a2);
-                            td.appendChild(label2);
-                            td.appendChild(a3);
-                            td.appendChild(label3);
-                            tr.appendChild(td);
-                        }
-                        table.appendChild(tr);
-                        for(i = countOfSamples; i > 0; i--) {
-                            $("#mLSample" + data[i].SampleId).html(data[i].Sample19);
-                            $("#countOfLikesMLSample" + data[i].SampleId).html(data[i].Sample31);
-                            $("#countOfDisLikesMLSample" + data[i].SampleId).html(data[i].Sample32);
-                        }
-                    }
-                });
-
-                $("#friend1").on("click", function () {
-                    document.location.href = 'friend.html?' + firstFriend;
-                });
-                $("#friend2").on("click", function () {
-                    document.location.href = 'friend.html?' + secondFriend;
-                });
-                $("#friend3").on("click", function () {
-                    document.location.href = 'friend.html?' + thirdFriend;
                 });
             });
             
@@ -312,51 +320,7 @@ and open the template in the editor.
                 });
             };
         </script>
-        <!--background changer-->
-        <div id="background_changer">
-            <div class="alignleft_block backgrounds">
-                <ul id="theme_roller_list">
-                    <li>
-                        <a href="#">Color</a>
-                        <div>
-                            <span id="color_picker" class="alignleft_block"></span>
-                        </div>
-                    </li>
-                    <li>
-                        <a href="#">Pattern</a>
-                        <div id="background_patterns">
-                            <a href="0"><img src="images/background/page_tile_0.png" width="24" height="24" alt=""/></a>
-                            <a href="1"><img src="images/background/page_tile_1.png" width="24" height="24" alt=""/></a>
-                            <a href="2"><img src="images/background/page_tile_2.png" width="24" height="24" alt=""/></a>
-                            <a href="3"><img src="images/background/page_tile_3.png" width="24" height="24" alt=""/></a>
-                            <a href="4"><img src="images/background/page_tile_4.png" width="24" height="24" alt=""/></a>
-                            <a href="5"><img src="images/background/page_tile_5.png" width="24" height="24" alt=""/></a>
-                            <a href="6"><img src="images/background/page_tile_6.png" width="24" height="24" alt=""/></a>
-                            <a href="7"><img src="images/background/page_tile_7.png" width="24" height="24" alt=""/></a>
-                            <a href="8"><img src="images/background/page_tile_8.png" width="24" height="24" alt=""/></a>                        
-                            <a href="9"><img src="images/background/page_tile_9.png" width="24" height="24" alt=""/></a>
-                            <a href="10"><img src="images/background/page_tile_10.png" width="24" height="24" alt=""/></a>
-                            <a href="11"><img src="images/background/page_tile_11.png" width="24" height="24" alt=""/></a>
-                            <a href="12"><img src="images/background/page_tile_12.png" width="24" height="24" alt=""/></a>                                                                        
-                            <a href="13"><img src="images/background/page_tile_13.png" width="24" height="24" alt=""/></a>                        
-                        </div>
-                    </li>
-                    <li>
-                        <a href="#">Background</a>
-                        <div id="background_images">
-                            <a href="1"><img src="images/background/bg01.jpg" width="154" alt=""/></a>
-                            <a href="2"><img src="images/background/bg02.jpg" width="154" alt=""/></a>
-                            <a href="3"><img src="images/background/bg03.jpg" width="154" alt=""/></a>
-                            <a href="4"><img src="images/background/bg04.jpg" width="154" alt=""/></a>
-                            <a href="5"><img src="images/background/bg05.jpg" width="154" alt=""/></a>                                                                                                
-                        </div>
-                    </li>
-                </ul>
-            </div>
-            <div class="alignleft_block open_close">
-                    <a href="#" class="arrow">OPEN</a>
-            </div>  
-        </div>
+        
         
         <!--header-->
         <div id="body-wrapper">
@@ -393,15 +357,15 @@ and open the template in the editor.
                             <span>My friends</span>                       
                         </li>
                         <li>
-                            <a href="findFriends.html">FIND FRIENDS</a>
-                            <span>Add friends</span>                       
+                            <a href="findFriends.html">FIND FRIENDS</a> 
+                            <span>Add friends</span>                        
                         </li>
                         <li>
                             <a href="editData.html">EDIT DATA</a>
                             <span>Edit your data</span>                       
                         </li>
                         <li>
-                            <input type="button" value="Log out" style="height: 35px" onclick="exit()"/>
+                            <button class="logOut"  onclick="exit()">Log Out</button>
                         </li>
                     </ul>                    
                 </div>
@@ -439,19 +403,19 @@ and open the template in the editor.
                                             <a id="friend1" class="sample">
                                                 <img id="firstFriendPhoto" alt="Friend1"  style="min-height: 100px; width: auto;">
                                                 <br>
-                                                <label id="firstFriend"></label>
+                                                <label id="firstFriend" style="font-size: 18px;"></label>
                                             </a>
                                         </td>
                                         <td>
                                             <a id="friend2" class="sample">
                                                 <img id="secondFriendPhoto" alt="Friend2"  style="min-height: 100px; width: auto;"><br>
-                                                <label id="secondFriend"></label>
+                                                <label id="secondFriend" style="font-size: 18px;"></label>
                                             </a>
                                         </td>
                                         <td>
                                             <a id="friend3" class="sample">
                                                 <img id="thirdFriendPhoto" alt="Friend3"  style="min-height: 100px; width: auto;"><br>
-                                                <label id="thirdFriend"></label>
+                                                <label id="thirdFriend" style="font-size: 18px;"></label>
                                             </a>
                                         </td>                                                                                            
                                     </tr>
@@ -500,7 +464,6 @@ and open the template in the editor.
                 <div>Copyright MusicInstagram. 2016</div>
             </div>
         </div>
-        <script type="text/javascript" src="scripts/jquery-1.7.1.min.js"></script>
         <script type="text/javascript" src="scripts/jquery.easing.1.3.js"></script>
         <script type="text/javascript" src="scripts/nivo-slider/jquery.nivo.slider.js"></script>
         <script type="text/javascript" src="scripts/superfish/js/superfish.js"></script>
