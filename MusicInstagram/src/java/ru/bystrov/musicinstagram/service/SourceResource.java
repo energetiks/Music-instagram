@@ -110,7 +110,7 @@ public class SourceResource {
             
             HashMap<Integer,Attribute> attrValue = new HashMap<>();
             attrValue.put(NAME_ID,new Attribute("string", fileName));
-            attrValue.put(DURATION_ID,new Attribute("int", duration));
+            //attrValue.put(DURATION_ID,new Attribute("int", duration));
             attrValue.put(GENRE_ID,new Attribute("string", genre));
             attrValue.put(LANGUAGE_ID,new Attribute("string", language));
             attrValue.put(ALBUM_ID,new Attribute("string", albumName));
@@ -161,7 +161,7 @@ public class SourceResource {
             attrValue = new HashMap<>();
             String filename = GetHash(is1);
             
-            String pathToSource = "C:\\Users\\Test\\Desktop\\Programms on java\\MusicInstagram\\Music-instagram\\MusicInstagram\\web\\upload\\".concat(filename);
+            String pathToSource = "/home/ad/code/Music-instagram/MusicInstagram/web/upload/".concat(filename);
             attrValue.put(PATH_FILE_ID,new Attribute("string", "upload/" + filename));
             resource = new MainResource();
             resource.addAttributes(attrValue, newSourceFile,em);

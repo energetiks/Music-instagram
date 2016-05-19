@@ -41,13 +41,14 @@ and open the template in the editor.
                     }
                 });
             });
+            var nick;
             $(function(){
                 $.ajax({ 
                     type: "GET", 
                     url: "webresources/user/getLogin",
                     success: function(result, response) {
                         $("#userName").text(result.nickName);
-
+                        nick = result.nickName;
 
                         $.ajax({ 
                             type: "GET", 
@@ -102,7 +103,7 @@ and open the template in the editor.
                     documentData.append('albumName', $('#albumName').val());
                     documentData.append('year', $('#yearOfCreation').val());
                     documentData.append('musicalGroupName', $('#musicalGroupName').val());
-                    documentData.append('login', result.nickName);
+                    documentData.append('login', nick);
                     $.ajax({
                         url: "webresources/source/upload",
                         type: 'POST',
@@ -183,8 +184,8 @@ and open the template in the editor.
         <div class="melody transparent-background">
             <div style="margin-left: 40%;">
                 
-                <label>Duration</label><br>
-                <input type="text" id="duration" value="100"><br>
+                <!-- <label>Duration</label><br>
+                <input type="text" id="duration" value="100"><br> -->
                 <label>Genre</label><br>
                 <input type="text" id="genre" value=""><br>
                 <label>Language</label><br>
