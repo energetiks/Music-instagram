@@ -122,8 +122,9 @@ public class RegistrationResource {
 
             Objects newUser = new Objects();
             Objects newPhotoFile = new Objects();
-
-            Integer id = Integer.valueOf(em.createNativeQuery("select MAX(objId) from Objects").getResultList().get(0).toString());
+            Object o = em.createNativeQuery("select MAX(objId) from Objects").getSingleResult();
+            if (o == null) o = 0;
+            Integer id = Integer.valueOf(o.toString());
             newUser.setObjId(id + 1);
             newUser.setName("User " + getName(attrValue));
             newUser.setObjTypeId(USER_TYPE_ID);
@@ -138,7 +139,9 @@ public class RegistrationResource {
             em.persist(newPhotoFile);
 
             AttributeValue newAttrValue;
-            id = Integer.valueOf(em.createNativeQuery("select MAX(attrValueId) from AttributeValue").getResultList().get(0).toString());
+            o = em.createNativeQuery("select MAX(attrValueId) from AttributeValue").getSingleResult();
+            if (o == null) o = 0;
+            id = Integer.valueOf(o.toString());
             for (Map.Entry<Integer, Attribute> entry : attrValue.entrySet()) {
                 newAttrValue = new AttributeValue();
                 id = id + 1;
