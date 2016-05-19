@@ -59,6 +59,21 @@
                                 },
                                 dataType: "json"
                             });
+                            
+                            $.ajax({ 
+                                type: "GET", 
+                                url: "webresources/user/getFriendsByLogin",
+                                data:{login:data.nickName},
+                                success: function(data, response) {
+                                    var i
+                                    for (i = 1; i <= data[0].countOfFriend; i++) {
+                                        if (login == data[i].Friend8) {
+                                            $("#deletaFriend").attr('disabled', true);
+                                        }
+                                    }
+                                },
+                                dataType:"json"
+                            });
                         },
                         dataType: "json"
                     });
@@ -167,6 +182,7 @@
                             for(i = 1; i <= countOfSamples; i++) {
                                 var td = document.createElement('TD');
                                 var a1 = document.createElement('A');
+                                a1.setAttribute("onclick","window.open('player.html?id=" + data[i].Sample23 + "', 'player', 'width=700, height=500,resizable=yes,scrollbars=yes,status=yes'); return false;");
                                 var img1 = document.createElement('IMG');
                                 img1.setAttribute("src","images/songImage.jpg");
                                 img1.setAttribute("style","min-height: 90px; width: auto;");
@@ -227,6 +243,7 @@
 
                                 var td = document.createElement('TD');
                                 var a1 = document.createElement('A');
+                                a1.setAttribute("onclick","window.open('player.html?id=" + data[i].Sample23 + "', 'player', 'width=700, height=500,resizable=yes,scrollbars=yes,status=yes'); return false;");
                                 var img1 = document.createElement('IMG');
                                 img1.setAttribute("src","images/songImage.jpg");
                                 img1.setAttribute("style","min-height: 90px; width: auto;");

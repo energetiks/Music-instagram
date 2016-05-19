@@ -294,7 +294,7 @@ public class SampleResource {
             
             utx.commit();
             writeToFile(is2, pathToSource);
-            return "Written to server disk";
+            return "Written";
         } catch (IOException | NotSupportedException | 
                 NoSuchAlgorithmException | SystemException | RollbackException | 
                 HeuristicMixedException | HeuristicRollbackException | 

@@ -351,19 +351,19 @@ and open the template in the editor.
         <!--content container-->
         <div id="content_container" class="center-clear">
             <div class="box-three-sub-wrapper transparent-background">
-                <input type="button" value="Generate" id="generateButton">
-                <input type="button" value="Play/Pause" id="toggleButton">
-                <input type="button" value="Stop" id="stopButton">
-                <input type="button" value="Upload" id="uploadButton">
-                <input type="text" value="Name" id="nameInput">
-                <input type="text" value="Directory" id="directoryInput">
-                <progress value=0 max=100></progress><span id="progress_percent">0%</span>
+                <input type="button" value="Generate" id="generateButton" class="mainStyleButton" style="background: #b81900;"> 
+                <input type="button" value="Play/Pause" id="toggleButton" class="mainStyleButton" style="background: #55ea55;">
+                <input type="button" value="Stop" id="stopButton" class="mainStyleButton" style="background: #fbcb09;">
+                <input type="button" value="Upload" id="uploadButton" class="mainStyleButton" >
+                <input type="text" value="Name" id="nameInput" style="font-size: 15px;">
+                <input type="text" value="Directory" id="directoryInput" style="font-size: 15px;">
+                <progress value=0 max=100></progress><span id="progress_percent" style="font-size: 15px;">0%</span>
                 <br>
                 <input type="range" min="0" max="100" value="100" style="width: 500px" id="volumeRange">
                 <br>
                 <input type="range" min="0" max="100" value="0" style="width: 500px" id="positionRange">
                 <br>
-                <select id="effectsSelect">
+                <select id="effectsSelect" style="font-size: 15px;">
                     <option>chorus</option>
                     <option>delay</option>
                     <option>phaser</option>
@@ -378,7 +378,7 @@ and open the template in the editor.
                     <option>moog</option>
                     <option>glitch</option>
                 </select>
-                <input type="button" value="Add effect" id="addEffectButton">
+                <input type="button" value="Add effect" id="addEffectButton" class="mainStyleButton" style="background: ">
                 <br>
                 <div id="deleteEffect"></div>
                 <br>

@@ -1,0 +1,85 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+
+        <!-- Optional theme -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+
+        <!-- Latest compiled and minified JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    </head>
+    <body>
+        <script>
+            $(function(){
+                $("#insertUser").click(function(){
+//                $.ajax({ 
+//                    type: "POST", 
+//                    url: "webresources/directory/createSample", 
+//                    data:{name:$("#name").val(),duration:$("#duration").val(),filter1:$("#filter1").val(),
+//                          filter2:$("#filter2").val(),source_ref:$("#source_ref").val(),file_ref:$("#file_ref").val(),
+//                          login:$("#login").val()},
+//                    success: function(response2) { 
+//                       alert("SUCCESS!!");
+//                        
+//                    }, 
+//                    dataType: "json" 
+//                });
+                
+                $.ajax({ 
+                    type: "POST", 
+                    url: "webresources/directory/createNewDirectory", 
+                    data:{name:$("#name").val(),login:$("#login").val()},
+                    success: function(response2) { 
+                       alert("SUCCESS!!");
+                        
+                    }, 
+                    dataType: "json" 
+                });
+                
+
+            });
+        });
+            
+        </script>
+        <div class="row">
+            <div class="col-xs-6 col-md-4">
+                <form>
+                    <div class="form-group">
+                        <label for="first_name">Name</label>
+                        <input type="text" class="form-control" id="name" placeholder="First name">
+                    </div>
+                    <div class="form-group">
+                        <label for="last_name">duration</label>
+                        <input type="text" class="form-control" id="duration" placeholder="Last name">
+                    </div>
+                    <div class="form-group">
+                        <label for="age">Filter1</label>
+                        <input type="text" class="form-control" id="filter1" placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="city">Filter2</label>
+                        <input type="text" class="form-control" id="filter2" placeholder="City">
+                    </div>
+                    <div class="form-group">
+                        <label for="country">Source Ref</label>
+                        <input type="text" class="form-control" id="source_ref" placeholder="Country">
+                    </div>
+                    <div class="form-group">
+                        <label for="univercity">File Ref</label>
+                        <input type="text" class="form-control" id="file_ref" placeholder="Univercity">
+                    </div>
+                    <div class="form-group">
+                        <label for="photo_ref">Login</label>
+                        <input type="text" class="form-control" id="login" placeholder="login">
+                    </div>
+                    <button type='button'  class='btn btn-success' id="insertUser">Insert</button>
+                </form>
+            </div>
+        </div>
+        
+    </body>
+</html>

@@ -26,7 +26,23 @@ and open the template in the editor.
                     success: function(responseText, statusText)  {
                             if (statusText === 'success') {
                                 if (responseText === "Login: " + $('#username').val() + " successfully registered!") {
-                                    window.location.href='/MusicInstagram/index.html';
+                                    $.ajax({
+                                        type: "POST",
+                                        url: "./webresources/user/login",
+                                        data: {username: $('#username').val(),
+                                               password: $('#password').val() },
+                                        success: function(responseText, statusText) {
+                                            if (statusText === 'success') {
+                                                if (responseText === 'Success') {
+                                                    window.location.href='/MusicInstagram/editData.html';
+                                                }
+                                                else {
+                                                    $('#error_message').text(responseText);
+                                                }
+                                            }
+                                        },
+                                        dataType: "json"
+                                    });
                                 }
                                 else {
                                     $('#error_message').text(responseText);

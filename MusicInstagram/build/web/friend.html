@@ -59,6 +59,21 @@
                                 },
                                 dataType: "json"
                             });
+                            
+                            $.ajax({ 
+                                type: "GET", 
+                                url: "webresources/user/getFriendsByLogin",
+                                data:{login:data.nickName},
+                                success: function(data, response) {
+                                    var i
+                                    for (i = 1; i <= data[0].countOfFriend; i++) {
+                                        if (login == data[i].Friend8) {
+                                            $("#deletaFriend").attr('disabled', true);
+                                        }
+                                    }
+                                },
+                                dataType:"json"
+                            });
                         },
                         dataType: "json"
                     });
@@ -85,12 +100,28 @@
                                 "Country: " + data.User4 + "<br>" +
                                 "University: " + data.User6 + "<br>" +
                                 "Phone number: " + data.User7 + "<br>" +
-                                "About me: ");
+                                "<input type='button' class='mainStyleButton' id='deleteFriend' value='Delete Friend' onclick='deleteFriend(); return false;'>");
                                 $("#name").text(data.User1 + " " + data.User2);
                         },
                         dataType: "json"
                     });
-                    
+                    deleteFriend= function() {
+                        $.ajax({ 
+                            type: "GET", 
+                            url: "webresources/user/getLogin",
+                            success: function(result, response) {
+                                $.ajax({ 
+                                    type: "POST", 
+                                    url: "webresources/user/deleteFriend",
+                                    data:{myLogin:result.nickName,login:login},
+                                    success: function(data, response) {
+                                    },
+                                    dataType: "json"
+                                });
+                            },
+                            dataType:"json"
+                        });
+                    }
                     $.ajax({ 
                         type: "GET", 
                         url: "webresources/user/getFriendsByLogin",
@@ -151,11 +182,13 @@
                             for(i = 1; i <= countOfSamples; i++) {
                                 var td = document.createElement('TD');
                                 var a1 = document.createElement('A');
+                                a1.setAttribute("onclick","window.open('player.html?id=" + data[i].Sample23 + "', 'player', 'width=700, height=500,resizable=yes,scrollbars=yes,status=yes'); return false;");
                                 var img1 = document.createElement('IMG');
                                 img1.setAttribute("src","images/songImage.jpg");
                                 img1.setAttribute("style","min-height: 90px; width: auto;");
                                 var label1 = document.createElement('LABEL');
                                 label1.setAttribute("id","lCSample" + data[i].SampleId);
+                                label1.setAttribute("style","font-size: 18px;");
                                 var br1 = document.createElement('BR');
                                 var a2 = document.createElement('A');
                                 var img2 = document.createElement('IMG');
@@ -164,6 +197,7 @@
                                 img2.setAttribute("onclick","addLikeForTimeSample(this,'like'); return false;");
                                 var label2 = document.createElement('LABEL');
                                 label2.setAttribute("id","countOfLikesLCSample" + data[i].SampleId);
+                                label2.setAttribute("style","font-size: 18px; padding: 0px;");
                                 var a3 = document.createElement('A');
                                 var img3 = document.createElement('IMG');
                                 img3.setAttribute("id","dislikeLCSam" + data[i].SampleId);
@@ -171,7 +205,7 @@
                                 img3.setAttribute("onclick","addLikeForTimeSample(this,'dislike'); return false;");
                                 var label3 = document.createElement('LABEL');
                                 label3.setAttribute("id","countOfDisLikesLCSample" + data[i].SampleId);
-
+                                label3.setAttribute("style","font-size: 18px; padding: 0px;");
 
                                 a1.appendChild(img1);
                                 a1.appendChild(label1);
@@ -209,6 +243,7 @@
 
                                 var td = document.createElement('TD');
                                 var a1 = document.createElement('A');
+                                a1.setAttribute("onclick","window.open('player.html?id=" + data[i].Sample23 + "', 'player', 'width=700, height=500,resizable=yes,scrollbars=yes,status=yes'); return false;");
                                 var img1 = document.createElement('IMG');
                                 img1.setAttribute("src","images/songImage.jpg");
                                 img1.setAttribute("style","min-height: 90px; width: auto;");
@@ -216,6 +251,7 @@
                                 var label1 = document.createElement('LABEL');
                                 var br2 = document.createElement('BR');
                                 label1.setAttribute("id","mLSample" + data[i].SampleId);
+                                label1.setAttribute("style","font-size: 18px;");
                                 var a2 = document.createElement('A');
                                 var img2 = document.createElement('IMG');
                                 img2.setAttribute("id","likeMLSample" + data[i].SampleId);
@@ -223,6 +259,7 @@
                                 img2.setAttribute("onclick","addLikeForLikeSample(this,'like'); return false;");
                                 var label2 = document.createElement('LABEL');
                                 label2.setAttribute("id","countOfLikesMLSample" + data[i].SampleId);
+                                label2.setAttribute("style","font-size: 18px; padding: 0px;");
                                 var a3 = document.createElement('A');
                                 var img3 = document.createElement('IMG');
                                 img3.setAttribute("id","dislikeSampl" + data[i].SampleId);
@@ -230,7 +267,7 @@
                                 img3.setAttribute("onclick","addLikeForLikeSample(this,'dislike'); return false;");
                                 var label3 = document.createElement('LABEL');
                                 label3.setAttribute("id","countOfDisLikesMLSample" + data[i].SampleId);
-
+                                label3.setAttribute("style","font-size: 18px; padding: 0px;");
 
                                 a1.appendChild(img1);
                                 a2.appendChild(img2);
@@ -331,52 +368,6 @@
                 
                 
         </script>
-        <!--background changer-->
-        <div id="background_changer">
-            <div class="alignleft_block backgrounds">
-                <ul id="theme_roller_list">
-                    <li>
-                        <a href="#">Color</a>
-                        <div>
-                            <span id="color_picker" class="alignleft_block"></span>
-                        </div>
-                    </li>
-                    <li>
-                        <a href="#">Pattern</a>
-                        <div id="background_patterns">
-                            <a href="0"><img src="images/background/page_tile_0.png" width="24" height="24" alt=""/></a>
-                            <a href="1"><img src="images/background/page_tile_1.png" width="24" height="24" alt=""/></a>
-                            <a href="2"><img src="images/background/page_tile_2.png" width="24" height="24" alt=""/></a>
-                            <a href="3"><img src="images/background/page_tile_3.png" width="24" height="24" alt=""/></a>
-                            <a href="4"><img src="images/background/page_tile_4.png" width="24" height="24" alt=""/></a>
-                            <a href="5"><img src="images/background/page_tile_5.png" width="24" height="24" alt=""/></a>
-                            <a href="6"><img src="images/background/page_tile_6.png" width="24" height="24" alt=""/></a>
-                            <a href="7"><img src="images/background/page_tile_7.png" width="24" height="24" alt=""/></a>
-                            <a href="8"><img src="images/background/page_tile_8.png" width="24" height="24" alt=""/></a>                        
-                            <a href="9"><img src="images/background/page_tile_9.png" width="24" height="24" alt=""/></a>
-                            <a href="10"><img src="images/background/page_tile_10.png" width="24" height="24" alt=""/></a>
-                            <a href="11"><img src="images/background/page_tile_11.png" width="24" height="24" alt=""/></a>
-                            <a href="12"><img src="images/background/page_tile_12.png" width="24" height="24" alt=""/></a>                                                                        
-                            <a href="13"><img src="images/background/page_tile_13.png" width="24" height="24" alt=""/></a>                        
-                        </div>
-                    </li>
-                    <li>
-                        <a href="#">Background</a>
-                        <div id="background_images">
-                            <a href="1"><img src="images/background/bg01.jpg" width="154" alt=""/></a>
-                            <a href="2"><img src="images/background/bg02.jpg" width="154" alt=""/></a>
-                            <a href="3"><img src="images/background/bg03.jpg" width="154" alt=""/></a>
-                            <a href="4"><img src="images/background/bg04.jpg" width="154" alt=""/></a>
-                            <a href="5"><img src="images/background/bg05.jpg" width="154" alt=""/></a>                                                                                                
-                        </div>
-                    </li>
-                </ul>
-            </div>
-            <div class="alignleft_block open_close">
-                    <a href="#" class="arrow">OPEN</a>
-            </div>  
-        </div>
-        
         <!--header-->
         <div id="body-wrapper">
             <div id="header-contanier">
@@ -393,7 +384,7 @@
                         </tr>
                     </table>
 
-                    <!--menu-->
+                    <!--menu--> 
                     <ul id="top_menu" class="sf-menu">
                         <li>
                             <a href="homePage.html">MY PAGE</a>
@@ -412,7 +403,7 @@
                             <span>My friends</span>                       
                         </li>
                         <li>
-                            <a href="findFriends.html">FIND FRIENDS</a>
+                            <a href="findFriends.html">FIND FRIENDS</a> 
                             <span>Add friends</span>                       
                         </li>
                         <li>
@@ -420,7 +411,7 @@
                             <span>Edit your data</span>                       
                         </li>
                         <li>
-                            <input type="button" value="Log out" style="height: 35px" onclick="exit()"/>
+                            <button class="logOut" onclick="exit()">Log out</button>
                         </li>
                     </ul>                    
                 </div>
@@ -458,19 +449,19 @@
                                             <a id="friend1" class="sample">
                                                 <img id="firstFriendPhoto" alt="Friend1"  style="min-height: 100px; width: auto;">
                                                 <br>
-                                                <label id="firstFriend"></label>
+                                                <label id="firstFriend" style="font-size: 18px; padding: 0px;"></label>
                                             </a>
                                         </td>
                                         <td>
                                             <a id="friend2" class="sample">
                                                 <img id="secondFriendPhoto" alt="Friend2"  style="min-height: 100px; width: auto;"><br>
-                                                <label id="secondFriend"></label>
+                                                <label id="secondFriend" style="font-size: 18px; padding: 0px;"></label>
                                             </a>
                                         </td>
                                         <td>
                                             <a id="friend3" class="sample">
                                                 <img id="thirdFriendPhoto" alt="Friend3"  style="min-height: 100px; width: auto;"><br>
-                                                <label id="thirdFriend"></label>
+                                                <label id="thirdFriend" style="font-size: 18px; padding: 0px;"></label>
                                             </a>
                                         </td>                                                                                            
                                     </tr>

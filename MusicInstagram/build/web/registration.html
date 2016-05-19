@@ -12,6 +12,47 @@ and open the template in the editor.
         <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>        
     </head>
     <body>
+        <script type="text/javascript" src="scripts/jquery-1.7.1.min.js"></script>
+        <script type="text/javascript">
+
+            registrateUser = function() {
+                
+                $.ajax({
+                    type: 'POST',
+                    url: "./webresources/registration/registration",
+                    data: {username: $('#username').val(), 
+                            password: $('#password').val(), 
+                            confirmed_password: $('#confirmed_password').val()},
+                    success: function(responseText, statusText)  {
+                            if (statusText === 'success') {
+                                if (responseText === "Login: " + $('#username').val() + " successfully registered!") {
+                                    $.ajax({
+                                        type: "POST",
+                                        url: "./webresources/user/login",
+                                        data: {username: $('#username').val(),
+                                               password: $('#password').val() },
+                                        success: function(responseText, statusText) {
+                                            if (statusText === 'success') {
+                                                if (responseText === 'Success') {
+                                                    window.location.href='/MusicInstagram/editData.html';
+                                                }
+                                                else {
+                                                    $('#error_message').text(responseText);
+                                                }
+                                            }
+                                        },
+                                        dataType: "json"
+                                    });
+                                }
+                                else {
+                                    $('#error_message').text(responseText);
+                                }
+                            }
+                        },
+                    dataType: "json"
+                });   
+            };
+        </script>
         <div id="wrapper">
             <div id="panel">
                 <form>
@@ -56,40 +97,15 @@ and open the template in the editor.
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td colspan="2">
+                                <td colspan="2"> 
                                     <input type="button" onclick="window.location.href='/MusicInstagram/index.html'; return false;" value="back" class="back"/>
                                     <input type="button" onclick="registrateUser()" value="registration" class="reg" />
-                                </td>
+                                </td> 
                             </tr>
                         </tfoot>
                     </table>
                 </form>
             </div>
         </div>
-        <script type="text/javascript" src="scripts/jquery-1.7.1.min.js"></script>
-        <script type="text/javascript">
-
-            registrateUser = function() {
-                
-                $.ajax({
-                    type: 'POST',
-                    url: "./webresources/user/registration",
-                    data: {username: $('#username').val(), 
-                            password: $('#password').val(), 
-                            confirmed_password: $('#confirmed_password').val()},
-                    success: function(responseText, statusText)  {
-                            if (statusText === 'success') {
-                                if (responseText === "Login: " + $('#username').val() + " successfully registered!") {
-                                    window.location.href='/MusicInstagram/editData.html';
-                                }
-                                else {
-                                    $('#error_message').text(responseText);
-                                }
-                            }
-                        },
-                    dataType: "json"
-                });   
-            };
-        </script>
     </body>
 </html>

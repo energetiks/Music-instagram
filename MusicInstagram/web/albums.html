@@ -81,6 +81,7 @@
                                         var br1 = document.createElement('BR');
                                         var label = document.createElement('LABEL');
                                         label.setAttribute("id","nameSample" + data.Directory[i-1][size - j + 1].SampleId);
+                                        label.setAttribute("style","font-size: 15px; padding: 0px;");
                                         var br2 = document.createElement('BR');
                                         var a2=document.createElement('A');
                                         a2.setAttribute("id","photoLike" + data.Directory[i-1][size - j + 1].SampleId);
@@ -93,7 +94,7 @@
 
                                         var label2 = document.createElement('LABEL');
                                         label2.setAttribute("id","Like" + data.Directory[i-1][size - j + 1].SampleId);
-
+                                        label2.setAttribute("style","font-size: 15px; padding: 0px;");
                                         var a3=document.createElement('A');
                                         a3.setAttribute("id","photoDisLike" + data.Directory[i-1][size - j + 1].SampleId);
                                         a3.setAttribute("class","dislike");
@@ -105,7 +106,7 @@
 
                                         var label3 = document.createElement('LABEL');
                                         label3.setAttribute("id","DisLike" + data.Directory[i-1][size - j + 1].SampleId);
-                                        
+                                        label3.setAttribute("style","font-size: 15px; padding: 0px;");
                                         a1.appendChild(img1);
                                         a1.appendChild(br1);
                                         a1.appendChild(label);

@@ -283,19 +283,19 @@
         <!--content container-->
         <div id="content_container" class="center-clear">
             <div class="box-three-sub-wrapper transparent-background">
-                <input type="button" value="Play/Pause" class="mainStyleButton" id="toggleButton" style="">
-                <input type="button" value="Stop" class="mainStyleButton" id="stopButton" style="background-color: #b81900;">
+                <input type="button" value="Play/Pause" class="mainStyleButton" id="toggleButton" style="background: #55ea55;">
+                <input type="button" value="Stop" class="mainStyleButton" id="stopButton" style="background: #fbcb09;">
                 <br>
                 <input type="range" min="0" max="100" value="100" style="width: 500px" id="volumeRange">
                 <br>
                 <input type="range" min="0" max="100" value="0" style="width: 500px" id="positionRange">
                 <br>
-                <input type="button" value="Rec/Pause" class="mainStyleButton" id="recButton">
-                <input type="button" value="Clear" class="mainStyleButton" id="clearRecButton">
-                <input type="button" value="Upload" class="mainStyleButton" id="uploadRecButton">
+                <input type="button" value="Rec/Pause" class="mainStyleButton" id="recButton" style="background: #b81900;">
+                <input type="button" value="Clear" class="mainStyleButton" id="clearRecButton" style="background: #333;">
+                <input type="button" value="Upload" class="mainStyleButton" id="uploadRecButton" style="">
                 <input type="text" value="Name" id="nameInput">
                 <input type="text" value="Directory" id="directoryInput">
-                <progress value=0 max=100></progress><span id="progress_percent" style="font-size: 15px;">0%</span>
+                <progress value=0 max=100></progress><span id="progress_percent" style="font-size: 15px; ">0%</span>
                 <br>
                 <select id="effectsSelect" style="font-size: 15px;">
                     <option>chorus</option>
@@ -312,7 +312,7 @@
                     <option>moog</option>
                     <option>glitch</option>
                 </select>
-                <input type="button" value="Add effect" class="mainStyleButton" id="addEffectButton">
+                <input type="button" value="Add effect" class="mainStyleButton" id="addEffectButton" style="background: #444444;">
                 <br>
                 <div id="deleteEffect"></div>
                 <canvas id="frequencyCanvas"></canvas>
@@ -323,6 +323,7 @@
 
         <div id="footer_container">
             <div id="footer" class="center-clear">
+                <div id="logo"></div>
                 <ul>
                     <li>
                         <a href="homePage.html" >MY PAGE</a>

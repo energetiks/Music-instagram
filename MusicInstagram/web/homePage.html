@@ -52,7 +52,7 @@ and open the template in the editor.
                     url: "webresources/user/getLogin",
                     success: function(result, response) {
                         $("#userName").text(result.nickName);
-                    
+                        
 
                         $.ajax({ 
                             type: "GET", 
@@ -144,7 +144,7 @@ and open the template in the editor.
                                 for(i = 1; i <= countOfSamples; i++) {
                                     var td = document.createElement('TD');
                                     var a1 = document.createElement('A');
-                                    a1.setAttribute("onclick","window.open('player.html?id=" + data[i].Sample23 + "', 'player', 'width:700, height:400'); return false;");
+                                    a1.setAttribute("onclick","window.open('player.html?id=" + data[i].Sample23 + "', 'player', 'width=700, height=500,resizable=yes,scrollbars=yes,status=yes'); return false;");
                                     var img1 = document.createElement('IMG');
                                     img1.setAttribute("src","images/songImage.jpg");
                                     img1.setAttribute("style","min-height: 90px; width: auto;");
@@ -159,7 +159,7 @@ and open the template in the editor.
                                     img2.setAttribute("onclick","addLikeForTimeSample(this,'like'); return false;");
                                     var label2 = document.createElement('LABEL');
                                     label2.setAttribute("id","countOfLikesLCSample" + data[i].SampleId);
-                                    label2.setAttribute("style","font-size: 18px; padding 0px;");
+                                    label2.setAttribute("style","font-size: 18px; padding 0px; margin: 0px;");
                                     var a3 = document.createElement('A');
                                     var img3 = document.createElement('IMG');
                                     img3.setAttribute("id","dislikeLCSam" + data[i].SampleId);
@@ -167,7 +167,7 @@ and open the template in the editor.
                                     img3.setAttribute("onclick","addLikeForTimeSample(this,'dislike'); return false;");
                                     var label3 = document.createElement('LABEL');
                                     label3.setAttribute("id","countOfDisLikesLCSample" + data[i].SampleId);
-                                    label3.setAttribute("style","font-size: 18px; padding 0px;");
+                                    label3.setAttribute("style","font-size: 18px; padding 0px; margin: 0px;");
 
                                     a1.appendChild(img1);
                                     a1.appendChild(label1);
@@ -204,8 +204,9 @@ and open the template in the editor.
                                 for(i = countOfSamples; i > countOfSamples-count; i--) {
 
                                     var td = document.createElement('TD');
+                                    td.setAttribute("style","padding 0px;");
                                     var a1 = document.createElement('A');
-                                    a1.setAttribute("onclick","window.open('player.html?id=" + data[i].Sample23 + "', 'player', 'width:700, height:400'); return false;");
+                                    a1.setAttribute("onclick","window.open('player.html?id=" + data[i].Sample23 + "', 'player', 'width=700, height=500,resizable=yes,scrollbars=yes,status=yes'); return false;");
                                     var img1 = document.createElement('IMG');
                                     img1.setAttribute("src","images/songImage.jpg");
                                     img1.setAttribute("style","min-height: 90px; width: auto;");
@@ -326,7 +327,7 @@ and open the template in the editor.
         <div id="body-wrapper">
             <div id="header-contanier">
                 <div id="header" class="center-clear">
-                    
+                    <div id="logo"></div>
                     <table id="userface">
                         <tr>
                             <td>
