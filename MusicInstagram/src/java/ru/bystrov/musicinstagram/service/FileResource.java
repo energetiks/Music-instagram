@@ -27,7 +27,7 @@ public class FileResource {
     
     @GET
     @Path("getPathById")
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
     public String getPathById(@QueryParam("id") String fileId) {
         try {
             Object opath = em.createNativeQuery(

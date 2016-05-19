@@ -1,5 +1,6 @@
 package ru.bystrov.musicinstagram.service;
 
+import com.google.gson.Gson;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -44,6 +45,7 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 import javax.ws.rs.Consumes;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import ru.bystrov.musicinstagram.entities.dataobject.CountOfLikeObject;
@@ -129,7 +131,9 @@ public class SampleResource {
             Objects newSample  = new Objects();
             Objects newSampleFile = new Objects();
             
-            Integer id = Integer.valueOf(em.createNativeQuery("select MAX(objId) from Objects").getResultList().get(0).toString());
+            Object o = em.createNativeQuery("select MAX(objId) from Objects").getSingleResult();
+            if (o == null) o = 0;
+            Integer id = Integer.valueOf(o.toString());
             newSample.setObjId(id+1);
             newSample.setName("Sample " + name);
             newSample.setObjTypeId(SAMPLE_TYPE_ID);
@@ -236,8 +240,9 @@ public class SampleResource {
             Objects newSample  = new Objects();
             Objects newSampleFile = new Objects();
             
-            
-            Integer id = Integer.valueOf(em.createNativeQuery("select MAX(objId) from Objects").getResultList().get(0).toString());
+            Object o = em.createNativeQuery("select MAX(objId) from Objects").getSingleResult();
+            if (o == null) o = 0;
+            Integer id = Integer.valueOf(o.toString());
             newSample.setObjId(id+1);
             newSample.setName("Sample " + name);
             newSample.setObjTypeId(SAMPLE_TYPE_ID);
@@ -282,8 +287,8 @@ public class SampleResource {
             attrValue = new HashMap<>();
             String hashName = GetHash(is1);
             
-            String pathToSource = "C:\\Users\\Test\\Desktop\\Programms on java\\MusicInstagram\\Music-instagram\\MusicInstagram\\web\\upload\\".concat(hashName);
-            attrValue.put(PATH_FILE_ID,new Attribute("string", "upload/" + hashName));
+            String pathToSource = "/home/ad/code/Music-instagram/MusicInstagram/web/upload/".concat(hashName);
+            attrValue.put(PATH_FILE_ID,new Attribute("string", hashName));
             resource = new MainResource();
             resource.addAttributes(attrValue, newSampleFile, em);
             
@@ -467,6 +472,7 @@ public class SampleResource {
                         .setParameter(1, COUNT_OF_DISLIKE_ID).setParameter(2,sampleId).getResultList().get(0);
                 CountOfLikeObject countOfLikeObject = new CountOfLikeObject(countOfLikes,countOfDisLikes,Long.valueOf(sampleId));
                 mapOfLastSamples.put(countOfLikeObject, attrs);
+                
             }
             obj = new JSONObject();
             obj.put("countOfSamples", samplesId.size());
@@ -788,5 +794,27 @@ public class SampleResource {
         attrValues[6].setValue(isDisLikeId);
             
         return attrValues;
+    }
+    
+    
+    @GET
+    @Path("getPathById")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getPathById(@QueryParam("id") String sourceId) {
+        try {
+            Object opath = em.createNativeQuery(
+                    "select file.stringvalue "
+                    + "from attributevalue file, attributevalue source "
+                    + "where source.objid = ? and source.referencevalue = file.objid "
+                    + "and source.attrid = (select a.attrid from attributes a, attributeobjecttypes aot, objecttypes ot "
+                    + "where aot.attrid = a.attrid and aot.otid = ot.otid and a.name = 'file_ref' and ot.name = 'Sample')"
+                    + "and file.attrid = (select a.attrid from attributes a, attributeobjecttypes aot, objecttypes ot "
+                    + "where aot.attrid = a.attrid and aot.otid = ot.otid and a.name = 'path' and ot.name = 'File')"
+            )
+                    .setParameter(1, sourceId).getSingleResult();
+            return (new Gson()).toJson(opath);
+        } catch (NoResultException | NonUniqueResultException e) {
+            return (new Gson()).toJson("File not found");
+        }
     }
 }

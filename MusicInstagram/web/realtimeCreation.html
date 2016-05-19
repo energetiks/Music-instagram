@@ -138,13 +138,12 @@
                         url: "webresources/user/getLogin",
                         success: function(result, response) {
                             var documentData = new FormData();
-                            alert(result.nickName);
                             documentData.append("file", blob);
                             documentData.append("name", $("#nameInput").val());
                             documentData.append("duration", 0); // TODO, from blob size (it is raw format)
                             documentData.append("source", source_id);
                             documentData.append("directory", $("#directoryInput").val()); // TODO make good field
-                            documentData.append("login", result.nickName); // TODO
+                            documentData.append("login", result.nickName);
                    
                             $.ajax({
                                 url: "./webresources/sample/uploadSample",

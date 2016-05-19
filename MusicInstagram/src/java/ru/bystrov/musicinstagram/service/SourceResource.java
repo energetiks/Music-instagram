@@ -141,6 +141,7 @@ public class SourceResource {
             Objects newSource  = new Objects();
             Objects newSourceFile  = new Objects();
             
+            
             Integer id = Integer.valueOf(em.createNativeQuery("select MAX(objId) from Objects").getResultList().get(0).toString());
             newSource.setObjId(id+1);
             newSource.setName("Source" + fileName);
@@ -162,7 +163,7 @@ public class SourceResource {
             String filename = GetHash(is1);
             
             String pathToSource = "/home/ad/code/Music-instagram/MusicInstagram/web/upload/".concat(filename);
-            attrValue.put(PATH_FILE_ID,new Attribute("string", "upload/" + filename));
+            attrValue.put(PATH_FILE_ID,new Attribute("string", filename));
             resource = new MainResource();
             resource.addAttributes(attrValue, newSourceFile,em);
             
